@@ -1,6 +1,6 @@
 #include "ObjParser/ObjParser.h"
 
-
+// Setting up custom std::cout of the triangle
 std::ostream& operator<<(std::ostream& os, const Triangle& triangle)
 {
     os << "(" 
@@ -13,67 +13,109 @@ std::ostream& operator<<(std::ostream& os, const Triangle& triangle)
     return os;
 }
 
+/** @brief Loads a 3D mesh from an OBJ file.
+ *
+ * This function reads an OBJ file and extracts the vertex, vertex normal, and face information to construct a mesh of triangles.
+ * The mesh and the number of triangles are returned via reference parameters.
+ *
+ * @param filePath The path to the OBJ file.
+ * @param mesh A reference to a vector of Triangles that will be filled with the triangles from the OBJ file.
+ * @param numTriangles A reference to an unsigned int that will be set to the number of triangles in the mesh.
+ */
 void loadMesh(std::string filePath, std::vector<Triangle>& mesh, unsigned int& numTriangles)
 {
+    // Open the OBJ file
     std::ifstream file(filePath);
+    if (!file) {
+        std::cerr << "File " << filePath << " does not exist or could not be opened." << std::endl;
+        return;
+    }
+
     std::string line;
+    // Vectors to store the vertices and vertex normals from the OBJ file
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> vertexNormals;
 
-    if (file.is_open()) {
-        while (std::getline(file, line))
+    // Read the OBJ file line by line
+
+    while (std::getline(file, line))
+    {
+        std::istringstream iss(line);
+        std::string identificator;
+
+        // loading the line identificator (v, vn, f)
+        if (!(iss >> identificator)) {
+            std::cerr << "Error reading line: " << line << std::endl;
+            continue;
+        }
+
+        // If the line starts with "v", it's a vertex definition
+        if (identificator == "v")
         {
-            std::istringstream iss(line);
-            std::string identificator;
+            glm::vec3 vertex;
+            iss >> vertex.x >> vertex.y >> vertex.z;
+            vertices.push_back(vertex);
+        }
+        // If the line starts with "vn", it's a vertex normal definition
+        else if (identificator == "vn")
+        {
+            glm::vec3 vertexNormal;
+            iss >> vertexNormal.x >> vertexNormal.y >> vertexNormal.z;
+            vertexNormals.push_back(vertexNormal);
+        }
+        // If the line starts with "f", it's a face definition
+        else if (identificator == "f")
+        {
+            int v1, v2, v3;
+            int vt1, vt2, vt3;
+            int vn1, vn2, vn3;
+            char slash;
+            char space;
+                
+            /* Alternative obj face definition(if there are no texture coordinates)
+            iss >>  v1 >> slash  >> slash >> vn1 >>
+                    v2 >> slash  >> slash >> vn2 >>
+                    v3 >> slash  >> slash >> vn3;
+            */  
 
-            iss >> identificator;
-            if (identificator == "v")
-            {
-                glm::vec3 vertex;
-                iss >> vertex.x >> vertex.y >> vertex.z;
-                vertices.push_back(vertex);
-            }
-            else if (identificator == "vn")
-            {
-                glm::vec3 vertexNormal;
-                iss >> vertexNormal.x >> vertexNormal.y >> vertexNormal.z;
-                vertexNormals.push_back(vertexNormal);
-            }
-            else if (identificator == "f")
-            {
-                int v1, v2, v3;
-                int vt1, vt2, vt3;
-                int vn1, vn2, vn3;
-                char slash;
-                char space;
-                //iss >>  v1 >> slash  >> slash >> vn1 >>
-                //        v2 >> slash  >> slash >> vn2 >>
-                //        v3 >> slash  >> slash >> vn3;
-
-                iss >> v1 >> slash >> vt1 >> slash >> vn1 >>
+            // Parse the face definition
+            iss >> v1 >> slash >> vt1 >> slash >> vn1 >>
                     v2 >> slash >> vt2 >> slash >> vn2 >>
                     v3 >> slash >> vt3 >> slash >> vn3;
 
-                Triangle triangle;
-                triangle.v1 = vertices[v1 - 1];
-                triangle.v2 = vertices[v2 - 1];
-                triangle.v3 = vertices[v3 - 1];
-
-                triangle.NA = vertexNormals[vn1 - 1];
-                triangle.NB = vertexNormals[vn2 - 1];
-                triangle.NC = vertexNormals[vn3 - 1];
-
-                triangle.centroid = (triangle.v1 + triangle.v2 + triangle.v3) / 3.0f; // average of all 3 vertices
-
-                mesh.push_back(triangle);
-                numTriangles++;
+                
+            // Check that the indices are valid
+            if (v1 < 1 || v1 > vertices.size() ||
+                v2 < 1 || v2 > vertices.size() ||
+                v3 < 1 || v3 > vertices.size() ||
+                vn1 < 1 || vn1 > vertexNormals.size() ||
+                vn2 < 1 || vn2 > vertexNormals.size() ||
+                vn3 < 1 || vn3 > vertexNormals.size()) {
+                std::cerr << "Invalid vertex or vertex normal index in line: " << line << std::endl;
+                continue;
             }
+
+            // indexing in obj file starts from 1 and vertices array starts from index 0
+            // therefore we need to subtract 1 from the indices
+            Triangle triangle;
+            triangle.v1 = vertices[v1 - 1];
+            triangle.v2 = vertices[v2 - 1];
+            triangle.v3 = vertices[v3 - 1];
+
+            triangle.NA = vertexNormals[vn1 - 1];
+            triangle.NB = vertexNormals[vn2 - 1];
+            triangle.NC = vertexNormals[vn3 - 1];
+
+            // Compute the centroid of the triangle (average of all 3 vertices)
+            triangle.centroid = (triangle.v1 + triangle.v2 + triangle.v3) / 3.0f; 
+
+            // Add the triangle to the mesh
+            mesh.push_back(triangle);
+            numTriangles++;
         }
-        file.close();
     }
-    else {
-        std::cout << "Unable to load file " + filePath << std::endl;
-    }
+
+    file.close();
 }
 
 // constructor
@@ -99,15 +141,26 @@ namespace BVH {
         return os;
     }
 }
-
+// Function to compute the minimum corner of an AABB given the current minimum corner and a vertex
 glm::vec3 BVH::minCorner(const glm::vec3& current_min, const glm::vec3& vertex) {
     return glm::vec3(std::min(current_min.x, vertex.x), std::min(current_min.y, vertex.y), std::min(current_min.z, vertex.z));
 }
 
+// Function to compute the maximum corner of an AABB given the current maximum corner and a vertex
 glm::vec3 BVH::maxCorner(const glm::vec3& current_max, const glm::vec3& vertex) {
     return glm::vec3(std::max(current_max.x, vertex.x), std::max(current_max.y, vertex.y), std::max(current_max.z, vertex.z));
 }
 
+/**
+ * @brief Computes the Axis-Aligned Bounding Box (AABB) for a set of triangles.
+ *
+ * This function iterates over a set of triangles, represented by their indices, and computes the minimum and maximum corners of the AABB that encloses them. The minimum and maximum corners are updated for each vertex of each triangle.
+ *
+ * @param triangle_indices The indices of the triangles for which to compute the AABB.
+ * @param triangle_mesh The mesh containing the triangles.
+ * @param minVec A reference to a vector that will be set to the minimum corner of the AABB.
+ * @param maxVec A reference to a vector that will be set to the maximum corner of the AABB.
+ */
 void BVH::computeAABB(const std::vector<unsigned int>& triangle_indices, const std::vector<Triangle>& triangle_mesh, glm::vec3& minVec, glm::vec3& maxVec)
 {
     minVec = glm::vec3(std::numeric_limits<float>::infinity());
@@ -115,8 +168,9 @@ void BVH::computeAABB(const std::vector<unsigned int>& triangle_indices, const s
 
     for (const unsigned int& tri_index : triangle_indices)
     {
-        const Triangle& triangle = triangle_mesh[tri_index]; // stands for current triangle
+        const Triangle& triangle = triangle_mesh[tri_index]; // Get the current triangle.
 
+        // Update minVec and maxVec for each vertex of the triangle.
         minVec = minCorner(minVec, triangle.v1);
         maxVec = maxCorner(maxVec, triangle.v1);
 

@@ -166,13 +166,15 @@ void Renderer::configure_BVH_SSBO_block()
 {
 	GLCall(glGenBuffers(1, &BVH_SSBO_ID));
 	GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, BVH_SSBO_ID));
-	GLCall(glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(BVH::Node) * BVH_of_mesh.BVH_size, nullptr, GL_STATIC_DRAW));
+	std::cout << "BVH_size: " << BVH_of_mesh.BVH_size << std::endl;
+	std::cout << "sizeof(BVH::Node): " << sizeof(BVH::Node) << std::endl;
+	GLCall(glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(BVH::Node)*2 * (BVH_of_mesh.BVH_size + 1), nullptr, GL_STATIC_DRAW));
 	GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, BVH_SSBO_ID));
 }
 
 void Renderer::update_BVH_SSBO_block()
 {
 	GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, BVH_SSBO_ID));
-	GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(BVH::Node) * BVH_of_mesh.BVH_size, BVH_of_mesh.BVH));
+	GLCall(glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(BVH::Node)*2 * (BVH_of_mesh.BVH_size + 1), BVH_of_mesh.BVH));
 	GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0)); // unbind
 }

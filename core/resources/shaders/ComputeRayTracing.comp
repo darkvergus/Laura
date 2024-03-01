@@ -345,76 +345,87 @@ HitInfo RayTriangleIntersection(Ray ray, Triangle tri)
     return hitInfo;
 }
 
+
+// This function traverses the Bounding Volume Hierarchy (BVH) to find 
+// the closest intersection of a ray with the objects in the scene.
 bool BVH_traverse(Ray ray, inout HitInfo closestHit)
 {
+    // A stack is initialized to keep track of the BVH nodes that need to be checked.
     Stack stack;
     stack_init(stack);
-    stack_push(stack, 0); // id of the root node
+    stack_push(stack, 0); // The root node of the BVH is pushed onto the stack.
     
+    // The function continues to check nodes as long as there are nodes left on the stack.
     while (!stack_empty(stack))
     {
+        // The next node to check is popped from the stack.
         int current_node_idx;
         stack_pop(stack, current_node_idx); // updates the current_node_idx
         BVHNode current_node = BVH[current_node_idx];
+
+        // The function checks if the ray intersects the bounding box of the current node.
         if (RayAABBIntersection(ray, current_node.minVec, current_node.maxVec))
         {
+            // If the current node is a leaf node (it has no children), the function 
+            // checks for intersections with the primitives contained in the node.
             if (current_node.child1_idx == -1 && current_node.child2_idx == -1)
             {
+                // The function iterates over each primitive in the leaf node.
                 for (int i = 0; i < AABB_primitives_limit; i++)
                 {
                     int triangle_idx = current_node.leaf_primitive_indices[i];
                     
+                    // If there are no more primitives in the node, the 
+                    // function breaks out of the loop.
                     if (triangle_idx == -1)
                     {
                         break;
                     }
-                    
+
+                    // The function retrieves the triangle associated with the current primitive.
                     Triangle tri = MESH[triangle_idx];
-                    if (triangle_idx == 0)
-                    {
-                        tri.material.color = vec3(0.0f, 1.0f, 0.0f);
-                    }
-                    else
-                    {
-                        tri.material.color = vec3(1.0f, 0.0f, 0.0f);
-                    }
-                    // for now set the material here
-                    
+
+                    tri.material.color = vec3(1.0f, 0.0f, 0.0f);
                     tri.material.emissionColor = vec3(0.0f, 0.0f, 0.0f);
                     tri.material.emissionStrength = 0.0f;
-                    
+                                  
                     HitInfo triHitInfo = RayTriangleIntersection(ray, tri);
                     
+                    // If the ray intersects the triangle and the intersection is closer than the
+                    // closest intersection found so far, the closest intersection is updated.
                     if (triHitInfo.didCollide && triHitInfo.dst < closestHit.dst)
                     {
                         closestHit = triHitInfo;
                         closestHit.material = tri.material;
+                        return true;
                     }
                 }
 
             }
             else
             {
-                if (current_node.child1_idx > 11 || current_node.child2_idx > 11)
-                {
-                    return false;
-                }
+                // If the current node is not an AABB containing leaf nodes, 
+                // the function pushes the children of the
                 stack_push(stack, current_node.child1_idx);
                 stack_push(stack, current_node.child2_idx);
             }
         }
     }
-    return true;
+    return false;
 }
 
+// This function checks if a ray intersects any of the objects in the scene.
 HitInfo CheckRayCollision(Ray ray, inout bool mydebug)
 {
     HitInfo closestHit;
     closestHit.didCollide = false;
     closestHit.dst = 1.0 / 0.0; // infinity
+
+    // The function iterates over each sphere in the scene and checks for intersections.
     for (int i = 0; i < NUM_SPHERES; i++)
     {
         Sphere sphere = u_Spheres[i];
+
         HitInfo hitInfo = RaySphereIntersection(ray, sphere.position, sphere.radius);
         if (hitInfo.didCollide && hitInfo.dst < closestHit.dst)
         {
@@ -423,11 +434,13 @@ HitInfo CheckRayCollision(Ray ray, inout bool mydebug)
         }
     }    
     
+    // The function traverses the BVH to find the closest intersection of the ray with the objects in the scene.
     mydebug = BVH_traverse(ray, closestHit); // traversing all the triangles
     
     return closestHit;
 }
 
+// This function traces a ray through the scene and returns the color of the pixel that the ray equates to.
 vec3 TraceRay(Ray ray, inout uint state, inout bool mydebug)
 {
     vec3 rayColor = vec3(1.0);

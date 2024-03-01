@@ -76,7 +76,7 @@ int main() {
 
 		SceneData sceneData = getSceneData();
 		
-		BVH::BVH_data knight_BVH = BVH::construct(APP_RESOURCES_PATH "models/knight.obj", BVH::Heuristic::OBJECT_MEDIAN_SPLIT);
+		BVH::BVH_data knight_BVH = BVH::construct(APP_RESOURCES_PATH "models/Tetrahedron.obj", BVH::Heuristic::OBJECT_MEDIAN_SPLIT);
 
 		std::cout << "----Traingle mesh-----" << std::endl;
 		std::cout << "Num Tris: " << knight_BVH.TRIANGLES_size << std::endl;
