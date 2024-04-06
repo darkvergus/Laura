@@ -33,11 +33,11 @@ SceneData getSceneData() {
     //sphere1.material.emissionStrength = 0.0f;
 
     Sphere sphere2;
-    sphere2.position = glm::vec3(300.0f, 500.0f, 1000.0f);
-    sphere2.radius = 200.0f;
+    sphere2.position = glm::vec3(-476.0f, 513.0f, 0.0f);
+    sphere2.radius = 50.0f;
     sphere2.material.color = glm::vec3(0.0f, 0.0f, 0.0f); 
     sphere2.material.emissionColor = glm::vec3(1.0f, 0.9f, 1.0f);
-    sphere2.material.emissionStrength = 10.0f;
+    sphere2.material.emissionStrength = 3.0f;
     //
     //Sphere sphere3;
     //sphere3.position = glm::vec3(0.3f, 2.0f, 10.0f);

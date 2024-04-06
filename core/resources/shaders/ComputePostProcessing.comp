@@ -13,13 +13,5 @@ void main()
     ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
 
     vec3 color = imageLoad(rtxTexture, pixel_coords).rgb;
-    //if (u_numAccumulatedFrames != 0)
-    //{
-    //    imageStore(postprocTexture, pixel_coords, vec4(color / u_numAccumulatedFrames, 1.0f));
-    //}
-    //else
-    //{
-    //    imageStore(postprocTexture, pixel_coords, vec4(color, 1.0f));
-    //}
     imageStore(postprocTexture, pixel_coords, vec4(color, 1.0f));
 }

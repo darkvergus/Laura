@@ -1,4 +1,4 @@
-#include "ObjParser/ObjParser.h"
+#include "core/ObjParser/ObjParser.h"
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -67,7 +67,9 @@ void loadMesh(std::string filePath, std::vector<Triangle>& mesh, unsigned int& n
             // Calculate centroid 
             triangle.centroid = (triangle.v1 + triangle.v2 + triangle.v3) / 3.0f;
 
-            triangle.material.color = glm::vec3(0.5f, 0.5f, 0.5f);
+
+            // Set the material properties
+            triangle.material.color = glm::vec3(0.95f, 0.9f, 0.9f);
             triangle.material.emissionColor = glm::vec3(0.0f, 0.0f, 0.0f);
             triangle.material.emissionStrength = 0.0f;
 
@@ -147,6 +149,13 @@ BVH::Node BVH::init(const std::vector<unsigned int>& triangle_indices, const std
 }
 
 BVH::Partition_output BVH::PartitionNode(const BVH::Node parent_node, std::vector<unsigned int>& triangle_indices, const std::vector<Triangle>& triangles, const Heuristic& heuristic) {
+
+    if (heuristic == BVH::Heuristic::SURFACE_AREA_HEURISTIC) {
+		return BVH::surface_area_heuristic(parent_node, triangle_indices, triangles, false);
+	}
+    else if (heuristic == BVH::Heuristic::SURFACE_AREA_HEURISTIC_BUCKETS) {
+        return BVH::surface_area_heuristic(parent_node, triangle_indices, triangles, true);
+    }
 
     BVH::Partition_output output;
 
@@ -292,6 +301,103 @@ BVH::Partition_output BVH::PartitionNode(const BVH::Node parent_node, std::vecto
     return output;
 }
 
+
+BVH::Partition_output BVH::surface_area_heuristic(const BVH::Node parent_node, std::vector<unsigned int>& triangle_indices, const std::vector<Triangle>& triangles, const bool& split_buckets) {
+    BVH::Partition_output output;
+
+    float best_SAH_cost = std::numeric_limits<float>::infinity();
+    unsigned int best_axis;
+    unsigned int best_idx;
+
+    float parent_surface_area = 2 * ((parent_node.maxVec.x - parent_node.minVec.x) * (parent_node.maxVec.y - parent_node.minVec.y) +
+        		                     (parent_node.maxVec.x - parent_node.minVec.x) * (parent_node.maxVec.z - parent_node.minVec.z) +
+        		                     (parent_node.maxVec.y - parent_node.minVec.y) * (parent_node.maxVec.z - parent_node.minVec.z));
+
+
+    for (size_t axis = 0; axis < 3; axis++)
+    {
+        // sort the triangles based on the centroid of the triangles
+        std::sort(triangle_indices.begin(), triangle_indices.end(), [&](unsigned int a, unsigned int b) 
+        {
+			return triangles[a].centroid[axis] < triangles[b].centroid[axis];
+		});
+
+        // iterate over each split possible for the current axis and calculate the SAH cost
+        // always having at least one triangle on each side (starting from idx 1, ending one before the last)
+        unsigned int iterator = 1;
+        if (split_buckets && size(triangle_indices) > 16) {
+            const unsigned int num_buckets = 16;
+            iterator = size(triangle_indices) / num_buckets;
+        }
+
+        for (size_t split_idx = 0; split_idx < size(triangle_indices); split_idx += iterator) 
+        {
+            std::vector<unsigned int> left_triangles(triangle_indices.begin(), triangle_indices.begin() + split_idx);
+			std::vector<unsigned int> right_triangles(triangle_indices.begin() + split_idx, triangle_indices.end());
+
+			glm::vec3 left_min, left_max, right_min, right_max;
+			BVH::computeAABB(left_triangles, triangles, left_min, left_max);
+			BVH::computeAABB(right_triangles, triangles, right_min, right_max);
+
+			float left_surface_area = 2 * ((left_max.x - left_min.x) * (left_max.y - left_min.y) +
+                				           (left_max.x - left_min.x) * (left_max.z - left_min.z) +
+                				           (left_max.y - left_min.y) * (left_max.z - left_min.z));
+
+			float right_surface_area = 2 * ((right_max.x - right_min.x) * (right_max.y - right_min.y) +
+                				            (right_max.x - right_min.x) * (right_max.z - right_min.z) +
+                				            (right_max.y - right_min.y) * (right_max.z - right_min.z));
+            
+            /*
+            Surface Area Heuristic (SAH) cost calculation
+            
+            https://www.pbr-book.org/3ed-2018/Primitives_and_Intersection_Acceleration/Bounding_Volume_Hierarchies#fragment-Computecostsforsplittingaftereachbucket-0
+
+            The assumption made in PBRT (Physically Based Rendering Techniques) is that the cost of intersecting a ray with any primitive 
+            (be it a triangle, sphere, etc.) is roughly the same. This is a simplification, 
+            but it's one that generally holds true in practice and simplifies the calculation of the Surface Area Heuristic (SAH).
+            Given this assumption, the cost of intersecting a ray with a set of primitives is proportional to the number of primitives. 
+            Therefore, instead of summing the individual intersection costs for each primitive, we can just count the number of primitives.
+            This is why the SAH cost formula uses the counts N_left and N_right of primitives in the left and right child AABBs, respectively. 
+            By multiplying these counts by the ratios of the child AABBs' surface areas to the parent AABB's surface area, we get an estimate 
+            of the expected number of ray-primitive intersection tests for the primitives in each child AABB.
+            */
+
+            float SAH_cost = .125f + (size(left_triangles) * left_surface_area + size(right_triangles) * right_surface_area) / parent_surface_area;
+
+            if (SAH_cost < best_SAH_cost) 
+            {
+                best_SAH_cost = SAH_cost;
+                best_axis = axis;
+                best_idx = split_idx;
+			}   
+        }
+    }
+
+    // at this point we know the best split so we build the output
+    std::sort(triangle_indices.begin(), triangle_indices.end(), [&](unsigned int a, unsigned int b) {
+        return triangles[a].centroid[best_axis] < triangles[b].centroid[best_axis];
+        });
+
+    std::vector<unsigned int> left_triangles(triangle_indices.begin(), triangle_indices.begin() + best_idx);
+    std::vector<unsigned int> right_triangles(triangle_indices.begin() + best_idx, triangle_indices.end());
+
+    BVH::computeAABB(left_triangles, triangles, output.LAABBmin, output.LAABBmax);
+    BVH::computeAABB(right_triangles, triangles, output.RAABBmin, output.RAABBmax);
+
+    if (size(left_triangles) <= BVH::AABB_primitives_limit) {
+		output.LIsLeaf = true;
+	}
+
+    if (size(right_triangles) <= BVH::AABB_primitives_limit) {
+        output.RIsLeaf = true;
+    }
+
+    output.LTris = left_triangles;
+    output.RTris = right_triangles;
+
+    return output;
+}
+
 BVH::BVH_data BVH::construct(std::string path, const Heuristic heuristic) {
     // loading mesh
     std::vector<Triangle> triangles;
@@ -359,23 +465,43 @@ BVH::BVH_data BVH::construct(std::string path, const Heuristic heuristic) {
 
     }
 
-    // converting from std::vector to a c++ array
-    //Triangle* TRIANGLES_array = new Triangle[num_triangles];
-    //std::copy(triangles.begin(), triangles.end(), TRIANGLES_array);
-
-    //BVH::Node* BVH_array = new BVH::Node[BVH.size()];
-    //std::copy(BVH.begin(), BVH.end(), BVH_array);
-
     BVH_data bvh_data;
 
-    //bvh_data.BVH = BVH_array;
     bvh_data.BVH = BVH;
     bvh_data.BVH_size = BVH.size();
-    //bvh_data.TRIANGLES = TRIANGLES_array;
     bvh_data.TRIANGLES = triangles;
     bvh_data.TRIANGLES_size = num_triangles;
-
+    bvh_data.BVH_tree_depth = BVH::getBVHTreeDepth(BVH, BVH[0], 0);
+    
     return  bvh_data;
 }
 
+/**
+* @brief Get the maximum height of the BVH
+* @param BVH - the BVH
+* @param current_node - pass the root node
+* @param height - pass 0
+* 
+* recursive function using DFS to get the maximum height of the BVH
+* */
+unsigned int BVH::getBVHTreeDepth(const std::vector<Node>& BVH, BVH::Node current_node, unsigned int height) 
+{
+    if (current_node.child1_idx == -1 && current_node.child2_idx == -1) {
+        // we found a leaf node so we return the height of the leaf
+        return height;
+    }
+    
+    unsigned int left_height = 0;
+    unsigned int right_height = 0;
+
+    if (current_node.child1_idx != -1) {
+		left_height = getBVHTreeDepth(BVH, BVH[current_node.child1_idx], height+1);
+	}
+    if (current_node.child2_idx != -1) {
+		right_height = getBVHTreeDepth(BVH, BVH[current_node.child2_idx], height+1);
+	}
+
+    return std::max(left_height, right_height);
+
+}
 

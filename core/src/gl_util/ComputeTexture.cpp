@@ -1,4 +1,4 @@
-#include "gl_util/ComputeTexture.h"
+#include "core/gl_util/ComputeTexture.h"
 #include <iostream>
 
 ComputeTexture::ComputeTexture(int width, int height, unsigned int binding_point)

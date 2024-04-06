@@ -1,4 +1,4 @@
-#include "gl_util/OpenGLdebugFuncs.h"
+#include "core/gl_util/OpenGLdebugFuncs.h"
 #include <iostream>
 
 void GLClearError() {

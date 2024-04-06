@@ -1,4 +1,4 @@
-#include "camera/CameraHandler.hpp"
+#include "core/camera/CameraHandler.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 #include <map>

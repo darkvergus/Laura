@@ -1,5 +1,5 @@
 #pragma once
-#include "camera/Camera.hpp"
+#include "core/camera/Camera.hpp"
 #include <imgui.h>
 #include <unordered_map>
 
@@ -208,67 +208,74 @@ void component_cameraGUI(Camera& camera, bool& was_IMGUI_Input, bool disabled, b
 	ImGui::SeparatorText("CONTROLLS & SETTINGS");
 
 
-
-	if (ImGui::BeginTable("KeybindTable", 2))
+	if (ImGui::TreeNode("Keybinds")) 
 	{
-		ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_None);
-		ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_None);
+		if (ImGui::BeginTable("KeybindTable", 2))
+		{
+			ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_None);
+			ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_None);
 
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Forward"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.FORWARD]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.FORWARD);
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Forward"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.FORWARD]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.FORWARD);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Backward"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.BACKWARD]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.BACKWARD);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Left"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.LEFT]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.LEFT);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Right"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.RIGHT]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.RIGHT);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Up"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.UP]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.UP);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Down"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.DOWN]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.DOWN);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Roll left"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.ROLL_LEFT]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.ROLL_LEFT);
+			}
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0); ImGui::Text("Roll right"); ImGui::TableSetColumnIndex(1);
+			if (ImGui::Button((keyMap[camera.cameraKeybinds.ROLL_RIGHT]).c_str())) {
+				scheduleKeybindChange(camera, camera.cameraKeybinds.ROLL_RIGHT);
+			}
+
+			ImGui::EndTable();
 		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Backward"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.BACKWARD]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.BACKWARD);
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Left"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.LEFT]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.LEFT);
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Right"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.RIGHT]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.RIGHT);
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Up"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.UP]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.UP);
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Down"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.DOWN]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.DOWN);
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Roll left"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.ROLL_LEFT]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.ROLL_LEFT);
-		}
-
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0); ImGui::Text("Roll right"); ImGui::TableSetColumnIndex(1);
-		if (ImGui::Button((keyMap[camera.cameraKeybinds.ROLL_RIGHT]).c_str())) {
-			scheduleKeybindChange(camera, camera.cameraKeybinds.ROLL_RIGHT);
-		}
-
-		ImGui::EndTable();
+	ImGui::TreePop();
 	}
 
 
 
+
 	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.0f);
-	ImGui::SliderFloat("Velocity", &camera.speed, 1.0f, 100.0f, "%.1f");
+	float logSpeed = log10(camera.speed);
+	if (ImGui::SliderFloat("Velocity", &logSpeed, std::log10(1.0f), std::log10(1000.0f), "%.1f")) {
+		camera.speed = pow(10, logSpeed);
+	}
 	ImGui::SliderFloat("Sensitivity", &camera.sensitivity, 10.0f, 50.0f, "%.2f");
 	ImGui::PopItemWidth();
 

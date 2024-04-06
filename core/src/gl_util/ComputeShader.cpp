@@ -1,11 +1,11 @@
-#include "gl_util/ComputeShader.h"
+#include "core/gl_util/ComputeShader.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
-#include "gl_util/OpenGLdebugFuncs.h"
+#include "core/gl_util/OpenGLdebugFuncs.h"
 
 ComputeShader::ComputeShader(const std::string& filepath)
  : m_Filepath(filepath), m_RendererID(0)

@@ -1,9 +1,8 @@
 #include <iostream>
 
-#include "Renderer.h"
+#include "core/Renderer.h"
 
 struct SceneData;
-
 
 Renderer::Renderer(SceneData& scene, BVH::BVH_data BVH_of_mesh)
 	: m_Scene(scene),
@@ -99,7 +98,7 @@ ComputeTexture* Renderer::RenderComputePostProcStage()
 void Renderer::configure_rtx_parameters_UBO_block() {	
 	GLCall(glGenBuffers(1, &rtx_parameters_UBO_ID));
 	GLCall(glBindBuffer(GL_UNIFORM_BUFFER, rtx_parameters_UBO_ID));
-	GLCall(glBufferData(GL_UNIFORM_BUFFER, 148, nullptr, GL_DYNAMIC_DRAW));
+	GLCall(glBufferData(GL_UNIFORM_BUFFER, 168, nullptr, GL_DYNAMIC_DRAW));
 	GLCall(glBindBufferBase(GL_UNIFORM_BUFFER, 0, rtx_parameters_UBO_ID)); // binding the uniform buffer object to binding point 0
 }
 
@@ -115,6 +114,12 @@ void Renderer::update_rtx_parameters_UBO_block() {
 	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 64,  sizeof(glm::vec3), &rtx_uniform_parameters.CameraPos));
 	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 80,  sizeof(glm::mat4), &rtx_uniform_parameters.ModelMatrix));
 	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 144, sizeof(bool), &rtx_uniform_parameters.WasInput));
+
+	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 148, sizeof(bool), &rtx_uniform_parameters.display_BVH));
+	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 152, sizeof(bool), &rtx_uniform_parameters.display_multiple));
+	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 156, sizeof(unsigned int), &rtx_uniform_parameters.displayed_layer));
+	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 160, sizeof(unsigned int), &rtx_uniform_parameters.BVH_tree_depth));
+	GLCall(glBufferSubData(GL_UNIFORM_BUFFER, 164, sizeof(bool), &rtx_uniform_parameters.show_skybox));
 	GLCall(glBindBuffer(GL_UNIFORM_BUFFER, 0)); // unbind
 }
 
@@ -151,8 +156,6 @@ void Renderer::configure_TrisMesh_SSBO_block()
 {
 	GLCall(glGenBuffers(1, &tris_SSBO_ID));
 	GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, tris_SSBO_ID));
-	std::cout << "sizeof(Triangle): " << sizeof(Triangle) << std::endl;
-	std::cout << "BVH_of_mesh.TRIANGLES_size: " << BVH_of_mesh.TRIANGLES_size << std::endl;
 	GLCall(glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(Triangle) * BVH_of_mesh.TRIANGLES_size, nullptr, GL_STATIC_DRAW));
 	GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, tris_SSBO_ID));
 }
@@ -168,9 +171,6 @@ void Renderer::configure_BVH_SSBO_block()
 {
 	GLCall(glGenBuffers(1, &BVH_SSBO_ID));
 	GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, BVH_SSBO_ID));
-	std::cout << "BVH_size: " << BVH_of_mesh.BVH_size << std::endl;
-	std::cout << "sizeof(BVH::Node): " << sizeof(BVH::Node) << std::endl;
-
 	GLCall(glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(BVH::Node) * BVH_of_mesh.BVH_size, nullptr, GL_STATIC_DRAW));
 	GLCall(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, BVH_SSBO_ID));
 }

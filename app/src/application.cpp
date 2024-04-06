@@ -1,38 +1,39 @@
 // third party
-#include <GL/glew.h> // done
-#include <GLFW/glfw3.h> // done
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp> // done
-#include <glm/gtc/matrix_transform.hpp> // done
-#include <glm/gtx/string_cast.hpp>	// done
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
-#include "imgui.h" // done
-#include "imgui_impl_glfw.h" // done
-#include "imgui_impl_opengl3.h" // done
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 // standard
-#include <iostream> // done
-#include <fstream> // done
-#include <string> // done
-#include <sstream> // done	
-#include <vector>	// done
-#include <stdio.h>	// done
+#include <iostream>
+#include <fstream> 
+#include <string>
+#include <sstream> 
+#include <vector>
+#include <stdio.h>
 
 // core
-#include "Renderer.h" 
-#include "gl_util/OpenGLdebugFuncs.h"
-#include "camera/CameraHandler.hpp"
+#include "core/Renderer.h" 
+#include "core/gl_util/OpenGLdebugFuncs.h"
+#include "core/camera/CameraHandler.hpp"
 
 // app
-#include "GUI/CameraComponentGUI.h" // done
-#include "GUI/DockspaceGUI.h" // done
-#include "GUI/PerformanceCounterGUI.h" // done
-#include "GUI/InspectorGUI.h" // done
-#include "GUI/SkyBoxGUI.h" // done
+#include "GUI/CameraComponentGUI.h"
+#include "GUI/DockspaceGUI.h"
+#include "GUI/PerformanceCounterGUI.h"
+#include "GUI/InspectorGUI.h"
+#include "GUI/SkyBoxGUI.h"
+#include "GUI/BVHsettingsGUI.h"
 
-#include "delta_lib/DeltaTime.h" // done
-#include "scenes/Scene1.hpp" // done
+#include "delta_lib/DeltaTime.h"
+#include "scenes/Scene1.hpp"
 
 const int SCREEN_WIDTH = 1920, SCREEN_HEIGHT = 1080;
 int main() {
@@ -75,22 +76,17 @@ int main() {
 		CameraHandler cameraHandler(camera);
 		SceneData sceneData = getSceneData();
 		
-		BVH::BVH_data knight_BVH = BVH::construct(APP_RESOURCES_PATH "models/stanford_dragon_pbr.glb", BVH::Heuristic::SPATIAL_MIDDLE_SPLIT);
-
-		/*std::cout << "----Traingle mesh-----" << std::endl;
-		std::cout << "Num Tris: " << knight_BVH.TRIANGLES_size << std::endl;
-		for (size_t i = 0; i < knight_BVH.TRIANGLES_size; i++) {
-			std::cout << knight_BVH.TRIANGLES[i] << std::endl;
-		}
-
-		std::cout << "-------CUBE BVH-------" << std::endl;
-		std::cout << "Num Nodes: " << knight_BVH.BVH_size << std::endl;
-		for (size_t i = 0; i < knight_BVH.BVH_size; i++) {
-			std::cout << knight_BVH.BVH[i] << std::endl;
-		}
-		std::cout << "----------------------" << std::endl;*/
+		BVH::Heuristic active_heuristic = BVH::Heuristic::SURFACE_AREA_HEURISTIC_BUCKETS;
+		//BVH::BVH_data scene_BVH = BVH::construct(APP_RESOURCES_PATH "models/stanford_dragon_pbr.glb", active_heuristic);
+		//BVH::BVH_data scene_BVH = BVH::construct(APP_RESOURCES_PATH "models/sponza.obj", active_heuristic);
+		//BVH::BVH_data scene_BVH = BVH::construct(APP_RESOURCES_PATH "models/knight.obj", active_heuristic);
+		BVH::BVH_data scene_BVH = BVH::construct(APP_RESOURCES_PATH "models/stanford_bunny.obj", active_heuristic);
+		std::cout << "BVH height: " << scene_BVH.BVH_tree_depth << std::endl;
 		
-		Renderer renderer(sceneData, knight_BVH);
+		//camera.posVec = glm::vec3(3.027f, 46.893f, -134.682f); // set the initial camera position for stanford dragon
+		camera.posVec = glm::vec3(0.0f, 0.0f, 0.0f); // set the initial camera position for knight
+
+		Renderer renderer(sceneData, scene_BVH);
 		
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
@@ -120,6 +116,8 @@ int main() {
 		int bouncesPerRay = 5;
 		
 		//skybox
+		bool show_skybox = true;
+
 		glm::vec3 SkyGroundColor  = glm::vec3(0.6392156862f, 0.5803921f, 0.6392156862f);
 		glm::vec3 SkyColorHorizon = glm::vec3(1.0f, 1.0f, 1.0f);
 		glm::vec3 SkyColorZenith  = glm::vec3(0.486274509f, 0.71372549f, 234.0f / 255.0f);
@@ -131,7 +129,14 @@ int main() {
 		ImVec2 prevViewportWindowPos = ImVec2(0.0f, 0.0f);
 		ImVec2 viewportSize, topLeftTextureCoords, bottomLeftTextureCoords;
 
-		camera.posVec = glm::vec3(3.027f, 46.893f, -134.682f); // set the initial camera position
+
+
+		// BVH settings
+		bool display_BVH = false;
+		
+		int displayed_layer = 1;
+		bool display_multiple = true;
+		int BVH_height = 15; // the height of the BVH tree (the size of the traversal stack in the shader)
 
 		while (!glfwWindowShouldClose(window)) {
 			deltaTime.update();
@@ -149,7 +154,9 @@ int main() {
 			genDockspace();
 			genInspector(cameraHandler.CameraControllMode);
 			component_cameraGUI(camera, was_ImGui_Input, cameraHandler.CameraControllMode, shouldAccumulate, shouldPostProcess, raysPerPixel, bouncesPerRay);
-			genSkyboxGUI(SkyGroundColor, SkyColorHorizon, SkyColorZenith, was_ImGui_Input, cameraHandler.CameraControllMode);
+			genSkyboxGUI(SkyGroundColor, SkyColorHorizon, SkyColorZenith, show_skybox, was_ImGui_Input, cameraHandler.CameraControllMode);
+			BVH_settings_GUI(display_BVH, active_heuristic, displayed_layer, display_multiple, scene_BVH.BVH_tree_depth, was_ImGui_Input, cameraHandler.CameraControllMode);
+
 			ImGui::ShowDemoWindow(&show_demo_window);
 			if (camera.cameraKeybinds.camera_keybind_window_active) { genCameraChangeKeybindSplashScreen(); }
 			
@@ -228,6 +235,14 @@ int main() {
 			renderer.rtx_uniform_parameters.CameraPos = camera.posVec;
 			renderer.rtx_uniform_parameters.ModelMatrix = glm::mat4(camera.getModelMatrix());
 			renderer.rtx_uniform_parameters.WasInput = wasInput;
+
+			renderer.rtx_uniform_parameters.display_BVH = display_BVH;
+			renderer.rtx_uniform_parameters.displayed_layer = displayed_layer;
+			renderer.rtx_uniform_parameters.display_multiple = display_multiple;
+			renderer.rtx_uniform_parameters.BVH_tree_depth = scene_BVH.BVH_tree_depth;
+			renderer.rtx_uniform_parameters.show_skybox = show_skybox;
+
+
 			ComputeTexture* outputTexture = renderer.RenderComputeRtxStage();
 			
 			renderer.BeginComputePostProcStage();
