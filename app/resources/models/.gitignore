@@ -1,2 +1,5 @@
-*/
-!/.gitignore
+# Ignore all files in the current directory
+*
+
+# Unignore the .gitignore file
+!.gitignore
