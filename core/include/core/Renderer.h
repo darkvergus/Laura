@@ -21,7 +21,10 @@ struct SceneData {
 	int numberOfObjects;
 };
 
-
+struct PixelData {
+	glm::vec4 pixelColor; // .xyz = color, .w = TRI_intersect_count
+	unsigned int AABB_intersect_count;
+};
 
 /**
 * @brief The rtx_parameters_uniform_struct struct
@@ -39,15 +42,17 @@ struct rtx_parameters_uniform_struct {
 	glm::vec3 skyboxZenithColor;			// offset 48 // alignment 16 // total 64 bytes                            
 	glm::vec3 CameraPos;					// offset 64 // alignment 16 // total 80 bytes
 
-	glm::mat4 ModelMatrix;					// offset 80 // alignment 16 // total 144 bytes
+	glm::vec3 pixelGlobalInvocationID;		// offset 80 // alignment 16 // total 96 bytes
 
-	bool WasInput;							// offset 144 // alignment 4 // total 148 bytes 
+	glm::mat4 ModelMatrix;					// offset 96 // alignment 16 // total 160 bytes
 
-	bool display_BVH = display_BVH; 	    // offset 148 // alignment 4 // total 152 bytes
-	bool display_multiple = display_multiple; // offset 152 // alignment 4 // total 156 bytes
-	unsigned int displayed_layer = displayed_layer; // offset 156 // alignment 4 // total 160 bytes
-	unsigned int BVH_tree_depth = BVH_tree_depth;	// offset 160 // alignment 4 // total 164 bytes
-	bool show_skybox = show_skybox;			// offset 164 // alignment 4 // total 168 bytes
+	bool WasInput;							// offset 160 // alignment 4 // total 164 bytes
+	bool display_BVH = display_BVH;					// offset 164 // alignment 4 // total 168 bytes
+	bool display_multiple = display_multiple;		// offset 168 // alignment 4 // total 172 bytes
+	unsigned int displayed_layer = displayed_layer; // offset 172 // alignment 4 // total 176 bytes
+	unsigned int BVH_tree_depth = BVH_tree_depth;	// offset 176 // alignment 4 // total 180 bytes
+	bool show_skybox = show_skybox;					// offset 180 // alignment 4 // total 184 bytes
+	int heatmap_color_limit = heatmap_color_limit;	// offset 184 // alignment 4 // total 188 bytes
 };
 
 /**
@@ -74,7 +79,7 @@ private:
 	void initComputePostProcStage();
 
 	// unifom buffer object setup and functions
-	unsigned int rtx_parameters_UBO_ID, sphereBuffer_UBO_ID, postProcessing_parameters_UBO_ID, tris_SSBO_ID, BVH_SSBO_ID;
+	unsigned int rtx_parameters_UBO_ID, sphereBuffer_UBO_ID, postProcessing_parameters_UBO_ID, tris_SSBO_ID, BVH_SSBO_ID, pixelData_SSBO_ID;
 
 	void configure_rtx_parameters_UBO_block();
 	void update_rtx_parameters_UBO_block();
@@ -91,6 +96,8 @@ private:
 	void configure_BVH_SSBO_block();
 	void update_BVH_SSBO_block();
 
+	void configure_PixelData_SSBO_block();
+	void read_PixelData_SSBO_block();
 
 public:
 	Renderer(SceneData& scene, BVH::BVH_data BVH_of_mesh);
@@ -101,6 +108,8 @@ public:
 	void BeginComputeRtxStage();
 	ComputeTexture* RenderComputeRtxStage();
 	rtx_parameters_uniform_struct rtx_uniform_parameters;
+
+	PixelData pixelData; // should be read after rendering the compute rtx stage
 
 	void BeginComputePostProcStage();
 	ComputeTexture* RenderComputePostProcStage();

@@ -273,9 +273,7 @@ void component_cameraGUI(Camera& camera, bool& was_IMGUI_Input, bool disabled, b
 
 	ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x / 2.0f);
 	float logSpeed = log10(camera.speed);
-	if (ImGui::SliderFloat("Velocity", &logSpeed, std::log10(1.0f), std::log10(1000.0f), "%.1f")) {
-		camera.speed = pow(10, logSpeed);
-	}
+	if (ImGui::SliderFloat("Velocity", &camera.speed, 0.1, 1500, "%.1f", ImGuiSliderFlags_Logarithmic)) { was_IMGUI_Input = true; }
 	ImGui::SliderFloat("Sensitivity", &camera.sensitivity, 10.0f, 50.0f, "%.2f");
 	ImGui::PopItemWidth();
 

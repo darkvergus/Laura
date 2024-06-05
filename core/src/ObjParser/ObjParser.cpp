@@ -69,7 +69,9 @@ void loadMesh(std::string filePath, std::vector<Triangle>& mesh, unsigned int& n
 
 
             // Set the material properties
-            triangle.material.color = glm::vec3(0.95f, 0.9f, 0.9f);
+            //triangle.material.color = glm::vec3(144.0f/255.0f, 50.0f/255.0f, 220.0f/255.0f); // purple
+            //triangle.material.color = glm::vec3(0.1f, 0.1f, 0.1f); // black
+            triangle.material.color = glm::vec3(0.7f, 0.7f, 0.7f); // white
             triangle.material.emissionColor = glm::vec3(0.0f, 0.0f, 0.0f);
             triangle.material.emissionStrength = 0.0f;
 
@@ -77,6 +79,7 @@ void loadMesh(std::string filePath, std::vector<Triangle>& mesh, unsigned int& n
             numTriangles++;
         }
     }
+    std::cout << numTriangles << " triangles loaded" << std::endl;
 }
 
 // Constructor for the BVH Node
@@ -472,7 +475,6 @@ BVH::BVH_data BVH::construct(std::string path, const Heuristic heuristic) {
     bvh_data.TRIANGLES = triangles;
     bvh_data.TRIANGLES_size = num_triangles;
     bvh_data.BVH_tree_depth = BVH::getBVHTreeDepth(BVH, BVH[0], 0);
-    
     return  bvh_data;
 }
 

@@ -155,6 +155,7 @@ namespace BVH {
         std::vector<Triangle> TRIANGLES;
         
         unsigned int BVH_tree_depth;
+        std::vector<glm::vec3> heatmapLayers;
 
         unsigned int BVH_size;
         unsigned int TRIANGLES_size;

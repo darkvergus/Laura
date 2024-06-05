@@ -8,6 +8,9 @@ layout(std140, binding = 2) uniform uniforms {
 int u_numAccumulatedFrames;
 };
 
+/**
+ * This shader which will be later used for post processing but for now it just returns whatever is sent to it.
+ */
 void main()
 {
     ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);

@@ -1,3 +1,8 @@
+
+// This code is inspired by techniques and examples provided by Sebastian Lague
+// in their YouTube video: Coding Adventure: Ray Tracing
+// Link: https://www.youtube.com/watch?v=Qz0KTGYJtUk
+
 #version 460 core
 
 /** 
@@ -8,7 +13,7 @@
 
 // CONSTANTS
 #define AABB_primitives_limit 2
-#define MAX_STACK_SIZE 28 // (BVH tree depth)
+#define MAX_STACK_SIZE 30 // (BVH tree depth)
 
 #define heatmap_cold vec3(0.0, 0.0, 0.0)
 #define heatmap_warm vec3(0.9, 1.0, 0.9)
@@ -18,11 +23,13 @@
 #define LOCAL_GROUP_Y 4
 #define LOCAL_GROUP_Z 1
 
-#define NUM_SPHERES 1
+#define NUM_SPHERES 4
 
 #define PI 3.1415926
 #define EPSILON 1.0e-10 // Small value to avoid division by zero
+#define GAMMA 0.8
 #define INF 1.0 / 0.0;
+#define wantPixelInfo true
 
 /** The BVHNode struct represents a node in the Bounding Volume Hierarchy (BVH) tree.
  * The BVH tree is used to organize the triangles in the scene into a hierarchy of axis-aligned bounding boxes (AABBs).
@@ -122,22 +129,24 @@ layout (std140, binding = 0) uniform uniformParameters {
     vec3 u_skyboxZenithColor;       // offset 48 // alignment 16 // total 64 bytes                            
     vec3 u_CameraPos;               // offset 64 // alignment 16 // total 80 bytes
 
-    mat4 u_ModelMatrix;             // offset 80 // alignment 16 // total 144 bytes
+    vec3 u_pixelGlobalInvocationID; // offset 80 // alignment 16 // total 96 bytes
 
-    bool u_WasInput;                // offset 144 // alignment 4 // total 148 bytes
+    mat4 u_ModelMatrix; 		    // offset 96 // alignment 16 // total 160 bytes
 
-    bool u_displayBVH;               // offset 148 // alignment 4 // total 152 bytes
-    bool u_displayMultipleBVHlayers; // offset 152 // alignment 4 // total 156 bytes
-    uint u_BVHlayerToDisplay;        // offset 156 // alignment 4 // total 160 bytes
-    uint u_BVHTreeDepth;             // offset 160 // alignment 4 // total 164 bytes
-    bool u_show_skybox;              // offset 164 // alignment 4 // total 168 bytes
+    bool u_WasInput;                    // offset 160 // alignment 4 // total 164 bytes
+    bool u_displayBVH;                  // offset 164 // alignment 4 // total 168 bytes
+    bool u_displayMultipleBVHlayers;    // offset 168 // alignment 4 // total 172 bytes
+    uint u_BVHlayerToDisplay;           // offset 172 // alignment 4 // total 176 bytes
+    uint u_BVHTreeDepth;                // offset 176 // alignment 4 // total 180 bytes
+    bool u_show_skybox;                 // offset 180 // alignment 4 // total 184 bytes
+    uint u_heatmap_color_limit; 	    // offset 184 // alignment 4 // total 188 bytes
+    
 };
 
 layout (std140, binding = 1) uniform sceneBuffer
 {
     Sphere u_Spheres[NUM_SPHERES];
 };
-
 
 /** The MESH_buffer SSBO stores the triangles that make up the mesh in the scene.
  * The triangles are stored in an array of Triangle structs, where each Triangle struct contains the vertices of the triangle, the normals at each vertex, and the material properties of the triangle.
@@ -156,6 +165,16 @@ layout (std140, binding = 4) buffer BVH_buffer
     BVHNode BVH[];
 };
 
+struct PixelData {
+	vec4 pixelColor; // .xyz = color, .w = TRI_intersect_count
+	uint AABB_intersect_count;
+};
+
+layout (std430, binding = 5) buffer OutputBuffer
+{
+    PixelData pixelData;
+};
+
 
 /** The function getCurrentState calculates a unique state value based on the texel coordinates and the number of accumulated frames.
  * The state value is used to generate random numbers for sampling in the shader.
@@ -166,8 +185,13 @@ uint getCurrentState(ivec2 texelCoords, int screenWidth)
     return pixelIndex + u_numAccumulatedFrames * 745621; // new state every frame
 }
 
+/** The RandomValue function generates a random value between 0 and 1 using a simple linear congruential generator (LCG).
+ * The function uses the LCG algorithm to generate a sequence of pseudo-random numbers based on a seed value.
+ * Thanks to https://www.pcg-random.org, https://www.shadertoy.com/view/XlGcRh
+ */
 float RandomValue(inout uint state)
 {
+    
     state = state * 747796405u + 2891336453u;
     uint result = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
     result = (result >> 22u) ^ result;
@@ -176,11 +200,10 @@ float RandomValue(inout uint state)
 
 /** The RandomValueNormalDistribution function generates a random value from a normal distribution using the Box-Muller transform.
  * The function generates two random values from a uniform distribution and transforms them into a random value from a normal distribution.
+ * Thanks to https://stackoverflow.com/a/6178290
  */
 float RandomValueNormalDistribution(inout uint state)
 {
-    // Thanks to https://stackoverflow.com/a/6178290
-    // And Sebastian Lague
     float theta = 2 * PI * RandomValue(state);
     float rho = sqrt(-2 * log(RandomValue(state)));
     return rho * cos(theta);
@@ -188,16 +211,15 @@ float RandomValueNormalDistribution(inout uint state)
 
 /** The RandomDirection function generates a random direction vector by sampling from a normal distribution in three dimensions.
  * The function generates three random values from a normal distribution and normalizes them to create a random direction vector.
+ * Thanks to https://math.stackexchange.com/questions/1585975
  */
 vec3 RandomDirection(inout uint state)
 {
-    // thanks to https://math.stackexchange.com/questions/1585975 and Sebastian Lague
     float x = RandomValueNormalDistribution(state);
     float y = RandomValueNormalDistribution(state);
     float z = RandomValueNormalDistribution(state);
     return normalize(vec3(x, y, z));
 }
-
 
 /** The RandomDirectionInHemisphere function generates a random direction vector in the hemisphere defined by the normal vector.
  * The distribution is cosine-weighted. (meaning more rays are sent in the direction of the normal)
@@ -229,10 +251,73 @@ vec3 GainSkyboxLight(const Ray ray)
     return skyGradient;
 }
 
+/** The complexityToRGB function converts a complexity value to an RGB color using a rainbow color map.
+ * The function maps the complexity value to a wavelength in the visible spectrum and then converts the wavelength to an RGB color.
+ * The RGB color is gamma-corrected to ensure that the colors are displayed correctly on the screen.
+ */
+vec3 complexityToRGB(uint complexity) {
+
+	float wavelength = 380.0 + 370.0 * complexity/(u_heatmap_color_limit);
+    vec3 color;
+    if (wavelength <= 380.0) {
+		color.r = 0.0;
+		color.g = 0.0;
+		color.b = 0.0;
+	}
+    else if (wavelength > 380.0 && wavelength <= 440.0) {
+        color.r = -(wavelength - 440.0) / (440.0 - 380.0)/3;
+        color.g = 0.0;
+        color.b = 0.8;
+    } else if (wavelength >= 440.0 && wavelength <= 490.0) {
+        color.r = 0.0;
+        color.g = (wavelength - 440.0) / (490.0 - 440.0);
+        color.b = 1.0;
+    } else if (wavelength >= 490.0 && wavelength <= 510.0) {
+        color.r = 0.0;
+        color.g = 1.0;
+        color.b = -(wavelength - 510.0) / (510.0 - 490.0);
+    } else if (wavelength >= 510.0 && wavelength <= 580.0) {
+        color.r = (wavelength - 510.0) / (580.0 - 510.0);
+        color.g = 1.0;
+        color.b = 0.0;
+    } else if (wavelength >= 580.0 && wavelength <= 645.0) {
+        color.r = 1.0;
+        color.g = -(wavelength - 645.0) / (645.0 - 580.0);
+        color.b = 0.0;
+    } else if (wavelength >= 645.0 && wavelength <= 780.0) {
+        color.r = 1.0;
+        color.g = 0.0;
+        color.b = 0.0;
+    } else {
+        color.r = 1.0;
+        color.g = 1.0;
+        color.b = 1.0;
+    }
+
+    float factor;
+    vec3 white = vec3(1.0);
+    
+    if (wavelength >= 380 && wavelength < 420){
+        factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+    }
+    else if (wavelength >= 420 && wavelength < 701){
+		factor = 1.0;
+	}
+	else if (wavelength >= 701 && wavelength < 781){
+        factor = 0.3 + 0.7*(780 - wavelength) / (780 - 700);
+        return pow((color + factor*white), vec3(GAMMA));
+    }
+    else {
+        factor = 1.0;
+    }
+
+    return pow(factor * color, vec3(GAMMA)); //gamma correction component-wise
+}
+
 /** The RayAABBIntersection function checks if a ray intersects an axis-aligned bounding box (AABB).
  * The function uses the slab method to determine if the ray intersects the AABB.
- * Fast, Branchless Ray/Bounding Box Intersections
  * Source: https://tavianator.com/fast-branchless-raybounding-box-intersections/
+ * Source: https://tavianator.com/2022/ray_box_boundary.html
  */
 bool RayAABBIntersection(Ray ray, const vec3 minVec, const vec3 maxVec, inout float largest_tMin)
 {
@@ -251,7 +336,7 @@ bool RayAABBIntersection(Ray ray, const vec3 minVec, const vec3 maxVec, inout fl
 /** The RaySphereIntersection function checks if a ray intersects a sphere.
  * The function uses the quadratic formula to determine if the ray intersects the sphere.
  * If the ray intersects the sphere, the HitInfo struct.
- * Source: Sebastian Lague - https://youtu.be/Qz0KTGYJtUk?t=321
+ * Thanks to: Sebastian Lague - https://youtu.be/Qz0KTGYJtUk?t=321
  */
 HitInfo RaySphereIntersection(Ray ray, const vec3 spherePosition, const float sphereRadius)
 {
@@ -328,21 +413,13 @@ HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri)
     return hitInfo;
 }
 
-
-
-
 /** The BVH_traverse function traverses the Bounding Volume Hierarchy (BVH) tree to find the closest intersection of a ray with the objects in the scene.
  * The function uses a stack to keep track of the nodes that need to be checked for intersection.
  * The function iterates over the nodes in the BVH tree and checks for intersections with the bounding boxes of the nodes.
  * If the ray intersects a leaf node, the function checks for intersections with the primitives contained in the node.
  * If the ray intersects a primitive, the function updates the closest intersection found so far.
- *
- *   Optimizations applied:
- * - inlined stack functions & not using the stack struct but variables directly
- * - declaring the node and triangle as const
- * - (not implemented yet) depth testing of AABBs to avoid unnecessary intersection tests
  */
-void BVH_traverse(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
+void BVH_traverse(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
 {
     // A stack is initialized to keep track of the BVH nodes that need to be checked.
     int stack_elements[MAX_STACK_SIZE];
@@ -353,12 +430,12 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
         stack_elements[stack_top] = 0; // The root node of the BVH is pushed onto the stack.
     }
 
-    uint intersections_count = 0;
     float AABB_tMin;
     
     // The function continues to check nodes as long as there are nodes left on the stack.
     while (stack_top >= 0) // Inlined !stack_empty(stack)
     {
+
         // The next node to check is popped from the stack.
         int current_node_idx;
         if (stack_top >= 0) { // Inlined stack_pop
@@ -375,7 +452,6 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
 			{
 				continue;
 			}
-            
             // If the current node is a leaf node (it has no children), the function 
             // checks for intersections with the primitives contained in the node.
             if (current_node.child1_idx == -1 && current_node.child2_idx == -1)
@@ -384,7 +460,6 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
                 for (int i = 0; i < AABB_primitives_limit; i++)
                 {
                     const int triangle_idx = current_node.leaf_primitive_indices[i];
-                    
                     // If there are no more primitives in the node, the 
                     // function breaks out of the loop.
                     if (triangle_idx == -1)
@@ -399,25 +474,26 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
                     
                     // If the ray intersects the triangle and the intersection is closer than the
                     // closest intersection found so far, the closest intersection is updated.
-                    if (triHitInfo.didCollide && triHitInfo.dst < closestHit.dst)
-                    {
-                        closestHit = triHitInfo;
-                        closestHit.material = tri.material;
-                        break;
+                    if (triHitInfo.didCollide){
+                    	TRI_intersect_count += 1;
+                        if (triHitInfo.dst < closestHit.dst)
+                        {
+                            closestHit = triHitInfo;
+                            closestHit.material = tri.material;
+                            break;
+                        }
                     }
                 }
             }
             else
             {
-                intersections_count += 1;
-
+                AABB_intersect_count += 1;
                 if (current_node.child1_idx != -1) { // Inlined stack_push
                     if (stack_top < MAX_STACK_SIZE - 1) {
                         stack_top++;
                         stack_elements[stack_top] = current_node.child1_idx;
                     }
                 }
-
                 if (current_node.child2_idx != -1) { // Inlined stack_push
                     if (stack_top < MAX_STACK_SIZE - 1) {
                         stack_top++;
@@ -427,30 +503,18 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
             }
         }
     }
-    if (u_displayBVH)
-	{
-        if (u_displayMultipleBVHlayers && intersections_count <= u_BVHlayerToDisplay && intersections_count > 0){
-            float t1 = pow(float(intersections_count) / float(u_BVHlayerToDisplay), 1);
-            accum_AABB_clr = mix(heatmap_cold, heatmap_warm, t1);
-        }
-        else if (u_BVHlayerToDisplay <= intersections_count){
-            accum_AABB_clr = heatmap_warm;
-        }
-	}
 }
-
 
 /** The CheckRayCollision function traces a ray through the scene and checks for intersections with the objects in the scene.
  * The function iterates over each sphere in the scene and checks for intersections.
  * The function traverses the BVH to find the closest intersection of the ray with the objects in the scene.
  * If an intersection is found, the function returns information about the intersection, including the material properties of the object.
  */
-HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout vec3 accum_AABB_clr)
+HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
 {
     closestHit.didCollide = false;
-    closestHit.dst =  INF; // infinity
+    closestHit.dst = INF; // infinity
 
-    // The function iterates over each sphere in the scene and checks for intersections.
     for (int i = 0; i < NUM_SPHERES; i++)
     {
         Sphere sphere = u_Spheres[i];
@@ -463,9 +527,16 @@ HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout vec3 accum_AA
         }
     }   
     
-    // The function traverses the BVH to find the closest intersection of the ray with the objects in the scene.
-    BVH_traverse(ray, closestHit, accum_AABB_clr); // traversing all the triangles
+    HitInfo BVHhitInfo;
+    BVHhitInfo.didCollide = false;
+    BVHhitInfo.dst = INF;
     
+    BVH_traverse(ray, BVHhitInfo, AABB_intersect_count, TRI_intersect_count); // traversing all the triangles
+    if (BVHhitInfo.didCollide && BVHhitInfo.dst < closestHit.dst)
+    {
+        closestHit = BVHhitInfo;
+    }
+
     return closestHit;
 }
 
@@ -474,35 +545,32 @@ HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout vec3 accum_AA
  * The function uses the CheckRayCollision function to find the closest intersection of the ray with the objects in the scene.
  * The function calculates the color of the ray based on the material properties of the objects it intersects.
  */
-vec3 TraceRay(Ray ray, inout uint state, inout vec3 accum_AABB_clr)
+vec3 TraceRay(Ray ray, inout uint state, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
 {
     vec3 rayColor = vec3(1.0);
-    vec3 incomingLight = vec3(0.0);
-    HitInfo hitInfo;
+    vec3 brightness_score = vec3(0.0);
+    HitInfo current_collision;
     
-
     for (int i = 0; i <= RAY_BOUNCE_COUNT; i++)
     {
-        CheckRayCollision(ray, hitInfo, accum_AABB_clr);
-        if (hitInfo.didCollide)
+        CheckRayCollision(ray, current_collision, AABB_intersect_count, TRI_intersect_count);
+        if (current_collision.didCollide)
         {
-            ray.origin = hitInfo.hitPoint;
-            ray.dir = normalize(hitInfo.normal + RandomDirection(state));
+            ray.origin = current_collision.hitPoint;
+            ray.dir = normalize(current_collision.normal + RandomDirection(state));
             
-            RaytracingMaterial material = hitInfo.material;
-            vec3 emittedLight = material.emissionColor * material.emissionStrength;
+            vec3 emittedLight = current_collision.material.emissionColor * current_collision.material.emissionStrength;
             
-            // this is when the ray gets color
-            incomingLight += emittedLight * rayColor;
-            rayColor *= material.color;
+            brightness_score += emittedLight * rayColor;
+            rayColor *= current_collision.material.color;
         }
         else
         {
-            incomingLight += GainSkyboxLight(ray) * rayColor;
+            brightness_score += GainSkyboxLight(ray) * rayColor;
             break;
         }
     }
-    return incomingLight;
+    return brightness_score;
 }
 
 /** The main function of the compute shader is responsible for tracing rays through the scene and calculating the color of the pixels in the image.
@@ -524,30 +592,38 @@ void main()
     ray.dir = normalize(vec3(x, y, u_FocalLength));
     ray.dir = (u_ModelMatrix * vec4(ray.dir, 1.0f)).rgb; // apply the rotation transformation of the camera
     ray.origin = u_CameraPos.xyz;
-    vec3 accum_AABB_clr = vec3(0.0); 
+
+    uint AABB_intersect_count = 0; 
+    uint TRI_intersect_count = 0;
 
     // The actual tracing of the ray
     vec3 tracingResult = vec3(0.0);
     for (int i = 0; i < RAYS_PER_PIXEL_COUNT; i++)
     {
-        tracingResult += TraceRay(ray, state, accum_AABB_clr);
+        tracingResult += TraceRay(ray, state, AABB_intersect_count, TRI_intersect_count);
     }
 
     // averaging the current frame accumulated pixel color
     if (u_displayBVH)
 	{
-        tracingResult = accum_AABB_clr / RAYS_PER_PIXEL_COUNT;
+        tracingResult = complexityToRGB(AABB_intersect_count + 3*TRI_intersect_count);
     }
     else {
 		tracingResult = tracingResult / RAYS_PER_PIXEL_COUNT;
 	}
-
+    
     vec4 accumulatedColor = imageLoad(rayTracingTexture, texelCoords);
     
     // averaging the previous & current frame pixel color
     float weight = 1.0f / (u_numAccumulatedFrames + 1);
     vec3 outputColor = accumulatedColor.rgb * (1 - weight) + tracingResult * weight;
-    
-	imageStore(rayTracingTexture, texelCoords, vec4(outputColor, 1.0f));
 
+    imageStore(rayTracingTexture, texelCoords, vec4(outputColor, 1.0f));
+
+    barrier(); // wait for all threads to finish
+
+    if (gl_GlobalInvocationID.xy == u_pixelGlobalInvocationID.xy) {
+        pixelData.pixelColor = vec4(outputColor, TRI_intersect_count); // store the color & the num of tri-ray intersections
+	    pixelData.AABB_intersect_count = AABB_intersect_count; // store the num of AABB-ray intersections
+    }
 };
