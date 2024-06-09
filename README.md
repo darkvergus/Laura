@@ -39,9 +39,4 @@ This project uses a slightly more advanced CMake setup to promote code organizat
 * Linking the application's executable against the `core` static library
 * Linking the application's executable against the third-party libraries (GLFW, GLEW, etc.)
 
-**Benefits of this approach:**
-
-* **Code Reusability:** The `core` library can potentially be used in other OpenGL projects without modification.
-* **Clean Separation:** There's a clear distinction between reusable rendering logic (`core`) and the application-specific code (`app`).
-
 ![alt text](images/dependency-graph-version-1_0_0.png "Optional title")
