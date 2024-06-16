@@ -5,6 +5,8 @@
 #include "core/gl_util/ComputeTexture.h"
 
 #include "imgui.h"
+#include "stb_image/stb_image.h"
+#include <string>
 
 #include "core/gl_util/OpenGLdebugFuncs.h"
 #include "core/camera/Camera.hpp"
@@ -104,6 +106,7 @@ public:
 	~Renderer();
 
 	void setViewportSize(glm::vec2 viewportSize);
+	void setSkyboxTexture(std::string skyboxTexturePath);
 
 	void BeginComputeRtxStage();
 	ComputeTexture* RenderComputeRtxStage();

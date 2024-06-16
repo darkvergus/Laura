@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include "core/Renderer.h"
 
 struct SceneData;
@@ -44,6 +43,35 @@ void Renderer::setViewportSize(glm::vec2 viewportSize)
 	computeRtxTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 0);
 }
 
+void Renderer::setSkyboxTexture(std::string skyboxTexturePath)
+{
+	unsigned int skyboxTexID;
+	int m_Width, m_Height, channels;
+	unsigned char* skyboxTex = stbi_load(skyboxTexturePath.c_str(), &m_Width, &m_Height, &channels, 0);
+	if (!skyboxTex) {
+		std::cout << "Failed to load skybox texture" << std::endl;
+		return;
+	}
+
+	GLCall(glCreateTextures(GL_TEXTURE_2D, 1, &skyboxTexID));
+
+	// Allocate storage and set texture parameters
+	GLCall(glTextureStorage2D(skyboxTexID, 1, GL_RGBA8, m_Width, m_Height)); // GL_RGBA8 is more common for skyboxes
+	GLCall(glTextureSubImage2D(skyboxTexID, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, skyboxTex));
+
+	// Set texture parameters (filtering and wrapping)
+	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+	// Bind the texture as an image texture
+	GLCall(glBindImageTexture(10, skyboxTexID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8)); // Use GL_RGBA8 for image formats
+
+
+	stbi_image_free(skyboxTex);
+}
+
 
 void Renderer::initComputeRtxStage()
 {	
@@ -56,7 +84,7 @@ void Renderer::initComputeRtxStage()
 	configure_TrisMesh_SSBO_block();
 	configure_BVH_SSBO_block();
 	configure_PixelData_SSBO_block();
-	
+	setSkyboxTexture("C:/dev/RayTracing-PT2/ray-tracing-private/app/resources/skyboxes/skybox1.png");
 	update_sphereBuffer_UBO_block(); // only updated once in the beginning of the scene (assuming the scene is static)
 	update_BVH_SSBO_block();
 }

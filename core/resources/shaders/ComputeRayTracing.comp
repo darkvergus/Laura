@@ -116,6 +116,7 @@ layout (local_size_x = LOCAL_GROUP_X,
         local_size_z = LOCAL_GROUP_Z) in;
 
 layout (rgba32f, binding = 0) uniform image2D rayTracingTexture;
+layout (rgba32f, binding = 10) uniform image2D skyboxTexture;
 
 //UBOs
 layout (std140, binding = 0) uniform uniformParameters {
@@ -140,7 +141,6 @@ layout (std140, binding = 0) uniform uniformParameters {
     uint u_BVHTreeDepth;                // offset 176 // alignment 4 // total 180 bytes
     bool u_show_skybox;                 // offset 180 // alignment 4 // total 184 bytes
     uint u_heatmap_color_limit; 	    // offset 184 // alignment 4 // total 188 bytes
-    
 };
 
 layout (std140, binding = 1) uniform sceneBuffer
@@ -248,6 +248,7 @@ vec3 GainSkyboxLight(const Ray ray)
     float groundToSkyT = smoothstep(-0.01, 0.0, ray.dir.y);
     vec3 skyGradient = mix(u_skyboxHorizonColor.rgb, u_skyboxZenithColor.rgb, skyGradientT);
     skyGradient = mix(u_skyboxGroundColor.rgb, skyGradient, groundToSkyT);
+    vec4 texelColor = imageLoad(skyboxTexture, ivec2(0, 0));
     return skyGradient;
 }
 
