@@ -5,8 +5,7 @@
 
 
 CameraHandler::CameraHandler(Camera& camera)
-    : camera(camera) {
-}
+    : camera(camera) {}
 
 void CameraHandler::mouseCursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (CameraControllMode) // check if we can handle the camera
@@ -23,8 +22,8 @@ void CameraHandler::mouseCursorPositionCallback(GLFWwindow* window, double xpos,
         if (!camera.freeze) // check if the camera isnt frozen for this frame we dont
         { 
             if (delta_xpos != 0 || delta_ypos != 0) {
-                camera.rotAroundY += delta_xpos * static_cast<float>(camera.deltaTime.getDeltaTime()) * camera.sensitivity;
-                camera.rotAroundX += delta_ypos * static_cast<float>(camera.deltaTime.getDeltaTime()) * camera.sensitivity;
+                camera.rotAroundY += delta_xpos * static_cast<float>(camera.deltaTime.getDelta()) * camera.sensitivity;
+                camera.rotAroundX += delta_ypos * static_cast<float>(camera.deltaTime.getDelta()) * camera.sensitivity;
                 camera.flags.scheduleRotUpdate = true;
             }
         } 

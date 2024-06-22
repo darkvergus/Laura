@@ -42,11 +42,13 @@ void Camera::updatePosition()
     glm::vec3 tempRtDir;
     glm::vec3 offsetVector(0.0f);
 
+    // if the camera is in camera relative mode then the forward direction is the same as the camera's forward direction
     if (movementType == CAMERA_RELATIVE){
         tempFwdDir = fwdVec;
         tempUpDir = upVec;
         tempRtDir = rtVec;
     }
+    // if the camera is in world relative mode then the forward direction is the same as the world's forward direction
     else if (movementType == WORLD_RELATIVE){
         tempRtDir = rtVec;
         tempUpDir = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -66,7 +68,7 @@ void Camera::updatePosition()
         offsetVector = glm::normalize(offsetVector); 
     }
     wasCameraInput = true;
-    posVec += (static_cast<float>(deltaTime.getDeltaTime()) * offsetVector * speed); // s = v*t where s = offset * speed * deltaTime
+    posVec += (static_cast<float>(deltaTime.getDelta()) * offsetVector * speed); // s = v*t where s = offset * speed * deltaTime
     
 }
 
@@ -79,8 +81,8 @@ void Camera::updateRotation()
     glm::vec3 tempUp = defaultUpVec;
 
     if (movementType == CAMERA_RELATIVE) {
-        if (ROLL_RIGHT_KEY_ACTIVE) { rotAroundZ -= (static_cast<float>(deltaTime.getDeltaTime()) * 3 * sensitivity); }
-        if (ROLL_LEFT_KEY_ACTIVE) { rotAroundZ += (static_cast<float>(deltaTime.getDeltaTime()) * 3 * sensitivity); }
+        if (ROLL_RIGHT_KEY_ACTIVE) { rotAroundZ -= (static_cast<float>(deltaTime.getDelta()) * 3 * sensitivity); }
+        if (ROLL_LEFT_KEY_ACTIVE) { rotAroundZ += (static_cast<float>(deltaTime.getDelta()) * 3 * sensitivity); }
     }
 
 

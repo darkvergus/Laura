@@ -2,7 +2,8 @@
 #include <iostream>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "delta_lib/DeltaTime.h"
+#include "deltaLib/deltaLib.h"
+#include <GLFW/glfw3.h>
 
 enum MovementType {
     WORLD_RELATIVE = 1,
@@ -11,6 +12,20 @@ enum MovementType {
 
 class Camera
 {
+    //static struct cameraProperties {
+    //    float Aspect;
+    //    float FOV_rad;
+    //};
+    //
+    ///**
+    //* @brief The output of the camera
+	// * This is literally all the shader needs from the camera
+	// */
+    //struct cameraOutput {
+    //    float focalLength;
+    //    glm::vec3 posVec;
+    //    glm::mat3 u_ModelMatrix;
+    //};
 
 private:
     struct Flags {
@@ -84,6 +99,7 @@ public:
         bool camera_keybind_window_active = false;
         int* keybind_to_be_changed;
     };
+
     CameraKeybinds cameraKeybinds;
 
     bool wasCameraInput = false;

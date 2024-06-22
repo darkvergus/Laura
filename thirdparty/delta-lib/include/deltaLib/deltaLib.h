@@ -1,8 +1,6 @@
 #ifndef DELTA_TIME_H
 #define DELTA_TIME_H
 
-#include <GLFW/glfw3.h>
-
 /**
 * @brief DeltaTime class is used to calculate the time between frames to make the movement of objects independent of the frame rate.
  */
@@ -13,7 +11,11 @@ private:
 	double curr_time;
 public:
 	DeltaTime();
-	double getDeltaTime();
+	double getDelta();
+	/**
+	* @brief Needs to be called at the beginning of each frame
+	* in order to get the duration of the last frame later by calling deltaTime.delta()
+	 */
 	void update();
 };
 

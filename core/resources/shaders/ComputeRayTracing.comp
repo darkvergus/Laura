@@ -595,7 +595,12 @@ void main()
     
     // applying transformation (camera rotation)
     Ray ray;
+    // direction is just a unit vector pointing from the camera to the pixel on screen
+    // focal length is just the distance from the camera to the screen
+    // now we assume that the coordinates range from 0 to 1 therefore the focal length is calculated as follows:
+    // tan(FOV/2) = 1 / focal length => focal length = 1 / tan(FOV/2)
     ray.dir = normalize(vec3(x, y, u_FocalLength));
+
     ray.dir = (u_ModelMatrix * vec4(ray.dir, 1.0f)).rgb; // apply the rotation transformation of the camera
     ray.origin = u_CameraPos.xyz;
 

@@ -1,4 +1,5 @@
-#include <core/application_test.h>
+#include <core/application.h>
+
 
 extern Application* createApplication();
 

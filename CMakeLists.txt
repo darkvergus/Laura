@@ -31,6 +31,8 @@ add_executable("${EXECUTABLE_NAME}")
 
 set_property(TARGET "${EXECUTABLE_NAME}" PROPERTY CXX_STANDARD 17)
 
+target_sources("${EXECUTABLE_NAME}" PRIVATE ${APP_SOURCES} )
+
 
 if(MSVC) # If using the VS compiler...
 

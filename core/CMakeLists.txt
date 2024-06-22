@@ -18,5 +18,5 @@ target_compile_definitions(core PUBLIC APP_RESOURCES_PATH="${CMAKE_SOURCE_DIR}/a
 target_include_directories(core PUBLIC "${CMAKE_SOURCE_DIR}/core/include"
 									   "${CMAKE_SOURCE_DIR}/app/include")
 
-target_link_libraries(core PUBLIC libglew_static imgui glm delta_lib assimp stb_image)
+target_link_libraries(core PUBLIC glfw libglew_static imgui glm deltaLib assimp stb_image)
 

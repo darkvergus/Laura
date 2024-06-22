@@ -8,4 +8,4 @@ target_sources(deltaLib PRIVATE ${DELTA_LIB_SOURCES})
 
 target_include_directories(deltaLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(deltaLib PRIVATE glfw)
+target_link_libraries(deltaLib PUBLIC glfw)
