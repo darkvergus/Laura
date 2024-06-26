@@ -1,7 +1,6 @@
 #include "core/application.h"
 
 #include <iostream>
-#include <GLFW/glfw3.h>
 #include "core/gl_util/OpenGLdebugFuncs.h"
 
 #include "imgui_impl_glfw.h"
@@ -14,12 +13,9 @@
 #include "GUI/BVHsettingsGUI.h"
 
 
-
 Application::Application(int screen_width = 1920, int screen_height = 1080): 
 	SCREEN_WIDTH(screen_width), 
 	SCREEN_HEIGHT(screen_height),
-
-
 	camera(90, 16.0 / 9.0, deltaTime),
 	cameraHandler(camera),
 	sceneData(emptyScene()),
@@ -66,7 +62,8 @@ void Application::run()
 {
 	std::cout << "Running Application" << std::endl;
 	init();
-	while (!glfwWindowShouldClose(m_Window))
+	//while (!glfwWindowShouldClose(m_Window))
+	while (m_Window->isRunning)
 	{
 		update();
 		render();
@@ -77,103 +74,73 @@ void Application::run()
 
 void Application::init()
 {
-	//GLFW WINDOW SETUP
-	if (!glfwInit()) 
-	{
-		glfwTerminate();
-		ASSERT(false);
-		
-	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	m_Window = IWindow::createWindow();
+	m_EventDispatcher = new EventDispatcher();
+	m_Window->setEventCallback([this](Event* event) { m_EventDispatcher->notifyListeners(event); });
 
-	m_Window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, " ", NULL, NULL);
-	if (!m_Window)
-	{
-		glfwTerminate();
-		ASSERT(false);
-	}
-
-	glfwMakeContextCurrent(m_Window);
-
-	std::cout << glGetString(GL_VERSION) << std::endl;
-	glfwSwapInterval(false);
-
-	if (glewInit() != GLEW_OK) 
-	{
-		if (!m_Window)
-		{
-			glfwDestroyWindow(m_Window);
-			glfwTerminate();
-			ASSERT(false);
-		}
-	}
-
-	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	glfwSetWindowUserPointer(m_Window, &cameraHandler);
-	glfwSetKeyCallback(m_Window, CameraHandler::GLFWKeyCallback);
-	glfwSetCursorPosCallback(m_Window, CameraHandler::GLFWMousePositionCallback);
+	GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(m_Window->getNativeWindow());
 
-	eventDispatcher = new EventDispatcher();
+	//glfwSetWindowUserPointer(nativeWindow, &cameraHandler);
+	//glfwSetKeyCallback(nativeWindow, CameraHandler::GLFWKeyCallback);
+	//glfwSetCursorPosCallback(nativeWindow, CameraHandler::GLFWMousePositionCallback);
 
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
-	ImGui_ImplOpenGL3_Init("#version 460");
-
-	renderer = new Renderer(sceneData, scene_BVH, skyboxFilePath);
 	
+	ImGui::StyleColorsDark();
+	
+	ImGui_ImplGlfw_InitForOpenGL(nativeWindow, true);
+	ImGui_ImplOpenGL3_Init("#version 460");
+	
+	renderer = new Renderer(sceneData, scene_BVH, skyboxFilePath);
 }
 
 void Application::update()
 {
+	m_Window->onUpdate();
 	deltaTime.update();
 	totalFrames += 1;
 	was_ImGui_Input = false;
-
+	
 	GLCall(glClear(GL_COLOR_BUFFER_BIT));
 	GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-
+	
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-
+	
 	// Widget windows
 	genDockspace();
 	component_cameraGUI(camera, was_ImGui_Input, cameraHandler.CameraControllMode, shouldAccumulate, shouldPostProcess, raysPerPixel, bouncesPerRay);
 	genSkyboxGUI(SkyGroundColor, SkyColorHorizon, SkyColorZenith, show_skybox, was_ImGui_Input, skyboxFilePath, reloadSkybox, cameraHandler.CameraControllMode);
 	BVH_settings_GUI(display_BVH, active_heuristic, scene_BVH.BVH_tree_depth, heatmap_color_limit, showPixelData, was_ImGui_Input, cameraHandler.CameraControllMode);
-
-
+	
+	
 	ImGui::ShowDemoWindow(&show_demo_window);
 	if (camera.cameraKeybinds.camera_keybind_window_active) { genCameraChangeKeybindSplashScreen(); }
-
-
+	
+	
 	// viewport
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 	ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse);
-
+	
 	ImGui::SetNextWindowDockID(ImGui::GetID("MainDockspace"));
-
+	
 	ImVec2 viewportWindowSize = ImGui::GetContentRegionAvail();
-
+	
 	// check if the viewport size or aspect ratio changed
 	if (viewportWindowSize.x != prevViewportWindowSize.x || viewportWindowSize.y != prevViewportWindowSize.y || camera.getAspect() != prevCamAspect)
 	{
 		prevViewportWindowSize = viewportWindowSize;
 		prevCamAspect = camera.getAspect();
-
+	
 		double parentAspect = double(viewportWindowSize.x) / double(viewportWindowSize.y);
 		// check if the parent aspect is smaller or equal to camera aspect (width is the limiting factor so the window will span the entire width)
 		if (parentAspect <= camera.getAspect())
@@ -187,49 +154,49 @@ void Application::update()
 			viewportSize.y = viewportWindowSize.y; // height stays the same
 			viewportSize.x = ceil(viewportWindowSize.y * camera.getAspect()); // calculate the width based on the aspect ratio
 		}
-
+	
 		renderer->setViewportSize(glm::vec2(viewportSize.x, viewportSize.y)); // sets the texture size to the viewport size
-
+	
 		camera.setScreenDimentions(int(viewportSize.x), int(viewportSize.y));
 		was_ImGui_Input = true;
-
+	
 		topLeftTextureCoords.x = (viewportWindowSize.x - viewportSize.x) / 2.0f;
 		topLeftTextureCoords.y = (viewportWindowSize.y - viewportSize.y) / 2.0f;
 		// viewport offset
 		topLeftTextureCoords.x += ImGui::GetWindowPos().x;
 		topLeftTextureCoords.y += ImGui::GetWindowPos().y;
-
+	
 		bottomLeftTextureCoords.x = topLeftTextureCoords.x + viewportSize.x;
 		bottomLeftTextureCoords.y = topLeftTextureCoords.y + viewportSize.y;
 	}
-
-
+	
+	
 	// check if the viewport window position changed
 	ImVec2 viewportWindowPos = ImGui::GetWindowPos();
 	if (viewportWindowPos.x != prevViewportWindowPos.x || viewportWindowPos.y != prevViewportWindowPos.y)
 	{
 		prevViewportWindowPos = viewportWindowPos;
-
+	
 		topLeftTextureCoords.x = (viewportWindowSize.x - viewportSize.x) / 2.0f;
 		topLeftTextureCoords.y = (viewportWindowSize.y - viewportSize.y) / 2.0f;
 		// viewport offset
 		topLeftTextureCoords.x += viewportWindowPos.x;
 		topLeftTextureCoords.y += viewportWindowPos.y;
-
+	
 		bottomLeftTextureCoords.x = topLeftTextureCoords.x + viewportSize.x;
 		bottomLeftTextureCoords.y = topLeftTextureCoords.y + viewportSize.y;
 	}
-
+	
 	camera.Update();
-
+	
 	wasGlobalInput = (camera.wasCameraInput || was_ImGui_Input || !shouldAccumulate);
 	if (wasGlobalInput) { m_NumAccumulatedFrames = 0; }
 	else { m_NumAccumulatedFrames++; }
-
+	
 	viewport_mouseX = ImGui::GetMousePos().x - topLeftTextureCoords.x;
 	viewport_mouseY = ImGui::GetMousePos().y - topLeftTextureCoords.y;
 	inverted_viewport_mouseY = viewportSize.y - viewport_mouseY;
-
+	
 	if (reloadSkybox) {
 		renderer->setSkyboxFilePath(skyboxFilePath);
 		reloadSkybox = false;
@@ -257,18 +224,18 @@ void Application::render()
 	renderer->rtx_uniform_parameters.show_skybox = show_skybox;
 	renderer->rtx_uniform_parameters.heatmap_color_limit = heatmap_color_limit;
 	renderer->rtx_uniform_parameters.pixelGlobalInvocationID = glm::vec3(viewport_mouseX, inverted_viewport_mouseY, 1.0f); // invocations start from bottom left
-
-
+	
+	
 	// render function
 	ComputeTexture* outputTexture = renderer->RenderComputeRtxStage();
-
+	
 	renderer->BeginComputePostProcStage();
 	renderer->postProcessing_uniform_parameters.numAccumulatedFrames = m_NumAccumulatedFrames;
 	ComputeTexture* postProcOutput = renderer->RenderComputePostProcStage();
-
+	
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	drawList->AddImage((ImTextureID)postProcOutput->ID(), topLeftTextureCoords, bottomLeftTextureCoords, { 0, 1 }, { 1, 0 });
-
+	
 	if (ImGui::IsWindowHovered() && showPixelData && !cameraHandler.CameraControllMode) {
 		if (viewport_mouseX >= 0 && viewport_mouseX < viewportSize.x && inverted_viewport_mouseY >= 0 && inverted_viewport_mouseY < viewportSize.y) {
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.0f, 10.0f));
@@ -285,14 +252,14 @@ void Application::render()
 			}
 			prev_viewport_mouseX = viewport_mouseX;
 			prev_viewport_mouseY = viewport_mouseY;
-
+	
 			AABB_intersect_count_sum += renderer->pixelData.AABB_intersect_count;
 			TRI_intersect_count_sum += renderer->pixelData.pixelColor.w;
 			same_mouse_pos_count++;
-
-
+	
+	
 			glm::vec4 pclr = renderer->pixelData.pixelColor;
-
+	
 			ImVec4 pixelColor = ImVec4(pclr.r, pclr.g, pclr.b, 1.0f);
 			ImGui::ColorButton("MyColor##3c", *(ImVec4*)&pclr, NULL, ImVec2(20, 20));
 			ImGui::SameLine();
@@ -304,28 +271,27 @@ void Application::render()
 			ImGui::PopStyleVar();
 		}
 	}
-
+	
 	ImGui::PopStyleVar();
 	ImGui::End();
-
+	
 	genPerformanceCounter();
 	camera.ResetFlags();
-
+	
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	glfwSwapBuffers(m_Window);
-	glfwPollEvents();
 }
 
 void Application::shutdown()
 {
 	delete renderer;
-	//delete eventHandler;
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
-
+	
 	glfwTerminate();
+	delete m_Window;
+	delete m_EventDispatcher;
 }
 
 Application* createApplication()

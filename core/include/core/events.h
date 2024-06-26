@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <set>
 #include <vector>
+#include <ostream>
 
 /**
 * @brief EventType is an enum struct that represents the type of an event.
@@ -21,31 +22,45 @@ enum struct EventType
 
 struct Event
 {
+	virtual ~Event() = default;
 	EventType type;
 };
 
 struct KeyEvent : public Event
 {
+	virtual ~KeyEvent() = default;
 	int key;
+	bool keyCtrl;
+	bool keyShift;
+	bool keyAlt;
+	bool keySuper;
+	friend std::ostream& operator<<(std::ostream& COUT, const KeyEvent& EVENT);
 };
 
 struct MouseMoveEvent : public Event
 {
+	virtual ~MouseMoveEvent() = default;
 	double xpos;
 	double ypos;
+	friend std::ostream& operator<<(std::ostream& COUT, const MouseMoveEvent& EVENT);
 };
 
 struct MouseButtonEvent : public Event
 {
+	virtual ~MouseButtonEvent() = default;
 	int button;
+	friend std::ostream& operator<<(std::ostream& COUT, const MouseButtonEvent& EVENT);
 };
 
 struct MouseScrollEvent : public Event
 {
+	virtual ~MouseScrollEvent() = default;
 	double xoffset;
 	double yoffset;
+	friend std::ostream& operator<<(std::ostream& COUT, const MouseScrollEvent& EVENT);
 };
 
+void logEvent(Event* event);
 
 /**
 * @brief EventListener is an interface for classes that want to listen to events.
@@ -66,8 +81,6 @@ public:
 class EventDispatcher
 {
 public:
-	EventDispatcher() = default;
-
 	void addListener(EventListener* listener);
 	void removeListener(EventListener* listener);
 	void notifyListeners(Event* event);

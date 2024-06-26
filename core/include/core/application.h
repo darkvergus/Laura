@@ -8,9 +8,10 @@
 #include "core/camera/CameraHandler.hpp" // also includes Camera.hpp
 #include "scenes/Scene1.hpp"
 #include "core/Renderer.h"
-#include "core/events.h"
 
-#define PLATFORM_WINDOWS
+#include "core/IWindow.h"
+#include "platform/windows/GLFWWindow.h"
+#include "core/events.h"
 
 class Application
 {
@@ -18,13 +19,11 @@ class Application
 public:
 	const int SCREEN_WIDTH, SCREEN_HEIGHT;
 private:
+    // new stuff
+    IWindow* m_Window;
+    EventDispatcher* m_EventDispatcher;
 
-    enum struct EngineState {
-        RUNTIME_MODE,
-        EDITOR_MODE
-    };
-
-	GLFWwindow* m_Window;
+    // stuff to refactor
     DeltaTime deltaTime;
     Camera camera;
     CameraHandler cameraHandler;
@@ -32,10 +31,7 @@ private:
     BVH::Heuristic active_heuristic;
     BVH::BVH_data scene_BVH;
     std::string skyboxFilePath;
-    Renderer* renderer;
-
-    EventDispatcher* eventDispatcher;
-
+    Renderer* renderer;    
     bool was_ImGui_Input;
     bool shouldPostProcess;
     bool shouldAccumulate;

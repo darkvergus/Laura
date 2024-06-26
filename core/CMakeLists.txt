@@ -5,7 +5,7 @@ project(rayTracingCore)
 add_library(core STATIC)
 
 file(GLOB_RECURSE CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-file(GLOB_RECURSE PLATFORM_SOURCES "${CMAKE_SOURCE_DIR}/platform*.cpp")
+file(GLOB_RECURSE PLATFORM_SOURCES "${CMAKE_SOURCE_DIR}/platform/*.cpp")
 target_sources(core PRIVATE ${CORE_SOURCES} ${PLATFORM_SOURCES})
 
 
