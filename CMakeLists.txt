@@ -21,18 +21,18 @@ add_subdirectory(thirdparty/delta-lib)			#delta time
 add_subdirectory(thirdparty/assimp)				#3d model loaders
 add_subdirectory(thirdparty/spdlog)				#logging
 
-add_subdirectory(core)
+add_subdirectory(Laura)
 
 
 # Define APP_SOURCES to be a list of all the source files for my game 
 file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/app/src/*.cpp")
 
-set(EXECUTABLE_NAME "raytracing") # the name of the final executable
+set(EXECUTABLE_NAME "RayTracingDemo") # the name of the final executable
 add_executable("${EXECUTABLE_NAME}")
 
 set_property(TARGET "${EXECUTABLE_NAME}" PROPERTY CXX_STANDARD 17)
 
-target_sources("${EXECUTABLE_NAME}" PRIVATE ${APP_SOURCES} )
+target_sources("${EXECUTABLE_NAME}" PRIVATE ${APP_SOURCES})
 
 
 if(MSVC) # If using the VS compiler...
@@ -54,6 +54,5 @@ target_compile_definitions(${EXECUTABLE_NAME} PUBLIC APP_RESOURCES_PATH="${CMAKE
 target_include_directories("${EXECUTABLE_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/app/include/")
 
 
-target_link_libraries("${EXECUTABLE_NAME}" PUBLIC glm glfw libglew_static
-	stb_image stb_truetype imgui deltaLib core spdlog::spdlog)
-
+target_link_libraries("${EXECUTABLE_NAME}" PUBLIC LauraEngine glm glfw libglew_static
+	stb_image stb_truetype imgui deltaLib spdlog::spdlog)
