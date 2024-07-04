@@ -94,7 +94,8 @@ See https://github.com/ocornut/imgui/wiki/Bindings for the full list (e.g. Adven
 
 ### Recommended Backends
 
-If you are not sure which backend to use, the recommended platform/frameworks for portable applications:
+If you are not sure which backend to use, the recommended 
+frameworks for portable applications:
 
 |Library |Website |Backend |Note |
 |--------|--------|--------|-----|
