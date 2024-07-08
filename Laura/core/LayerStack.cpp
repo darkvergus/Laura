@@ -1,5 +1,4 @@
 #include "core/LayerStack.h"
-#include <iostream>
 
 LayerStack::~LayerStack()
 {

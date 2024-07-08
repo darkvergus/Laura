@@ -1,8 +1,9 @@
 #ifndef GLFW_WINDOW_IMPL_H
 #define GLFW_WINDOW_IMPL_H
 
-#include "core/IWindow.h"
 #include <GLFW/glfw3.h>
+
+#include "core/IWindow.h"
 #include "platform/OpenGL/OpenGLContext.h"
 
 

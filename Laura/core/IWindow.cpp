@@ -1,5 +1,4 @@
 #include "core/IWindow.h"
-#include <iostream>
 
 #define PLATFORM_WINDOWS
 

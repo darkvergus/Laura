@@ -1,6 +1,6 @@
 #include "core/application.h"
 
-#include <iostream>
+#include "lrpch.h"
 #include "core/gl_util/OpenGLdebugFuncs.h"
 
 #include "imgui_impl_glfw.h"

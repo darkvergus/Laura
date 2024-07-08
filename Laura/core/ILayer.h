@@ -1,7 +1,7 @@
 #ifndef ILAYER_H
 #define ILAYER_H
 
-#include "core/events.h"
+#include "events/events.h"
 #include "core/IWindow.h"
 
 class ILayer

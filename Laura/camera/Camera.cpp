@@ -1,4 +1,4 @@
-#include "core/camera/camera.hpp"
+#include "camera/camera.h"
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 

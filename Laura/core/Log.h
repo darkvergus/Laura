@@ -1,7 +1,8 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <memory>
+#include "lrpch.h"
+
 #include "spdlog/spdlog.h"
 
 class Log

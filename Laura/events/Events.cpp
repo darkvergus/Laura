@@ -1,6 +1,5 @@
-#include "core/events.h"
-#include <iostream>
 #include <GLFW/glfw3.h>
+#include "events/events.h"
 
 void logEvent(Event* event)
 {

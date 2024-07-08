@@ -5,13 +5,13 @@
 #include <imgui.h>
 
 #include "deltaLib/deltaLib.h"
-#include "core/camera/CameraHandler.hpp" // also includes Camera.hpp
+#include "camera/CameraHandler.h" // also includes Camera.hpp
 #include "scenes/Scene1.hpp"
-#include "core/Renderer.h"
+#include "renderer/Renderer.h"
 
 
 #include "core/IWindow.h"
-#include "core/Events.h"
+#include "events/Events.h"
 #include "core/LayerStack.h"
 #include "core/ImGuiLayer.h"
 #include "platform/windows/GLFWWindow.h"

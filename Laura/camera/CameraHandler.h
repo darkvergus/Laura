@@ -1,5 +1,5 @@
 #pragma once
-#include "core/camera/Camera.hpp"
+#include "camera/Camera.h"
 #include <string>
 #include <GLFW/glfw3.h>
 

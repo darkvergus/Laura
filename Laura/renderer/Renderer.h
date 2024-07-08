@@ -1,15 +1,16 @@
 #pragma once
 #include <GL/glew.h>
 
+#include "lrpch.h"
+
 #include "core/gl_util/ComputeShader.h"
 #include "core/gl_util/ComputeTexture.h"
 
 #include "imgui.h"
 #include "stb_image/stb_image.h"
-#include <string>
 
 #include "core/gl_util/OpenGLdebugFuncs.h"
-#include "core/camera/Camera.hpp"
+#include "camera/Camera.h"
 #include "core/ObjParser/ObjParser.h"
 
 

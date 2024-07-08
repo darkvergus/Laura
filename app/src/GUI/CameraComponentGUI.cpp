@@ -1,4 +1,4 @@
-#include "core/camera/Camera.hpp"
+#include "camera/Camera.h"
 #include <imgui.h>
 #include <unordered_map>
 

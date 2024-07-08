@@ -1,5 +1,4 @@
-#include <iostream>
-#include "core/Renderer.h"
+#include "renderer/Renderer.h"
 
 struct SceneData;
 

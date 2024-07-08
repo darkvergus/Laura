@@ -1,11 +1,11 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
+#include "lrpch.h"
+
 #include <GLFW/glfw3.h>
-#include <vector>
-#include <ostream>
-#include <functional>
-#include "core/KeyCodes.h"
+
+#include "events/KeyCodes.h"
 
 /**
 * @brief EventType is an enum struct that represents the type of an event.

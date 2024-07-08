@@ -1,13 +1,12 @@
 #ifndef IWINDOW_H
 #define IWINDOW_H
 
-#include <string>
-#include <functional>
+#include "lrpch.h"
 
-#include "core/Events.h"
+#include "events/Events.h"
 
-#include "core/KeyCodes.h"
-#include "core/MouseCodes.h"
+#include "events/KeyCodes.h"
+#include "events/MouseCodes.h"
 
 struct WindowProps
 {
