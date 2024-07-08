@@ -1,7 +1,7 @@
 #include "core/application.h"
 
 #include "lrpch.h"
-#include "core/gl_util/OpenGLdebugFuncs.h"
+#include "platform/OpenGL/OpenGLdebugFuncs.h"
 
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"

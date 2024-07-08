@@ -3,15 +3,15 @@
 
 #include "lrpch.h"
 
-#include "core/gl_util/ComputeShader.h"
-#include "core/gl_util/ComputeTexture.h"
+#include "platform/OpenGL/ComputeShader.h"
+#include "platform/OpenGL/ComputeTexture.h"
 
 #include "imgui.h"
 #include "stb_image/stb_image.h"
 
-#include "core/gl_util/OpenGLdebugFuncs.h"
+#include "platform/OpenGL/OpenGLdebugFuncs.h"
 #include "camera/Camera.h"
-#include "core/ObjParser/ObjParser.h"
+#include "ObjParser/ObjParser.h"
 
 
 /**

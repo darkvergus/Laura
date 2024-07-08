@@ -1,5 +1,5 @@
 #pragma once
-#include "core/gl_util/OpenGLdebugFuncs.h"
+#include "platform/OpenGL/OpenGLdebugFuncs.h"
 
 class ComputeTexture
 {
