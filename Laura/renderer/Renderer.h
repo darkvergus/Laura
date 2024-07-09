@@ -4,7 +4,7 @@
 #include "lrpch.h"
 
 #include "platform/OpenGL/shaders/OpenGLComputeShader.h"
-#include "platform/OpenGL/ComputeTexture.h"
+#include "platform/OpenGL/textures/ComputeTexture.h"
 
 #include "imgui.h"
 #include "stb_image/stb_image.h"
@@ -130,13 +130,13 @@ public:
 	void setSkyboxTexture();
 
 	void BeginComputeRtxStage();
-	ComputeTexture* RenderComputeRtxStage();
+	std::shared_ptr<ITexture> RenderComputeRtxStage();
 	rtx_parameters_uniform_struct rtx_uniform_parameters;
 
 	PixelData pixelData; // should be read after rendering the compute rtx stage
 
 	void BeginComputePostProcStage();
-	ComputeTexture* RenderComputePostProcStage();
+	std::shared_ptr<ITexture> RenderComputePostProcStage();
 	postProcessing_parameters_uniform_struct postProcessing_uniform_parameters;
 	void setSkyboxFilePath(std::string skyboxFilePath);
 
@@ -149,7 +149,7 @@ private:
 	ComputeTexture* computePostProcTexture;
 	std::shared_ptr<IComputeShader> computePostProcShader;
 
-	std::shared_ptr<ITexture> skyboxTexture;
+	std::shared_ptr<ITexture> m_SkyboxTexture, m_TracingTexture, m_PostProcTexture;
 
 	BVH::BVH_data BVH_of_mesh;
 	std::string skyboxFilePath;

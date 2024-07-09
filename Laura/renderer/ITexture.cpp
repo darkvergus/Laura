@@ -1,9 +1,9 @@
 #include "renderer/ITexture.h"
 #include "renderer/Renderer.h"
 
-#include "platform/OpenGL/shaders/OpenGLComputeShader.h"
+#include "platform/OpenGL/OpenGLTexture.h"
 
-std::shared_ptr<ITexture> ITexture::Create(const std::string& filepath, uint16_t bindingPoint)
+std::shared_ptr<ITexture> ITexture::Create(const std::string& filepath, int bindingPoint)
 {
 	switch (Renderer::GetAPI())
 	{
@@ -12,11 +12,11 @@ std::shared_ptr<ITexture> ITexture::Create(const std::string& filepath, uint16_t
 	}
 }
 
-std::shared_ptr<ITexture> ITexture::Create(int width, int height, int channels, uint16_t bindingPoint)
+std::shared_ptr<ITexture> ITexture::Create(int width, int height, int channels, int bindingPoint)
 {
 	switch (Renderer::GetAPI())
 	{
 	case RenderingAPI::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
-	case RenderingAPI::OpenGL: return std::make_shared<OpenGLTexture>(int width, int height, int channels, uint16_t bindingPoint);
+	case RenderingAPI::OpenGL: return std::make_shared<OpenGLTexture>(width, height, channels, bindingPoint);
 	}
 }

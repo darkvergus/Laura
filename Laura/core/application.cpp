@@ -11,6 +11,8 @@
 #include "GUI/SkyBoxGUI.h"
 #include "GUI/BVHsettingsGUI.h"
 
+#include "renderer/ITexture.h"
+
 // new includes
 #include "core/Log.h"
 
@@ -185,15 +187,15 @@ void Application::run()
 		
 		
 		/// ACTUALLY RENDERING THE FRAME IN THE SHADER
-		ComputeTexture* outputTexture = renderer->RenderComputeRtxStage();
+		std::shared_ptr<ITexture> outputTexture = renderer->RenderComputeRtxStage();
 		
 		/// Post Processing stage currently does NOTHING
 		renderer->BeginComputePostProcStage();
 		renderer->postProcessing_uniform_parameters.numAccumulatedFrames = m_NumAccumulatedFrames;
-		ComputeTexture* postProcOutput = renderer->RenderComputePostProcStage();
+		std::shared_ptr<ITexture> postProcOutput = renderer->RenderComputePostProcStage();
 		
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
-		drawList->AddImage((ImTextureID)postProcOutput->ID(), topLeftTextureCoords, bottomLeftTextureCoords, { 0, 1 }, { 1, 0 });
+		drawList->AddImage((ImTextureID)postProcOutput->GetID(), topLeftTextureCoords, bottomLeftTextureCoords, { 0, 1 }, { 1, 0 });
 		
 		// DEBUG pixeldata overlay
 		if (ImGui::IsWindowHovered() && showPixelData && !cameraHandler.CameraControllMode) {

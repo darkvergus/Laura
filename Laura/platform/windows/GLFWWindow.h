@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "core/IWindow.h"
-#include "platform/OpenGL/OpenGLContext.h"
+#include "platform/OpenGL/context/OpenGLContext.h"
 
 
 class GLFWWindowIMPL : public IWindow

@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "platform/OpenGL/OpenGLContext.h"
+#include "platform/OpenGL/context/OpenGLContext.h"
 #include "core/Log.h"
 
 void OpenGLContext::setWindowHints()

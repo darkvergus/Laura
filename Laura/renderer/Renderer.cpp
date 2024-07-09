@@ -22,7 +22,7 @@ Renderer::Renderer(SceneData& scene, BVH::BVH_data BVH_of_mesh, std::string& sky
 
 Renderer::~Renderer()
 {
-	delete computeRtxTexture;
+	//delete computeRtxTexture;
 	delete computePostProcTexture;
 
 	glDeleteBuffers(1, &rtx_parameters_UBO_ID);
@@ -35,39 +35,17 @@ void Renderer::setViewportSize(glm::vec2 viewportSize)
 	GLCall(glViewport(0, 0, viewportSize.x, viewportSize.y));
 	m_ViewportSize = viewportSize;
 
-	delete computePostProcTexture;
-	computePostProcTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 1);
-
-	delete computeRtxTexture;
-	computeRtxTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 0);
+	//delete computePostProcTexture;
+	//computePostProcTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 1);
+	m_TracingTexture = ITexture::Create(viewportSize.x, viewportSize.y, 4, 0);
+	m_PostProcTexture = ITexture::Create(viewportSize.x, viewportSize.y, 4, 1);
+	//delete computeRtxTexture;
+	//computeRtxTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 0);
 }
 
 void Renderer::setSkyboxFilePath(std::string new_skyboxFilePath) {
 	skyboxFilePath = new_skyboxFilePath;
-	Renderer::setSkyboxTexture();
-}
-
-void Renderer::setSkyboxTexture()
-{
-	unsigned int skyboxTexID;
-	int m_Width, m_Height, channels;
-	stbi_set_flip_vertically_on_load(1);
-	unsigned char* skyboxTex = stbi_load(skyboxFilePath.c_str(), &m_Width, &m_Height, &channels, 4);
-	if (!skyboxTex) {
-		std::cout << ("stbi_load() failed to generate a texture. (Did you pass the correct path?): " + skyboxFilePath).c_str() << std::endl;
-		return;
-	}
-
-	GLCall(glActiveTexture(GL_TEXTURE2)) // THE NEXT BOUND TEXTURE will be bound to texture slot 2
-	GLCall(glGenTextures(1, &skyboxTexID));
-	GLCall(glBindTexture(GL_TEXTURE_2D, skyboxTexID))
-	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-	GLCall(glTextureParameteri(skyboxTexID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-	GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_Width, m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, skyboxTex));
-
-	stbi_image_free(skyboxTex);
+	m_SkyboxTexture = ITexture::Create(skyboxFilePath, 0);
 }
 
 
@@ -91,7 +69,7 @@ void Renderer::BeginComputeRtxStage()
 	computeRtxShader->Bind();
 }
 
-ComputeTexture* Renderer::RenderComputeRtxStage()
+std::shared_ptr<ITexture> Renderer::RenderComputeRtxStage()
 {
 	update_rtx_parameters_UBO_block();
 	update_TrisMesh_SSBO_block();
@@ -100,7 +78,7 @@ ComputeTexture* Renderer::RenderComputeRtxStage()
 
 	read_PixelData_SSBO_block();
 
-	return computeRtxTexture;
+	return m_TracingTexture;
 }
 
 
@@ -116,12 +94,12 @@ void Renderer::BeginComputePostProcStage()
 	computePostProcShader->Bind();
 }
 
-ComputeTexture* Renderer::RenderComputePostProcStage()
+std::shared_ptr<ITexture> Renderer::RenderComputePostProcStage()
 {
 	update_postProcessing_parameters_UBO_block();
 	computePostProcShader->setWorkGroupSizes(glm::uvec3(ceil(m_ViewportSize.x / 8), ceil(m_ViewportSize.y / 4), 1));
 	computePostProcShader->Dispatch();
-	return computePostProcTexture;
+	return m_PostProcTexture;
 }
 
 // binding point 0
