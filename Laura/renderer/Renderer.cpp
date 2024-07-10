@@ -2,29 +2,22 @@
 
 struct SceneData;
 
-RenderingAPI Renderer::s_API = RenderingAPI::OpenGL; // super temporary stuff here - this whole file needs a refactor
-
 Renderer::Renderer(SceneData& scene, BVH::BVH_data BVH_of_mesh, std::string& skyboxFilePath)
 	: m_Scene(scene),
 
 	computeRtxShader(0),
-	computeRtxTexture(0),
-
 	computePostProcShader(0),
-	computePostProcTexture(0),
-
 	BVH_of_mesh(BVH_of_mesh),
 	skyboxFilePath(skyboxFilePath)
 {
+	m_API = IRendererAPI::Create();
+
 	initComputeRtxStage();
 	initComputePostProcStage();
 }
 
 Renderer::~Renderer()
 {
-	//delete computeRtxTexture;
-	delete computePostProcTexture;
-
 	glDeleteBuffers(1, &rtx_parameters_UBO_ID);
 	glDeleteBuffers(1, &postProcessing_parameters_UBO_ID);
 	glDeleteBuffers(1, &sphereBuffer_UBO_ID);
@@ -34,13 +27,8 @@ void Renderer::setViewportSize(glm::vec2 viewportSize)
 {
 	GLCall(glViewport(0, 0, viewportSize.x, viewportSize.y));
 	m_ViewportSize = viewportSize;
-
-	//delete computePostProcTexture;
-	//computePostProcTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 1);
 	m_TracingTexture = ITexture::Create(viewportSize.x, viewportSize.y, 4, 0);
 	m_PostProcTexture = ITexture::Create(viewportSize.x, viewportSize.y, 4, 1);
-	//delete computeRtxTexture;
-	//computeRtxTexture = new ComputeTexture(viewportSize.x, viewportSize.y, 0);
 }
 
 void Renderer::setSkyboxFilePath(std::string new_skyboxFilePath) {
@@ -66,13 +54,13 @@ void Renderer::initComputeRtxStage()
 
 void Renderer::BeginComputeRtxStage()
 {
-	computeRtxShader->Bind();
 }
 
 std::shared_ptr<ITexture> Renderer::RenderComputeRtxStage()
 {
 	update_rtx_parameters_UBO_block();
 	update_TrisMesh_SSBO_block();
+	computeRtxShader->Bind();
 	computeRtxShader->setWorkGroupSizes(glm::uvec3(ceil(m_ViewportSize.x / 8), ceil(m_ViewportSize.y / 4), 1));
 	computeRtxShader->Dispatch();
 

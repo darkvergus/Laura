@@ -7,8 +7,8 @@ std::shared_ptr<ITexture> ITexture::Create(const std::string& filepath, int bind
 {
 	switch (Renderer::GetAPI())
 	{
-	case RenderingAPI::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
-	case RenderingAPI::OpenGL: return std::make_shared<OpenGLTexture>(filepath, bindingPoint);
+	case IRendererAPI::API::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
+	case IRendererAPI::API::OpenGL: return std::make_shared<OpenGLTexture>(filepath, bindingPoint);
 	}
 }
 
@@ -16,7 +16,7 @@ std::shared_ptr<ITexture> ITexture::Create(int width, int height, int channels, 
 {
 	switch (Renderer::GetAPI())
 	{
-	case RenderingAPI::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
-	case RenderingAPI::OpenGL: return std::make_shared<OpenGLTexture>(width, height, channels, bindingPoint);
+	case IRendererAPI::API::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
+	case IRendererAPI::API::OpenGL: return std::make_shared<OpenGLTexture>(width, height, channels, bindingPoint);
 	}
 }

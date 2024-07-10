@@ -8,7 +8,7 @@ std::shared_ptr<IComputeShader> IComputeShader::Create(const std::string& filepa
 {
 	switch (Renderer::GetAPI())
 	{
-	case RenderingAPI::None: LR_CORE_CRITICAL("RendererAPI::None - UNSUPPORTED"); return nullptr;
-	case RenderingAPI::OpenGL : return std::make_shared<OpenGLComputeShader>(filepath, workGroupSizes);
+	case IRendererAPI::API::None: LR_CORE_CRITICAL("RendererAPI::None - UNSUPPORTED"); return nullptr;
+	case IRendererAPI::API::OpenGL : return std::make_shared<OpenGLComputeShader>(filepath, workGroupSizes);
 	}
 }

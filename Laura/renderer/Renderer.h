@@ -17,13 +17,7 @@
 //new stuff
 #include "renderer/IComputeShader.h"
 #include "renderer/ITexture.h"
-
-enum class RenderingAPI
-{
-	None = 0, 
-	OpenGL = 1,
-	//Vulkan = 2, // !!! Not IMPLEMENTED YET !!!
-};
+#include "renderer/IRendererAPI.h"
 
 /**
 * @brief The SceneData struct
@@ -88,11 +82,8 @@ struct postProcessing_parameters_uniform_struct {
 * */
 class Renderer
 {
-private:
-	static RenderingAPI s_API;
 public:
-	inline static RenderingAPI GetAPI() { return s_API; }
-
+	inline static IRendererAPI::API GetAPI() { return IRendererAPI::GetAPI(); }
 private:
 	SceneData m_Scene;
 
@@ -141,14 +132,8 @@ public:
 	void setSkyboxFilePath(std::string skyboxFilePath);
 
 private:
-	// compute rtx stage
-	ComputeTexture* computeRtxTexture;
-	std::shared_ptr<IComputeShader> computeRtxShader;
-
-	// compute post processing stage
-	ComputeTexture* computePostProcTexture;
-	std::shared_ptr<IComputeShader> computePostProcShader;
-
+	std::shared_ptr<IRendererAPI> m_API;
+	std::shared_ptr<IComputeShader> computeRtxShader, computePostProcShader;
 	std::shared_ptr<ITexture> m_SkyboxTexture, m_TracingTexture, m_PostProcTexture;
 
 	BVH::BVH_data BVH_of_mesh;
