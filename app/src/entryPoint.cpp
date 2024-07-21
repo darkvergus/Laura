@@ -1,11 +1,11 @@
 #include <core/application.h>
 
 
-extern Application* createApplication();
+extern Laura::Application * Laura::createApplication();
 
 int main()
 {
-	Application* app = createApplication();
+	Laura::Application* app = Laura::createApplication();
 	app->run();
 	delete app;
 	return 0;

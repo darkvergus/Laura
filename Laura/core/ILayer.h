@@ -4,25 +4,29 @@
 #include "events/events.h"
 #include "core/IWindow.h"
 
-class ILayer
-{
+namespace Laura {
 
-public:
-	ILayer(IWindow* window);
-	virtual ~ILayer() = default;
+	class ILayer
+	{
 
-	virtual void onAttach() {};
-	virtual void onDetach() {};
-	virtual void onUpdate() {};
-	virtual void onImGuiRender() {};
-	virtual void onEvent(Event* event) {};
+	public:
+		ILayer(IWindow* window);
+		virtual ~ILayer() = default;
 
-	inline void setLayerName(const std::string& name) { m_LayerName = name; }
-	inline std::string getLayerName() const { return m_LayerName; }
+		virtual void onAttach() {};
+		virtual void onDetach() {};
+		virtual void onUpdate() {};
+		virtual void onImGuiRender() {};
+		virtual void onEvent(Event* event) {};
 
-protected:
-	IWindow* m_Window;
-	std::string m_LayerName;
-};
+		inline void setLayerName(const std::string& name) { m_LayerName = name; }
+		inline std::string getLayerName() const { return m_LayerName; }
+
+	protected:
+		IWindow* m_Window;
+		std::string m_LayerName;
+	};
+
+}
 
 #endif // ILAYER_H

@@ -5,14 +5,16 @@
 // don't want to include the whole ObjParser.h file so we just define the same enum here
 #ifndef heuristicEnum
 #define heuristicEnum
-namespace BVH
-{
-    enum class Heuristic {
-        OBJECT_MEDIAN_SPLIT,
-        SPATIAL_MIDDLE_SPLIT,
-        SURFACE_AREA_HEURISTIC,
-        SURFACE_AREA_HEURISTIC_BUCKETS
-    };
+namespace Laura {
+    namespace BVH
+    {
+        enum class Heuristic {
+            OBJECT_MEDIAN_SPLIT,
+            SPATIAL_MIDDLE_SPLIT,
+            SURFACE_AREA_HEURISTIC,
+            SURFACE_AREA_HEURISTIC_BUCKETS
+        };
+    }
 }
 #endif
 
@@ -35,4 +37,4 @@ namespace BVH
 * @param was_IMGUI_input - whether there was IMGUI input (used in shader to tell when to restart the accumulation of rays)
 * @param disabled - to disable the GUI when in the camera control mode
 * */
-void BVH_settings_GUI(bool& display_BVH, BVH::Heuristic& active_heuristic, int BVH_tree_depth, int& heatmap_color_limit, bool& showPixelData, bool& was_IMGUI_input, bool disabled);
+void BVH_settings_GUI(bool& display_BVH, Laura::BVH::Heuristic& active_heuristic, int BVH_tree_depth, int& heatmap_color_limit, bool& showPixelData, bool& was_IMGUI_input, bool disabled);

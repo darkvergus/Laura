@@ -5,31 +5,32 @@
 
 #include "spdlog/spdlog.h"
 
-class Log
-{
-public:
-	Log();
-	~Log();
-	static void Init();
+namespace Laura {
 
-	inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-	inline static std::shared_ptr<spdlog::logger>& GetAppLogger() { return s_AppLogger; }
+	class Log
+	{
+	public:
+		static void Init();
 
-private:
-	static std::shared_ptr<spdlog::logger> s_CoreLogger;
-	static std::shared_ptr<spdlog::logger> s_AppLogger;
-};
+		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+		inline static std::shared_ptr<spdlog::logger>& GetAppLogger() { return s_AppLogger; }
 
-#define LR_CORE_TRACE(...)    ::Log::GetCoreLogger()->trace(__VA_ARGS__)
-#define LR_CORE_INFO(...)     ::Log::GetCoreLogger()->info(__VA_ARGS__)
-#define LR_CORE_WARN(...)     ::Log::GetCoreLogger()->warn(__VA_ARGS__)
-#define LR_CORE_ERROR(...)    ::Log::GetCoreLogger()->error(__VA_ARGS__)
-#define LR_CORE_CRITICAL(...) ::Log::GetCoreLogger()->critical(__VA_ARGS__)
+	private:
+		static std::shared_ptr<spdlog::logger> s_CoreLogger;
+		static std::shared_ptr<spdlog::logger> s_AppLogger;
+	};
+}
 
-#define LR_APP_TRACE(...)    ::Log::GetAppLogger()->trace(__VA_ARGS__)
-#define LR_APP_INFO(...)     ::Log::GetAppLogger()->info(__VA_ARGS__)
-#define LR_APP_WARN(...)     ::Log::GetAppLogger()->warn(__VA_ARGS__)
-#define LR_APP_ERROR(...)    ::Log::GetAppLogger()->error(__VA_ARGS__)
-#define LR_APP_CRITICAL(...) ::Log::GetAppLogger()->critical(__VA_ARGS__)
+#define LR_CORE_TRACE(...)    ::Laura::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define LR_CORE_INFO(...)     ::Laura::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define LR_CORE_WARN(...)     ::Laura::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define LR_CORE_ERROR(...)    ::Laura::Log::GetCoreLogger()->error(__VA_ARGS__)
+#define LR_CORE_CRITICAL(...) ::Laura::Log::GetCoreLogger()->critical(__VA_ARGS__)
+
+#define LR_APP_TRACE(...)    ::Laura::Log::GetAppLogger()->trace(__VA_ARGS__)
+#define LR_APP_INFO(...)     ::Laura::Log::GetAppLogger()->info(__VA_ARGS__)
+#define LR_APP_WARN(...)     ::Laura::Log::GetAppLogger()->warn(__VA_ARGS__)
+#define LR_APP_ERROR(...)    ::Laura::Log::GetAppLogger()->error(__VA_ARGS__)
+#define LR_APP_CRITICAL(...) ::Laura::Log::GetAppLogger()->critical(__VA_ARGS__)
 
 #endif // LOG_H

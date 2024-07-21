@@ -1,68 +1,72 @@
 #include "core/LayerStack.h"
 
-LayerStack::~LayerStack()
-{
-	for (ILayer* layer : m_Layers)
+namespace Laura {
+
+	LayerStack::~LayerStack()
 	{
-		delete layer;
+		for (ILayer* layer : m_Layers)
+		{
+			delete layer;
+		}
+
+		for (ILayer* overlay : m_Overlays)
+		{
+			delete overlay;
+		}
 	}
 
-	for (ILayer* overlay : m_Overlays)
+
+	void LayerStack::PushLayer(ILayer* layer)
 	{
-		delete overlay;
-	}
-}
-
-
-void LayerStack::PushLayer(ILayer* layer)
-{
-	m_Layers.push_back(layer);
-	layer->onAttach();
-}
-
-
-void LayerStack::PushOverlay(ILayer* overlay)
-{
-	m_Overlays.push_back(overlay);
-	overlay->onAttach();
-}
-
-
-void LayerStack::PopLayer(ILayer* layer)
-{
-	m_Layers.erase(std::remove(m_Layers.begin(), m_Layers.end(), layer), m_Layers.end());
-	layer->onDetach();
-}
-
-
-void LayerStack::PopOverlay(ILayer* overlay)
-{
-	m_Overlays.erase(std::remove(m_Overlays.begin(), m_Overlays.end(), overlay), m_Overlays.end());
-	overlay->onDetach();
-}
-
-void LayerStack::onUpdate()
-{
-	for (ILayer* layer : m_Layers)
-	{
-		layer->onUpdate();
+		m_Layers.push_back(layer);
+		layer->onAttach();
 	}
 
-	for (ILayer* overlay : m_Overlays)
-	{
-		overlay->onUpdate();
-	}
-}
 
-void LayerStack::dispatchEvent(Event* event)
-{
-	for (ILayer* layer : m_Layers)
+	void LayerStack::PushOverlay(ILayer* overlay)
 	{
-		layer->onEvent(event);
+		m_Overlays.push_back(overlay);
+		overlay->onAttach();
 	}
 
-	for (ILayer* overlay : m_Overlays)
+
+	void LayerStack::PopLayer(ILayer* layer)
 	{
-		overlay->onEvent(event);
+		m_Layers.erase(std::remove(m_Layers.begin(), m_Layers.end(), layer), m_Layers.end());
+		layer->onDetach();
 	}
+
+
+	void LayerStack::PopOverlay(ILayer* overlay)
+	{
+		m_Overlays.erase(std::remove(m_Overlays.begin(), m_Overlays.end(), overlay), m_Overlays.end());
+		overlay->onDetach();
+	}
+
+	void LayerStack::onUpdate()
+	{
+		for (ILayer* layer : m_Layers)
+		{
+			layer->onUpdate();
+		}
+
+		for (ILayer* overlay : m_Overlays)
+		{
+			overlay->onUpdate();
+		}
+	}
+
+	void LayerStack::dispatchEvent(Event* event)
+	{
+		for (ILayer* layer : m_Layers)
+		{
+			layer->onEvent(event);
+		}
+
+		for (ILayer* overlay : m_Overlays)
+		{
+			overlay->onEvent(event);
+		}
+	}
+
 }

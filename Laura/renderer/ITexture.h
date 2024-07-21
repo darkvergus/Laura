@@ -3,22 +3,26 @@
 
 #include "lrpch.h"
 
-class ITexture
-{
-public:
-	static std::shared_ptr<ITexture> Create(const std::string& filepath, int bindingPoint);
-	static std::shared_ptr<ITexture> Create(int width, int height, int channels, int bindingPoint);
+namespace Laura {
 
-	virtual ~ITexture() {}
+	class ITexture
+	{
+	public:
+		static std::shared_ptr<ITexture> Create(const std::string& filepath, int bindingPoint);
+		static std::shared_ptr<ITexture> Create(int width, int height, int channels, int bindingPoint);
 
-	virtual void Bind() = 0;
-	virtual void Unbind() = 0;
-	virtual void ChangeBindingPoint(int bindingPoint) = 0;
+		virtual ~ITexture() {}
 
-	/// GETTERS ///
-	virtual int GetWidth() = 0;
-	virtual int GetHeight() = 0;
-	virtual int GetID() = 0;
-};
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
+		virtual void ChangeBindingPoint(int bindingPoint) = 0;
+
+		/// GETTERS ///
+		virtual int GetWidth() = 0;
+		virtual int GetHeight() = 0;
+		virtual int GetID() = 0;
+	};
+
+}
 
 #endif // ITEXTURE_H

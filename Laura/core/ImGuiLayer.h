@@ -4,21 +4,24 @@
 #include "core/ILayer.h"
 #include "core/IWindow.h"
 
-class ImGuiLayer : public ILayer
-{
-public:
-	ImGuiLayer(IWindow* window);
-	virtual ~ImGuiLayer();
+namespace Laura {
 
-	void Begin();
-	void End();
+	class ImGuiLayer : public ILayer
+	{
+	public:
+		ImGuiLayer(IWindow* window);
+		virtual ~ImGuiLayer();
 
-	void onAttach() override;
-	void onDetach() override;
-	void onImGuiRender() override;
-private:
-	IWindow* m_Window;
-};
+		void Begin();
+		void End();
 
+		void onAttach() override;
+		void onDetach() override;
+		void onImGuiRender() override;
+	private:
+		IWindow* m_Window;
+	};
+
+}
 
 #endif // IMGUI_LAYER_H

@@ -2,15 +2,19 @@
 
 #include "platform/opengl/OpenGLRendererAPI.h"
 
-IRendererAPI::API IRendererAPI::s_API = IRendererAPI::API::OpenGL; // OpenGL by default
+namespace Laura {
 
-std::shared_ptr<IRendererAPI> IRendererAPI::Create()
-{
-	switch (IRendererAPI::GetAPI())
+	IRendererAPI::API IRendererAPI::s_API = IRendererAPI::API::OpenGL; // OpenGL by default
+
+	std::shared_ptr<IRendererAPI> IRendererAPI::Create()
 	{
-	case IRendererAPI::API::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
-	case IRendererAPI::API::OpenGL:  return std::make_shared<OpenGLRendererAPI>();
+		switch (IRendererAPI::GetAPI())
+		{
+		case IRendererAPI::API::None: LR_CORE_CRITICAL("in ITexture::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
+		case IRendererAPI::API::OpenGL:  return std::make_shared<OpenGLRendererAPI>();
+		}
+
+		return nullptr;
 	}
 
-	return nullptr;
 }

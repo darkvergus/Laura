@@ -52,12 +52,12 @@ std::unordered_map<int, std::string> keyMap = {
 {GLFW_KEY_9, "9"}
 };
 
-void scheduleKeybindChange(Camera& camera, int& keybind) {
+void scheduleKeybindChange(Laura::Camera& camera, int& keybind) {
 	camera.cameraKeybinds.camera_keybind_window_active = true;
 	camera.cameraKeybinds.keybind_to_be_changed = &keybind;
 }
 
-void component_cameraGUI(Camera& camera, bool& was_IMGUI_Input, bool disabled, bool& shouldAccumulate, bool& doPostProc, int& raysPerPixel, int& bouncesPerRay) {
+void component_cameraGUI(Laura::Camera& camera, bool& was_IMGUI_Input, bool disabled, bool& shouldAccumulate, bool& doPostProc, int& raysPerPixel, int& bouncesPerRay) {
 	if (disabled) { ImGui::BeginDisabled(); }
 	ImGui::Begin("Camera");
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -65,15 +65,15 @@ void component_cameraGUI(Camera& camera, bool& was_IMGUI_Input, bool disabled, b
 
 	ImGui::Spacing();
 	ImGui::SeparatorText("TRANSFORM");
-	static int currentMode = WORLD_RELATIVE;
-	if (ImGui::RadioButton("WORLD RELATIVE", &currentMode, WORLD_RELATIVE)) {
-		camera.movementType = WORLD_RELATIVE;
+	static int currentMode = Laura::WORLD_RELATIVE;
+	if (ImGui::RadioButton("WORLD RELATIVE", &currentMode, Laura::WORLD_RELATIVE)) {
+		camera.movementType = Laura::WORLD_RELATIVE;
 		camera.rotAroundZ = 0.0f;
 		camera.flags.scheduleRotUpdate = true;
 	}
 	ImGui::SameLine();
-	if (ImGui::RadioButton("CAMERA RELATIVE", &currentMode, CAMERA_RELATIVE)) {
-		camera.movementType = CAMERA_RELATIVE;
+	if (ImGui::RadioButton("CAMERA RELATIVE", &currentMode, Laura::CAMERA_RELATIVE)) {
+		camera.movementType = Laura::CAMERA_RELATIVE;
 	}
 	ImGui::SameLine();
 	ImGui::Dummy(ImVec2(60.0f, 0.0f));
@@ -137,11 +137,11 @@ void component_cameraGUI(Camera& camera, bool& was_IMGUI_Input, bool disabled, b
 	ImGui::PopID();
 	ImGui::SameLine(0, 10); // Add some spacing between sliders
 	ImGui::PushItemWidth(itemWidth);
-	if (camera.movementType == WORLD_RELATIVE) { ImGui::BeginDisabled(); }
+	if (camera.movementType == Laura::WORLD_RELATIVE) { ImGui::BeginDisabled(); }
 	ImGui::PushID("rotate_z");
 	ImGui::DragFloat("z", &camera.rotAroundZ, 0.05f, -FLT_MAX, FLT_MAX, "%.3f");
 	ImGui::PopID();
-	if (camera.movementType == WORLD_RELATIVE) { ImGui::EndDisabled(); }
+	if (camera.movementType == Laura::WORLD_RELATIVE) { ImGui::EndDisabled(); }
 
 	ImGui::PopItemWidth();
 	ImGui::PopItemWidth();

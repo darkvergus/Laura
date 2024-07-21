@@ -5,22 +5,26 @@
 
 #include "ILayer.h"
 
-class LayerStack
-{
-public:
-	LayerStack() = default;
-	~LayerStack();
-	
-	void PushLayer(ILayer* layer);
-	void PushOverlay(ILayer* overlay);
-	void PopLayer(ILayer* layer);
-	void PopOverlay(ILayer* overlay);
+namespace Laura {
 
-	void onUpdate();
-	void dispatchEvent(Event* event);
+	class LayerStack
+	{
+	public:
+		LayerStack() = default;
+		~LayerStack();
 
-	std::vector<ILayer*> m_Layers;
-	std::vector<ILayer*> m_Overlays;
-};
+		void PushLayer(ILayer* layer);
+		void PushOverlay(ILayer* overlay);
+		void PopLayer(ILayer* layer);
+		void PopOverlay(ILayer* overlay);
+
+		void onUpdate();
+		void dispatchEvent(Event* event);
+
+		std::vector<ILayer*> m_Layers;
+		std::vector<ILayer*> m_Overlays;
+	};
+
+}
 
 #endif // LAYERSTACK_H

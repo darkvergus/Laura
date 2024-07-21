@@ -7,14 +7,15 @@
 #include "platform/windows/GLFWWindow.h"
 #endif
 
+namespace Laura {
 
-
-IWindow* IWindow::createWindow(WindowProps windowProps)
-{
-	#ifdef PLATFORM_WINDOWS
-		return new GLFWWindowIMPL(windowProps);
-	#else
-		std::cout << "Unknown platform!" << std::endl;
-		return nullptr;
-	#endif
+	IWindow* IWindow::createWindow(WindowProps windowProps)
+	{
+		#ifdef PLATFORM_WINDOWS
+			return new GLFWWindowIMPL(windowProps);
+		#else
+			std::cout << "Unknown platform!" << std::endl;
+			return nullptr;
+		#endif
+	}
 }

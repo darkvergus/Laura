@@ -3,23 +3,27 @@
 
 #include "renderer/IComputeShader.h"
 
-void OpenGLRendererAPI::Init()
-{
-}
+namespace Laura {
 
-void OpenGLRendererAPI::Clear(const glm::vec4& color)
-{
-	glClearColor(color.r, color.g, color.b, color.a);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
+	void OpenGLRendererAPI::Init()
+	{
+	}
 
-void OpenGLRendererAPI::SetViewportSize(uint32_t width, uint32_t height)
-{
-	glViewport(0, 0, width, height);
-}
+	void OpenGLRendererAPI::Clear(const glm::vec4& color)
+	{
+		glClearColor(color.r, color.g, color.b, color.a);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 
-void OpenGLRendererAPI::Dispatch(std::shared_ptr<IComputeShader> computeShader)
-{
-	computeShader->Bind();
-	computeShader->Dispatch();
+	void OpenGLRendererAPI::SetViewportSize(uint32_t width, uint32_t height)
+	{
+		glViewport(0, 0, width, height);
+	}
+
+	void OpenGLRendererAPI::Dispatch(std::shared_ptr<IComputeShader> computeShader)
+	{
+		computeShader->Bind();
+		computeShader->Dispatch();
+	}
+
 }
