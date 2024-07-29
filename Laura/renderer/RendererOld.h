@@ -6,7 +6,7 @@
 #include "platform/OpenGL/OpenGLdebugFuncs.h"
 
 #include "CameraOld/CameraOld.h"
-#include "ObjParser/ObjParser.h"
+#include "Renderer/BVHBuilder.h"
 
 //new stuff
 #include "renderer/IRendererAPI.h"

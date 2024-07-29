@@ -2,7 +2,7 @@
 
 #include "GLFWWindow.h"
 #include "platform/windows/GLFWWindow.h"
-#include "events/KeyCodes.h"
+#include "Core/Events/KeyCodes.h"
 #include "core/Log.h"
 
 namespace Laura {

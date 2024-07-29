@@ -3,7 +3,7 @@
 
 namespace Laura {
 
-    struct RaytracingMaterial
+    struct Material
     {
         glm::vec3 color;              // offset 0   // alignment 16 // size 12 // total 12 bytes
         float emissionStrength;       // offset 12  // alignment 4  // size 4  // total 16 bytes

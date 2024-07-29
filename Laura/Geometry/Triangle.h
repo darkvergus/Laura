@@ -1,16 +1,10 @@
+#include "renderer/Material.h"
+
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
 namespace Laura
 {
-    /**
-     * @struct Triangle
-     * @brief A structure representing a triangle in 3D space.
-     *
-     * This structure contains the vertices and normals of a triangle,
-     * as well as the material properties of the triangle.
-     * It is used in the construction of 3D meshes for ray tracing.
-     */
     struct Triangle
     {
         // vertices
@@ -32,11 +26,8 @@ namespace Laura
         glm::vec3 centroid;             //offset 96  // alignment 16 // size 12 // total 108 bytes
         float padding7;	                //offset 108 // alignment 4  // size 4  // total 112 bytes
 
-        RaytracingMaterial material;    //offset 112 // alignment 16 // size 32 // total 144 bytes
-
-
-        // overload the << operator to print the triangle
-        friend std::ostream& operator<<(std::ostream& os, const Triangle& triangle);
+        Material material;    //offset 112 // alignment 16 // size 32 // total 144 bytes
     };
+
 }
 #endif // TRIANGLE_H

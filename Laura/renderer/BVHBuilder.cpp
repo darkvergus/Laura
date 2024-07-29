@@ -1,88 +1,9 @@
-#include "ObjParser/ObjParser.h"
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include "Renderer/BVHBuilder.h"
+
+#include "Assets/MeshLoader.h"
+#include "Components/MeshComponent.h"
 
 namespace Laura {
-
-    // Setting up custom std::cout of the triangle
-    std::ostream& operator<<(std::ostream& os, const Triangle& triangle)
-    {
-        os << "("
-            << "[(" << triangle.v1.x << ", " << triangle.v1.y << ", " << triangle.v1.z << "), "
-            << "(" << triangle.v2.x << ", " << triangle.v2.y << ", " << triangle.v2.z << "), "
-            << "(" << triangle.v3.x << ", " << triangle.v3.y << ", " << triangle.v3.z << ")] "
-            ", ("
-            << triangle.centroid.x << ", " << triangle.centroid.y << ", " << triangle.centroid.z <<
-            ")),";
-        return os;
-    }
-
-
-    void loadMesh(std::string filePath, std::vector<Triangle>& mesh, unsigned int& numTriangles)
-    {
-
-        numTriangles = 0;
-
-        const aiScene* scene = aiImportFile(filePath.c_str(), aiProcessPreset_TargetRealtime_MaxQuality);
-
-        if (!scene) {
-            std::cerr << "Error loading the model: " << filePath << std::endl;
-            return;
-        }
-
-        for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-            const aiMesh* currentMesh = scene->mMeshes[i];
-            for (unsigned int i = 0; i < currentMesh->mNumFaces; ++i) {
-                const aiFace& face = currentMesh->mFaces[i];
-
-                // Ensure the face is a triangle 
-                if (face.mNumIndices != 3) {
-                    continue; // Skip non-triangle faces
-                }
-
-                Triangle triangle;
-                triangle.v1 = glm::vec3(currentMesh->mVertices[face.mIndices[0]].x,
-                    currentMesh->mVertices[face.mIndices[0]].y,
-                    currentMesh->mVertices[face.mIndices[0]].z);
-
-                triangle.v2 = glm::vec3(currentMesh->mVertices[face.mIndices[1]].x,
-                    currentMesh->mVertices[face.mIndices[1]].y,
-                    currentMesh->mVertices[face.mIndices[1]].z);
-
-                triangle.v3 = glm::vec3(currentMesh->mVertices[face.mIndices[2]].x,
-                    currentMesh->mVertices[face.mIndices[2]].y,
-                    currentMesh->mVertices[face.mIndices[2]].z);
-
-                triangle.NA = glm::vec3(currentMesh->mNormals[face.mIndices[0]].x,
-                    currentMesh->mNormals[face.mIndices[0]].y,
-                    currentMesh->mNormals[face.mIndices[0]].z);
-
-                triangle.NB = glm::vec3(currentMesh->mNormals[face.mIndices[1]].x,
-                    currentMesh->mNormals[face.mIndices[1]].y,
-                    currentMesh->mNormals[face.mIndices[1]].z);
-
-                triangle.NC = glm::vec3(currentMesh->mNormals[face.mIndices[2]].x,
-                    currentMesh->mNormals[face.mIndices[2]].y,
-                    currentMesh->mNormals[face.mIndices[2]].z);
-
-                // Calculate centroid 
-                triangle.centroid = (triangle.v1 + triangle.v2 + triangle.v3) / 3.0f;
-
-
-                // Set the material properties
-                //triangle.material.color = glm::vec3(144.0f/255.0f, 50.0f/255.0f, 220.0f/255.0f); // purple
-                //triangle.material.color = glm::vec3(0.1f, 0.1f, 0.1f); // black
-                triangle.material.color = glm::vec3(0.7f, 0.7f, 0.7f); // yellow white
-                triangle.material.emissionColor = glm::vec3(0.0f, 0.0f, 0.0f);
-                triangle.material.emissionStrength = 0.0f;
-
-                mesh.push_back(triangle);
-                numTriangles++;
-            }
-        }
-        std::cout << numTriangles << " triangles loaded" << std::endl;
-    }
 
     // Constructor for the BVH Node
     BVH::Node::Node(glm::vec3 minVec, glm::vec3 maxVec)
@@ -404,11 +325,9 @@ namespace Laura {
     }
 
     BVH::BVH_data BVH::construct(std::string path, const Heuristic heuristic) {
-        // loading mesh
-        std::vector<Triangle> triangles;
-        unsigned int num_triangles = 0;
-        loadMesh(path, triangles, num_triangles);
 
+        MeshComponent mesh = loadMesh(path);
+        std::vector<Triangle> triangles = mesh.GetMeshData();
 
         std::vector<unsigned int> triangle_indices;
         for (unsigned int i = 0; i < triangles.size(); i++) {
@@ -475,7 +394,7 @@ namespace Laura {
         bvh_data.BVH = BVH;
         bvh_data.BVH_size = BVH.size();
         bvh_data.TRIANGLES = triangles;
-        bvh_data.TRIANGLES_size = num_triangles;
+        bvh_data.TRIANGLES_size = mesh.info.triangleCount;
         bvh_data.BVH_tree_depth = BVH::getBVHTreeDepth(BVH, BVH[0], 0);
         return  bvh_data;
     }

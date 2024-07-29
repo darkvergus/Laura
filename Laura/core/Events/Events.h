@@ -5,7 +5,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "events/KeyCodes.h"
+#include "Core/Events/KeyCodes.h"
 
 namespace Laura {
 

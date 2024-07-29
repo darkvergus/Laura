@@ -12,17 +12,6 @@
 
 namespace Laura {
 
-    /** @brief Loads a 3D mesh from an OBJ file.
-        *
-        * This function reads an OBJ file and extracts the vertex, vertex normal, and face information to construct a mesh of triangles.
-        * The mesh and the number of triangles are returned via reference parameters.
-        *
-        * @param filePath The path to the OBJ file.
-        * @param mesh A reference to a vector of Triangles that will be filled with the triangles from the OBJ file.
-        * @param numTriangles A reference to an unsigned int that will be set to the number of triangles in the mesh.
-        */
-    void loadMesh(std::string filePath, std::vector<Triangle>& mesh, unsigned int& numTriangles);
-
     namespace BVH {
 
         // The heuristic used to partition the primitives in the BVH

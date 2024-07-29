@@ -1,5 +1,5 @@
 #include <GLFW/glfw3.h>
-#include "events/events.h"
+#include "Core/Events/Events.h"
 
 namespace Laura {
 
