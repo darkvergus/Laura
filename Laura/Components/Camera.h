@@ -10,10 +10,18 @@ namespace Laura
 	class Camera
 	{
 	public:
-		Camera(float fov, float aspectRatio);
+		Camera();
+
+		/// SETTERS ///
+		void setFOV(float fov);
 		
-		float fov, aspectRatio, focalLength;
+		/// GETTERS ///
+		float getFOV() const;
+		float getFocalLength() const;
+
 		TransformComponent transform;
+	private:
+		float m_FOV, m_FocalLength;
 	};
 }
 

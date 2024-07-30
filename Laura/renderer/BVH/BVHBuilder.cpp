@@ -1,7 +1,4 @@
-#include "Renderer/BVHBuilder.h"
-
-#include "Assets/MeshLoader.h"
-#include "Components/MeshComponent.h"
+#include "Renderer/BVH/BVHBuilder.h"
 
 namespace Laura {
 
@@ -324,9 +321,8 @@ namespace Laura {
         return output;
     }
 
-    BVH::BVH_data BVH::construct(std::string path, const Heuristic heuristic) {
+    BVH::BVH_data BVH::construct(MeshComponent& mesh, const Heuristic heuristic) {
 
-        MeshComponent mesh = loadMesh(path);
         std::vector<Triangle> triangles = mesh.GetMeshData();
 
         std::vector<unsigned int> triangle_indices;

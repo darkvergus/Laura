@@ -19,7 +19,7 @@ namespace Laura
         const aiScene* scene = importer.ReadFile(filepath, aiProcessPreset_TargetRealtime_MaxQuality);
 
         if (!scene) {
-            //LR_CORE_CRITICAL("Failed to load mesh: {}", filepath);
+            LR_CORE_CRITICAL("Failed to load mesh: {}", filepath);
             return MeshComponent(mesh); // Return empty MeshComponent on failure
         }
 
@@ -64,7 +64,7 @@ namespace Laura
                 else {
                     // Set default normals if none are provided
                     triangle.NA = triangle.NB = triangle.NC = glm::vec3(0.0f, 1.0f, 0.0f);
-                    //LR_CORE_WARN("Mesh has no normals, using default normals.");
+                    LR_CORE_WARN("Mesh has no normals, using default normals.");
                 }
 
                 // Calculate centroid
@@ -82,10 +82,10 @@ namespace Laura
 
         if (hasNonTriangleFaces)
         {
-            //LR_CORE_WARN("Skipping non-triangle face in mesh: {}", filepath); 
+            LR_CORE_WARN("Skipping non-triangle face in mesh: {}", filepath); 
         }
 
-        //LR_CORE_INFO("Loaded {} triangles from mesh: {}", triangleCount, filepath);
+        LR_CORE_INFO("Loaded {} triangles from mesh: {}", triangleCount, filepath);
         MeshComponent meshComponent(mesh);
         meshComponent.info.triangleCount = triangleCount;
 

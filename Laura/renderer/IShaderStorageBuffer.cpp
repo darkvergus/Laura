@@ -1,7 +1,6 @@
 #include "IShaderStorageBuffer.h"
-
-#include "renderer/IRendererAPI.h"
-#include "platform/OpenGL/OpenGLShaderStorageBuffer.h"
+#include "Renderer/IRendererAPI.h"
+#include "Platform/OpenGL/OpenGLShaderStorageBuffer.h"
 
 namespace Laura
 {

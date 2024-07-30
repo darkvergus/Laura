@@ -13,9 +13,7 @@ namespace Laura {
 
 		virtual ~ITexture() {}
 
-		virtual void Bind() = 0;
-		virtual void Unbind() = 0;
-		virtual void ChangeBindingPoint(int bindingPoint) = 0;
+		virtual void ChangeTextureUnitSlot(int textureUnitSlot) = 0;
 
 		/// GETTERS ///
 		virtual int GetWidth() = 0;

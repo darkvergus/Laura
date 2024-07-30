@@ -1,32 +1,34 @@
+#ifndef BVH_BUILDER_H
+#define BVH_BUILDER_H
+
 #include "lrpch.h"
-// standard
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <queue>
+
 #include "renderer/Material.h"
 #include "Geometry/Triangle.h"
+#include "Components/MeshComponent.h"
 
-namespace Laura {
+namespace Laura 
+{
 
-    namespace BVH {
-
-        // The heuristic used to partition the primitives in the BVH
-        #ifndef heuristicEnum
-        #define heuristicEnum
-        enum class Heuristic {
+    namespace BVH 
+    {
+        enum class Heuristic 
+        {
             OBJECT_MEDIAN_SPLIT,
             SPATIAL_MIDDLE_SPLIT,
             SURFACE_AREA_HEURISTIC,
             SURFACE_AREA_HEURISTIC_BUCKETS
         };
-        #endif
 
         // The maximum number of primitives (triangles) a leaf node can contain
         const unsigned int AABB_primitives_limit = 2;
+
+        // true stupidity
+        struct Int128 
+        {
+            int data;
+            char padding[12];  // Ensure 16-byte size
+        };
 
         /**
             * @class Node
@@ -36,15 +38,9 @@ namespace Laura {
             * indices of the primitives (triangles) it contains if it is a leaf node, and
             * the indices of its child nodes if it is an internal node.
             */
-
-        struct Int128 {
-            int data;
-            char padding[12];  // Ensure 16-byte size
-        };
-
-        class Node {
+        struct Node 
+        {
         public:
-            // constructors
             Node() {};
             Node(glm::vec3 minVec, glm::vec3 maxVec);
 
@@ -72,7 +68,8 @@ namespace Laura {
             * This structure contains a vector of all nodes in the BVH, the size of the BVH,
             * a pointer to the array of triangles represented by the BVH, and the size of this array.
             */
-        struct BVH_data {
+        struct BVH_data 
+        {
             std::vector<BVH::Node> BVH;
             std::vector<Triangle> TRIANGLES;
 
@@ -159,8 +156,10 @@ namespace Laura {
             * @param heuristic The heuristic to use for partitioning the BVH nodes.
             * @return A BVH_data structure containing the data of the constructed BVH.
             */
-        BVH::BVH_data construct(std::string path, const Heuristic heuristic);
+        BVH::BVH_data construct(MeshComponent& mesh, const Heuristic heuristic);
 
         unsigned int getBVHTreeDepth(const std::vector<Node>& BVH, BVH::Node current_node, unsigned int height);
     }
 }
+
+#endif // BVH_BUILDER_H

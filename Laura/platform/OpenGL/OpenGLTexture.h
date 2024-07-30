@@ -13,9 +13,7 @@ namespace Laura {
 		OpenGLTexture(int width, int height, int channels, int bindingPoint);
 		virtual ~OpenGLTexture() override;
 
-		virtual void Bind() override;
-		virtual void Unbind() override;
-		virtual void ChangeBindingPoint(int bindingPoint) override;
+		virtual void ChangeTextureUnitSlot(int textureUnitSlot) override;
 
 		inline virtual int GetWidth()  override { return m_Width; }
 		inline virtual int GetHeight() override { return m_Height; }
@@ -23,7 +21,7 @@ namespace Laura {
 
 	private:
 		unsigned int m_ID;
-		int m_BindingPoint, m_Channels;
+		int m_TextureUnitSlot, m_Channels;
 		int m_Width, m_Height;
 		std::string m_Filepath;
 	};

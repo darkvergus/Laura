@@ -8,7 +8,7 @@ file(GLOB_RECURSE LAURA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 target_sources(LauraEngine PRIVATE ${LAURA_SOURCES} ${LAURA_PLATFORM_SOURCES})
 
 
-target_compile_definitions(LauraEngine PUBLIC CORE_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/") # This is useful to get an ASSETS_PATH in your IDE during development but you should comment this if you compile a release version and uncomment the next line
+target_compile_definitions(LauraEngine PUBLIC CORE_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/Resources/") # This is useful to get an ASSETS_PATH in your IDE during development but you should comment this if you compile a release version and uncomment the next line
 #target_compile_definitions(LauraEngine PUBLIC CORE_RESOURCES_PATH="./resources/") # Uncomment this line to setup the ASSETS_PATH macro to the final assets directory when you share the game and move the resources to the build folder
 
 target_compile_definitions(LauraEngine PUBLIC APP_RESOURCES_PATH="${CMAKE_SOURCE_DIR}/app/resources/") # This is useful to get an ASSETS_PATH in your IDE during development but you should comment this if you compile a release version and uncomment the next line

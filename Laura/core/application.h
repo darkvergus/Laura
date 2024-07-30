@@ -1,20 +1,25 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <GL/glew.h>
+#include "lrpch.h"
+
 #include <imgui.h>
 
-#include "deltaLib/deltaLib.h"
-#include "CameraOld/CameraHandler.h" // also includes Camera.hpp
-#include "scenes/Scene1.hpp"
-#include "renderer/RendererOld.h"
+// THESE NEED TO GO ASAP // 
+#include <GL/glew.h>
+#include "Platform/OpenGL/OpenGLdebugFuncs.h"
+///////////////////////////
 
+#include "Core/IWindow.h"
+#include "Core/LayerStack.h"
+#include "Core/ImGuiLayer.h"
+#include "Events/Events.h"
+#include "Platform/windows/GLFWWindow.h"
 
-#include "core/IWindow.h"
-#include "events/Events.h"
-#include "core/LayerStack.h"
-#include "core/ImGuiLayer.h"
-#include "platform/windows/GLFWWindow.h"
+#include "Renderer/Renderer.h"
+
+#include "Components/Camera.h"
+#include "Entity/Environment.h"
 
 namespace Laura {
 
@@ -26,49 +31,16 @@ namespace Laura {
         LayerStack* m_LayerStack;
         ImGuiLayer* m_ImGuiLayer;
 
-        // stuff to refactor
-        DeltaTime deltaTime;
-        Camera camera;
-        CameraHandler cameraHandler;
-        SceneData sceneData;
-        BVH::Heuristic active_heuristic;
-        BVH::BVH_data scene_BVH;
-        std::string skyboxFilePath;
         Renderer* renderer;
-        bool was_ImGui_Input;
-        bool shouldPostProcess;
-        bool shouldAccumulate;
-        int heatmap_color_limit;
-        int raysPerPixel;
-        int bouncesPerRay;
-        bool show_skybox;
-        bool reloadSkybox;
-        glm::vec3 SkyGroundColor;
-        glm::vec3 SkyColorHorizon;
-        glm::vec3 SkyColorZenith;
-        bool show_demo_window;
-        int totalFrames;
-        double prevCamAspect;
-        glm::vec2 prevViewportWindowSize;
-        glm::vec2 prevViewportWindowPos;
-        ImVec2 viewportSize;
-        ImVec2 topLeftTextureCoords;
-        ImVec2 bottomLeftTextureCoords;
-        bool display_BVH;
-        bool showPixelData;
-        int displayed_layer;
-        bool display_multiple;
-        int BVH_height;
-        unsigned int viewport_mouseX;
-        unsigned int viewport_mouseY;
-        unsigned int prev_viewport_mouseX;
-        unsigned int prev_viewport_mouseY;
-        unsigned int inverted_viewport_mouseY;
-        unsigned int AABB_intersect_count_sum;
-        unsigned int TRI_intersect_count_sum;
-        unsigned int same_mouse_pos_count;
-        bool wasGlobalInput; // input from the camera, ImGui or any other source (which should reset accumulation)
-        unsigned int m_NumAccumulatedFrames;
+
+        Camera m_Camera;
+        EnvironmentEntity m_Environment;
+
+        // temporary
+        glm::vec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;
+        ImVec2 topLeftTextureCoords, bottomLeftTextureCoords;
+        uint32_t prev_viewport_mouseX, prev_viewport_mouseY;
+
 
     public:
         Application();
@@ -83,7 +55,6 @@ namespace Laura {
     };
 
     Application* createApplication();
-
 }
 
 #endif // APPLICATION_H

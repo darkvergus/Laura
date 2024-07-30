@@ -1,6 +1,6 @@
 #include "GUI/BVHsettingsGUI.h"
 
-void BVH_settings_GUI(bool& display_BVH, Laura::BVH::Heuristic& active_heuristic, int BVH_tree_depth, int& heatmap_color_limit, bool& showPixelData, bool& was_IMGUI_input, bool disabled) {
+void BVH_settings_GUI(bool& display_BVH, int BVH_tree_depth, int& heatmap_color_limit, bool& showPixelData, bool& was_IMGUI_input, bool disabled) {
     ImGuiWindowFlags BVH_window_flags = 0;
     BVH_window_flags |= ImGuiWindowFlags_NoCollapse;
     BVH_window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -9,18 +9,6 @@ void BVH_settings_GUI(bool& display_BVH, Laura::BVH::Heuristic& active_heuristic
     ImGui::Begin("BVH Settings", NULL, BVH_window_flags);
 
     ImGui::Text("BVH Tree Depth: %d", BVH_tree_depth);
-    if (active_heuristic == Laura::BVH::Heuristic::SURFACE_AREA_HEURISTIC_BUCKETS) {
-        ImGui::Text("Active BVH Heuristic: Surface Area Heuristic Buckets");
-    }
-    else if (active_heuristic == Laura::BVH::Heuristic::SURFACE_AREA_HEURISTIC) {
-        ImGui::Text("Active BVH Heuristic: %d", Laura::BVH::Heuristic::SURFACE_AREA_HEURISTIC);
-    }
-    else if (active_heuristic == Laura::BVH::Heuristic::OBJECT_MEDIAN_SPLIT) {
-        ImGui::Text("Active BVH Heuristic: %d", Laura::BVH::Heuristic::OBJECT_MEDIAN_SPLIT);
-    }
-    else if (active_heuristic == Laura::BVH::Heuristic::SPATIAL_MIDDLE_SPLIT) {
-        ImGui::Text("Active BVH Heuristic: %d", Laura::BVH::Heuristic::SPATIAL_MIDDLE_SPLIT);
-    }
 
     ImGui::SeparatorText("Visual");
     if (ImGui::Checkbox("Show BVH heatmap", &display_BVH)) {

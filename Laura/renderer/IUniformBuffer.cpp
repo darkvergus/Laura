@@ -1,7 +1,6 @@
 #include "IUniformBuffer.h"
-
-#include "renderer/IRendererAPI.h"
-#include "platform/OpenGL/OpenGLUniformBuffer.h"
+#include "Renderer/IRendererAPI.h"
+#include "Platform/OpenGL/OpenGLUniformBuffer.h"
 
 namespace Laura 
 {
