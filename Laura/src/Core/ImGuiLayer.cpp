@@ -11,7 +11,7 @@
 namespace Laura {
 
     ImGuiLayer::ImGuiLayer(IWindow* window)
-        : ILayer(window), m_Window(window)
+        : m_Window(window)
     {
     }
 

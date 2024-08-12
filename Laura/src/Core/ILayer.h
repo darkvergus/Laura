@@ -1,5 +1,4 @@
-#ifndef ILAYER_H
-#define ILAYER_H
+#pragma once
 
 #include "events/events.h"
 #include "core/IWindow.h"
@@ -10,7 +9,6 @@ namespace Laura {
 	{
 
 	public:
-		ILayer(IWindow* window);
 		virtual ~ILayer() = default;
 
 		virtual void onAttach() {};
@@ -28,5 +26,3 @@ namespace Laura {
 	};
 
 }
-
-#endif // ILAYER_H

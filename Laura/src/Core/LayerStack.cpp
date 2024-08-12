@@ -1,3 +1,4 @@
+#include "LayerStack.h"
 #include "core/LayerStack.h"
 
 namespace Laura {
@@ -56,7 +57,7 @@ namespace Laura {
 		}
 	}
 
-	void LayerStack::dispatchEvent(Event* event)
+	void LayerStack::onEvent(Event* event)
 	{
 		for (ILayer* layer : m_Layers)
 		{
@@ -66,6 +67,19 @@ namespace Laura {
 		for (ILayer* overlay : m_Overlays)
 		{
 			overlay->onEvent(event);
+		}
+	}
+
+	void LayerStack::onImGuiRender()
+	{
+		for (ILayer* layer : m_Layers)
+		{
+			layer->onImGuiRender();
+		}
+
+		for (ILayer* overlay : m_Overlays)
+		{
+			overlay->onImGuiRender();
 		}
 	}
 

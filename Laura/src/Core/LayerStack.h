@@ -19,7 +19,8 @@ namespace Laura {
 		void PopOverlay(ILayer* overlay);
 
 		void onUpdate();
-		void dispatchEvent(Event* event);
+		void onEvent(Event* event);
+		void onImGuiRender();
 
 		std::vector<ILayer*> m_Layers;
 		std::vector<ILayer*> m_Overlays;

@@ -1,5 +1,4 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include "lrpch.h"
 
@@ -25,12 +24,12 @@ namespace Laura {
 
     class Application
     {
-    private:
+    protected:
         // new stuff
         IWindow* m_Window;
         LayerStack* m_LayerStack;
         ImGuiLayer* m_ImGuiLayer;
-        Renderer* renderer;
+        std::shared_ptr<Renderer> m_Renderer;
 
         // should move to sandbox
         Camera m_Camera;
@@ -49,7 +48,6 @@ namespace Laura {
 
     protected:
         virtual void init();
-        virtual void update();
         virtual void render();
         virtual void shutdown();
     };
@@ -57,4 +55,3 @@ namespace Laura {
     Application* CreateApplication();
 }
 
-#endif // APPLICATION_H

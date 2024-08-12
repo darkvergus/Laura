@@ -22,16 +22,21 @@ namespace Laura {
 		while (!m_Window->shouldClose())
 		{
 				
-			Application::update();
+			m_Window->onUpdate();
+			m_LayerStack->onUpdate();
+
 			m_ImGuiLayer->Begin();
 			
+
+
+
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 		
 			bool showDemoWindow = true;
 			ImGui::ShowDemoWindow(&showDemoWindow);
 			
-			renderer->renderSettings.accumulateFrames = true;
+			m_Renderer->renderSettings.accumulateFrames = true;
 
 			/// VIEWPORT WINDOW
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
@@ -56,9 +61,9 @@ namespace Laura {
 					viewportSize.x = ceil(viewportWindowSize.y * aspectRatio); // calculate the width based on the aspect ratio
 				}
 
-				renderer->renderSettings.viewportDimensions = glm::vec2(viewportSize.x, viewportSize.y);
-				renderer->renderSettings.accumulateFrames = false;
-				renderer->UpdateRenderSettings();
+				m_Renderer->renderSettings.viewportDimensions = glm::vec2(viewportSize.x, viewportSize.y);
+				m_Renderer->renderSettings.accumulateFrames = false;
+				m_Renderer->UpdateRenderSettings();
 		
 				topLeftTextureCoords.x = (viewportWindowSize.x - viewportSize.x) / 2.0f;
 				topLeftTextureCoords.y = (viewportWindowSize.y - viewportSize.y) / 2.0f;
@@ -87,7 +92,7 @@ namespace Laura {
 				bottomLeftTextureCoords.y = topLeftTextureCoords.y + viewportSize.y;
 			}
 		
-			std::shared_ptr<IImage2D> RenderedFrame = renderer->RenderScene();
+			std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
 		
 			ImDrawList* drawList = ImGui::GetWindowDrawList();
 			drawList->AddImage((ImTextureID)RenderedFrame->GetID(), topLeftTextureCoords, bottomLeftTextureCoords, { 0, 1 }, { 1, 0 });
@@ -110,40 +115,9 @@ namespace Laura {
 		m_LayerStack = new LayerStack();
 		m_ImGuiLayer = new ImGuiLayer(m_Window);
 		// make window forward events to the layer stack
-		m_Window->setEventCallback([this](Event* event) { m_LayerStack->dispatchEvent(event); });
+		m_Window->setEventCallback([this](Event* event) { m_LayerStack->onEvent(event); });
 		m_LayerStack->PushLayer(m_ImGuiLayer);
-
-		renderer = new Renderer();
-		renderer->SetAPI(IRendererAPI::API::OpenGL);
-		
-		m_Camera.transform.setPosition({ 0.0f, 40.0f, -200.0f });
-		m_Camera.transform.setRotation({ 0.0f, 0.0f, 0.0f });
-		m_Camera.setFOV(90.0f);
-
-		m_Environment.skybox.changeType(SkyboxType::SKYBOX_TEXTURE);
-		std::string texturePath = LR_RESOURCES_PATH "Skyboxes/Metro_default.hdr";
-		m_Environment.skybox.setTexturePath(texturePath);
-		
-		renderer->renderSettings.viewportDimensions = glm::vec2(300, 100);
-		renderer->renderSettings.raysPerPixel = 1;
-		renderer->renderSettings.bouncesPerRay = 5;
-		renderer->renderSettings.maxAABBIntersections = 10000;
-		renderer->renderSettings.displayBVH = false;
-
-		renderer->BeginScene(m_Camera, m_Environment);
-
-		MeshComponent model3D = MeshLoader::loadMesh(std::string(LR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb"));
-		//MeshComponent model3D = MeshLoader::loadMesh(std::string(APP_RESOURCES_PATH "models/suzanne_high_poly_rotated.glb"));
-		//MeshComponent model3D = MeshLoader::loadMesh(std::string(APP_RESOURCES_PATH "models/tiny_house.glb"));
-		//MeshComponent model3D = MeshLoader::loadMesh(std::string(APP_RESOURCES_PATH "models/sponza.obj"));
-		//MeshComponent model3D = MeshLoader::loadMesh(std::string(APP_RESOURCES_PATH "models/stanford_bunny.obj"));
-		renderer->SubmitMesh(model3D);
-	}
-
-	void Application::update()
-	{
-		m_Window->onUpdate();
-		m_LayerStack->onUpdate();
+		m_Renderer = std::make_shared<Renderer>();
 	}
 
 	void Application::render()
@@ -153,7 +127,6 @@ namespace Laura {
 	void Application::shutdown()
 	{
 		glfwTerminate();
-		delete renderer;
 		delete m_LayerStack;
 		delete m_Window;
 	}
