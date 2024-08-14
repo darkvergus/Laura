@@ -17,7 +17,7 @@ namespace Laura {
 		int height;
 		bool VSync;
 
-		WindowProps(const std::string& title = std::string("Ray Tracing"),
+		WindowProps(const std::string& title = std::string("Laura"),
 			int width = 1600,
 			int height = 900,
 			bool VSync = false)

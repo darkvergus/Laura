@@ -17,15 +17,14 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(ONLY_LIBS ON)								# GLEW wont generate executable targets
-add_subdirectory(Thirdparty/glfw-3.3.2)			# Window creation
-add_subdirectory(Thirdparty/glew-cmake)			# OpenGL loader
-add_subdirectory(Thirdparty/stb_image)			# Loading textures/images
-add_subdirectory(Thirdparty/stb_truetype)		# Loading ttf fonts
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glm")				# Math
-add_subdirectory(Thirdparty/imgui-docking)		# UI
-add_subdirectory(Thirdparty/assimp)				# Model loading
-add_subdirectory(Thirdparty/spdlog)				# Logging/Debugging
-add_subdirectory(Thirdparty/delta-lib)			# Delta time // subject to change (my own library)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glfw-3.3.2")			# Window creation
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glew-cmake")			# OpenGL loader
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/stb_image")			# Loading textures/images
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/stb_truetype")		    # Loading ttf fonts
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glm")				    # Math
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/imgui-docking")		# UI
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/assimp")				# Model loading
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/spdlog")				# Logging/Debugging
 
 add_library(LauraEngine STATIC)
 set_property(TARGET LauraEngine PROPERTY CXX_STANDARD 20)
@@ -34,12 +33,12 @@ target_sources(LauraEngine PRIVATE ${LAURA_SOURCES})
 target_include_directories(LauraEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
 # Setting up the Precompiled Header
-#add_library(lrpchLib STATIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.cpp")
-#target_precompile_headers(lrpchLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.h")
-#target_link_libraries(lrpchLib PUBLIC glm spdlog::spdlog)
+add_library(lrpchLib STATIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.cpp")
+target_precompile_headers(lrpchLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.h")
+target_link_libraries(lrpchLib PUBLIC glm spdlog::spdlog)
 
 target_link_libraries(LauraEngine PUBLIC assimp glm glfw libglew_static stb_image 
-        stb_truetype imgui deltaLib spdlog::spdlog)
+        stb_truetype imgui spdlog::spdlog)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/Resources/")

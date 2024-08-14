@@ -1,7 +1,7 @@
-#include "core/application.h"
+#include "Core/application.h"
 
 #include "Core/Log.h"
-#include "renderer/ITexture2D.h"
+#include "Renderer/ITexture2D.h"
 #include "Assets/MeshLoader.h"
 
 namespace Laura {
@@ -15,13 +15,13 @@ namespace Laura {
 	void Application::init()
 	{
 		Log::Init();
-		m_Window = IWindow::createWindow();
-		m_LayerStack = std::make_shared<LayerStack>();
-		m_ImGuiLayer = std::make_shared<ImGuiLayer>(m_Window);
+		_Window = IWindow::createWindow();
+		_LayerStack = std::make_shared<LayerStack>();
+		_ImGuiLayer = std::make_shared<ImGuiLayer>(_Window);
 		// make window forward events to the layer stack
-		m_Window->setEventCallback([this](Event* event) { m_LayerStack->onEvent(event); });
-		m_LayerStack->PushLayer(m_ImGuiLayer);
-		m_Renderer = std::make_shared<Renderer>();
+		_Window->setEventCallback([this](Event* event) { _LayerStack->onEvent(event); });
+		_LayerStack->PushLayer(_ImGuiLayer);
+		_Renderer = std::make_shared<Renderer>();
 	}
 
 	void Application::run()
@@ -29,16 +29,16 @@ namespace Laura {
 		init();
 
 		//float aspectRatio = 16.0f / 9.0f;
-		while (!m_Window->shouldClose())
+		while (!_Window->shouldClose())
 		{
-			m_Window->onUpdate();
+			_Window->onUpdate();
 			GLCall(glClear(GL_COLOR_BUFFER_BIT));
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
-			m_LayerStack->onUpdate();
+			_LayerStack->onUpdate();
 
-			m_ImGuiLayer->Begin();
-			m_LayerStack->onImGuiRender();
-			m_ImGuiLayer->End();
+			_ImGuiLayer->Begin();
+			_LayerStack->onImGuiRender();
+			_ImGuiLayer->End();
 			render();
 		}
 		shutdown();

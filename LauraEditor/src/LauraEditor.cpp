@@ -21,7 +21,7 @@ namespace Laura
 		void init() override
 		{
 			Application::init(); // call the default init method first
-			m_LayerStack->PushLayer(std::make_shared<EditorLayer>(m_Renderer));
+			_LayerStack->PushLayer(std::make_shared<EditorLayer>(_Renderer));
 		}
 
 		~LauraEditor()
