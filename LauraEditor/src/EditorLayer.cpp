@@ -14,8 +14,6 @@ namespace Laura
 
 	void EditorLayer::onAttach()
 	{
-		m_Renderer->SetAPI(IRendererAPI::API::OpenGL);
-
 		m_Camera.transform.setPosition({ 0.0f, 40.0f, -200.0f });
 		m_Camera.transform.setRotation({ 0.0f, 0.0f, 0.0f });
 		m_Camera.setFOV(90.0f);
@@ -46,7 +44,6 @@ namespace Laura
 
 	void EditorLayer::onUpdate()
 	{
-
 	}
 
 	void EditorLayer::onImGuiRender()
@@ -121,5 +118,4 @@ namespace Laura
 	void EditorLayer::onEvent(Event* event)
 	{
 	}
-
 }

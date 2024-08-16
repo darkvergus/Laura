@@ -19,7 +19,6 @@ namespace Laura
 		Camera m_Camera;
 		EnvironmentEntity m_Environment;
 	private:
-		/// VIEWPORT WINDOW VARIABLES ///
 		glm::vec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;
 		ImVec2 topLeftTextureCoords, bottomLeftTextureCoords;
 		float aspectRatio;

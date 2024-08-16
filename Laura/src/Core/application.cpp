@@ -10,12 +10,15 @@ namespace Laura {
 	{
 	}
 
-	Application::~Application(){}
+	Application::~Application()
+	{
+	}
 
 	void Application::init()
 	{
 		Log::Init();
-		_Window = IWindow::createWindow();
+		_Window = IWindow::createWindow(); // window also sets up the rendering context (OpenGL, Vulkan ...)
+		_RendererAPI = IRendererAPI::Create();
 		_LayerStack = std::make_shared<LayerStack>();
 		_ImGuiLayer = std::make_shared<ImGuiLayer>(_Window);
 		// make window forward events to the layer stack
@@ -27,13 +30,10 @@ namespace Laura {
 	void Application::run()
 	{		
 		init();
-
-		//float aspectRatio = 16.0f / 9.0f;
 		while (!_Window->shouldClose())
 		{
 			_Window->onUpdate();
-			GLCall(glClear(GL_COLOR_BUFFER_BIT));
-			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			_RendererAPI->Clear({0.98f, 0.24f, 0.97f, 1.0f}); // fill the screen with a color (pink)
 			_LayerStack->onUpdate();
 
 			_ImGuiLayer->Begin();
