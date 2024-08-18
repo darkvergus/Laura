@@ -16,12 +16,13 @@ namespace Laura
 		virtual void onEvent(Event* event) override;
 	private:
 		std::shared_ptr<Renderer> m_Renderer;
-		Camera m_Camera;
-		EnvironmentEntity m_Environment;
 	private:
 		glm::vec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;
 		ImVec2 topLeftTextureCoords, bottomLeftTextureCoords;
 		float aspectRatio;
+
+	private:
+		Scene m_Scene;
 	};
 
 }

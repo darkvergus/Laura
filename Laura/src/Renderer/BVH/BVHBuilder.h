@@ -4,7 +4,8 @@
 
 #include "renderer/Material.h"
 #include "Geometry/Triangle.h"
-#include "Components/MeshComponent.h"
+
+#include "Scene/Components.h"
 
 namespace Laura 
 {
@@ -155,7 +156,7 @@ namespace Laura
             * @param heuristic The heuristic to use for partitioning the BVH nodes.
             * @return A BVH_data structure containing the data of the constructed BVH.
             */
-        BVH::BVH_data construct(MeshComponent& mesh, const Heuristic heuristic);
+        BVH::BVH_data construct(const MeshComponent& meshComponent, const Heuristic heuristic);
 
         unsigned int getBVHTreeDepth(const std::vector<Node>& BVH, BVH::Node current_node, unsigned int height);
     }

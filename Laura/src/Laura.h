@@ -12,16 +12,12 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/IRendererAPI.h"
 
-#include "Components/Camera.h"
-#include "Components/MaterialComponent.h"
-#include "Components/MeshComponent.h"
-#include "Components/SkyboxComponent.h"
-#include "Components/TransformComponent.h"
-
-#include "Entity/Environment.h"
+//// ECS within scene ////
+#include "Scene/Scene.h" 
+#include "Scene/Entity.h" 
+#include "Scene/Components.h"
+#include "Scene/Skybox.h" 
+//// ---------------- ////
 
 #include "Assets/MeshLoader.h"
 #include "Assets/TextureLoader.h"
-
-
-

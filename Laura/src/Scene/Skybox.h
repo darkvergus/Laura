@@ -10,13 +10,13 @@ namespace Laura
 		SKYBOX_GRADIENT = 1
 	};
 
-	class SkyboxComponent
+	class Skybox
 	{
 	public:
-		SkyboxComponent();
-		SkyboxComponent(std::string& skyboxFilePath);
-		SkyboxComponent(glm::vec3 groundColor, glm::vec3 horizonColor, glm::vec3 zenithColor);
-		~SkyboxComponent();
+		Skybox();
+		Skybox(std::string& skyboxFilePath);
+		Skybox(glm::vec3 groundColor, glm::vec3 horizonColor, glm::vec3 zenithColor);
+		~Skybox();
 		
 		/// SETTERS ///
 		inline void setTexturePath  (std::string& skyboxFilePath) { m_SkyboxFilepath = skyboxFilePath; };
@@ -27,9 +27,9 @@ namespace Laura
 
 		/// GETTERS ///
 		inline std::string getTexturePath() const { return m_SkyboxFilepath; };
-		inline glm::vec3 getGroundColor()   const { return m_GroundColor; };
-		inline glm::vec3 getHorizonColor()  const { return m_HorizonColor; };
-		inline glm::vec3 getZenithColor()   const { return m_ZenithColor; };
+		inline const glm::vec3& getGroundColor()   const { return m_GroundColor; };
+		inline const glm::vec3& getHorizonColor()  const { return m_HorizonColor; };
+		inline const glm::vec3& getZenithColor()   const { return m_ZenithColor; };
 		inline SkyboxType getType()         const { return m_SkyboxType; }
 	
 	private:

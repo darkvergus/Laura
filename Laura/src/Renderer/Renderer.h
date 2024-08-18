@@ -2,9 +2,9 @@
 
 #include "lrpch.h"
 
-#include "Components/Camera.h"
-#include "Components/MeshComponent.h"
-#include "Entity/Environment.h"
+#include "Scene/Entity.h"
+#include "Scene/Skybox.h"
+#include "Scene/Components.h"
 
 #include "Renderer/IRendererAPI.h"
 #include "Renderer/IComputeShader.h"
@@ -22,7 +22,7 @@ namespace Laura {
 	private:
 		struct RenderSettings
 		{
-			glm::vec2 viewportDimensions;
+			glm::vec2 frameDimentions;
 			uint32_t raysPerPixel;
 			uint32_t bouncesPerRay;
 			bool accumulateFrames;
@@ -41,12 +41,12 @@ namespace Laura {
 		// 3. load the rendererSettings information to a UBO with a binding point 2
 		// 4. load the default shader
 		// 5. load the default texture
-		void BeginScene(const Camera& camera, const EnvironmentEntity& environment);
+		void BeginScene(const Entity& camera, const Skybox& skybox);
 
-		void UpdateCamera(const Camera& camera);
-		void UpdateEnvironment(const EnvironmentEntity& environment);
+		void UpdateCameraUBO(const Entity& camera);
+		void UpdateSkyboxUBO(const Skybox& skybox);
 		
-		void UpdateRenderSettings();
+		void UpdateRenderSettingsUBO();
 		RenderSettings renderSettings;
 
 		// submit mesh has 3 roles
@@ -54,7 +54,8 @@ namespace Laura {
 		// 2. based on searching the data structure set flag genBottomLevelBVH = true/false - of course if this flag is false then the following flag will have to be false as well
 		// 3. if the transform has changed set flag genTopLevelBVH = true/false
 		// (not gonna be called every frame, only when the mesh is added)
-		void SubmitMesh(MeshComponent& mesh);//, uint32_t meshID); No MESH ID for now
+
+		void Submit(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material);
 		// removes the mesh from the data structure and subsequently sets the genTLBVH=true
 		// (also not gonna be called every frame, only when the mesh is removed)
 		//void RemoveMesh(uint32_t meshID);

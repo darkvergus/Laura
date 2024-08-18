@@ -1,8 +1,8 @@
-#include "SkyboxComponent.h"
+#include "Scene/Skybox.h"
 
 namespace Laura
 {
-	SkyboxComponent::SkyboxComponent()
+	Skybox::Skybox()
 		: m_SkyboxType(SkyboxType::SKYBOX_TEXTURE),
 		m_GroundColor(glm::vec3(0.63f, 0.58f, 0.63f)),
 		m_HorizonColor(glm::vec3(1.00f, 1.00f, 1.00f)),
@@ -11,7 +11,7 @@ namespace Laura
 	{
 	}
 
-	SkyboxComponent::SkyboxComponent(std::string& skyboxFilepath)
+	Skybox::Skybox(std::string& skyboxFilepath)
 		: m_SkyboxFilepath(skyboxFilepath), 
 		m_SkyboxType(SkyboxType::SKYBOX_TEXTURE), 
 		m_GroundColor(glm::vec3(0.63f, 0.58f, 0.63f)),
@@ -20,7 +20,7 @@ namespace Laura
 	{
 	}
 
-	SkyboxComponent::SkyboxComponent(glm::vec3 groundColor, glm::vec3 horizonColor, glm::vec3 zenithColor)
+	Skybox::Skybox(glm::vec3 groundColor, glm::vec3 horizonColor, glm::vec3 zenithColor)
 		: m_GroundColor(groundColor),
 		m_HorizonColor(horizonColor),
 		m_ZenithColor(zenithColor),
@@ -29,7 +29,7 @@ namespace Laura
 	{
 	}
 
-	SkyboxComponent::~SkyboxComponent()
+	Skybox::~Skybox()
 	{
 	}
 }

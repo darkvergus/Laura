@@ -12,9 +12,6 @@
 
 #include "Events/Events.h"
 
-#include "Components/Camera.h"
-#include "Entity/Environment.h"
-
 
 
 namespace Laura {

@@ -321,9 +321,10 @@ namespace Laura {
         return output;
     }
 
-    BVH::BVH_data BVH::construct(MeshComponent& mesh, const Heuristic heuristic) {
+    BVH::BVH_data BVH::construct(const MeshComponent& meshComponent, const Heuristic heuristic) {
 
-        std::vector<Triangle> triangles = mesh.GetMeshData();
+        std::vector<Triangle> triangles = meshComponent.mesh;
+        uint32_t triangleCount = triangles.size();
 
         std::vector<unsigned int> triangle_indices;
         for (unsigned int i = 0; i < triangles.size(); i++) {
@@ -390,7 +391,7 @@ namespace Laura {
         bvh_data.BVH = BVH;
         bvh_data.BVH_size = BVH.size();
         bvh_data.TRIANGLES = triangles;
-        bvh_data.TRIANGLES_size = mesh.info.triangleCount;
+        bvh_data.TRIANGLES_size = triangleCount;
         bvh_data.BVH_tree_depth = BVH::getBVHTreeDepth(BVH, BVH[0], 0);
         return  bvh_data;
     }

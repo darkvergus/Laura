@@ -10,11 +10,10 @@ namespace Laura
 {
     namespace MeshLoader
     {
-        MeshComponent loadMesh(const std::string& filepath)
+        std::vector<Triangle> loadMesh(const std::string& filepath)
         {
             bool hasNonTriangleFaces = false;
-            uint32_t triangleCount = 0;
-            std::vector<Triangle> mesh;
+            std::vector<Triangle> triangleMesh;
 
             // Import the scene using Assimp
             Assimp::Importer importer;
@@ -22,7 +21,7 @@ namespace Laura
 
             if (!scene) {
                 LR_CORE_CRITICAL("Failed to load mesh: {}", filepath);
-                return MeshComponent(mesh); // Return empty MeshComponent on failure
+                return std::vector<Triangle>(); // Return empty mesh
             }
 
             for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
@@ -77,8 +76,7 @@ namespace Laura
                     triangle.material.emissionColor = glm::vec3(0.0f, 0.0f, 0.0f);
                     triangle.material.emissionStrength = 0.0f;
 
-                    mesh.push_back(triangle);
-                    triangleCount++;
+                    triangleMesh.push_back(triangle);
                 }
             }
 
@@ -87,11 +85,9 @@ namespace Laura
                 LR_CORE_WARN("Skipping non-triangle face in mesh: {}", filepath);
             }
 
-            LR_CORE_INFO("Loaded {} triangles from mesh: {}", triangleCount, filepath);
-            MeshComponent meshComponent(mesh);
-            meshComponent.info.triangleCount = triangleCount;
+            LR_CORE_INFO("Loaded {} triangles from mesh: {}", triangleMesh.size(), filepath);
 
-            return meshComponent;
+            return triangleMesh;
         }
     }
 }

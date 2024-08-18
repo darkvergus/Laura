@@ -1,7 +1,8 @@
+#include "lrpch.h"
+
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "lrpch.h"
 
 namespace Laura {
 
