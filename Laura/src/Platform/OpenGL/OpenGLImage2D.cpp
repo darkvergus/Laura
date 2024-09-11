@@ -5,7 +5,7 @@ namespace Laura
 {
 
 	OpenGLImage2D::OpenGLImage2D(unsigned char* data, int width, int height, int imageUnit, Image2DType imageType)
-		: m_ImageUnit(imageUnit), m_ID(0)
+		: m_ImageUnit(imageUnit), m_ID(0), m_Dimensions(width, height)
 	{
 
 		if (width <= 0 || height <= 0)

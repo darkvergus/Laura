@@ -3,6 +3,7 @@
 #include "lrpch.h"
 #include <gl/glew.h>
 #include "renderer/IImage2D.h"
+#include "glm/glm.hpp"
 
 namespace Laura 
 {
@@ -13,9 +14,11 @@ namespace Laura
 		virtual ~OpenGLImage2D() override;
 		virtual void ChangeImageUnit(int imageUnit) override;
 		inline virtual int GetID() const override { return m_ID; }
+		inline virtual glm::ivec2 GetDimensions() const override { return m_Dimensions; }
 	private:
 		unsigned int m_ID;
 		int m_ImageUnit;
 		GLenum m_Image2DType;
+		glm::ivec2 m_Dimensions;
 	};
 }

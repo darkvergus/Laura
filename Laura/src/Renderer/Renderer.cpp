@@ -17,7 +17,7 @@ namespace Laura
 	{
 		m_Camera = camera;
 
-		m_ViewportTexture = IImage2D::Create(nullptr, m_ViewportDims.x, m_ViewportDims.y, 0, Image2DType::LR_READ_WRITE);
+		m_FrameTexture = IImage2D::Create(nullptr, m_FrameResolution.x, m_FrameResolution.y, 0, Image2DType::LR_READ_WRITE);
 
 		LoadedTexture tex = TextureLoader::loadTexture(skybox.getTexturePath(), 4);
 		m_SkyboxTexture = ITexture2D::Create(tex.data, tex.width, tex.height, 1);
@@ -69,10 +69,10 @@ namespace Laura
 		m_RenderSettingsUBO->Unbind();
 	}
 
-	void Renderer::UpdateViewport(const glm::vec2& ViewportDims)
+	void Renderer::SetFrameResolution(const glm::vec2& resolution)
 	{
-		m_ViewportDims = ViewportDims;
-		m_ViewportTexture = IImage2D::Create(nullptr, m_ViewportDims.x, m_ViewportDims.y, 0, Image2DType::LR_READ_WRITE);
+		m_FrameResolution = resolution;
+		m_FrameTexture = IImage2D::Create(nullptr, m_FrameResolution.x, m_FrameResolution.y, 0, Image2DType::LR_READ_WRITE);
 	}
 
 	void Renderer::Submit(const MeshComponent& meshComponent, const TransformComponent& transformComponent, const MaterialComponent& materialComponent)
@@ -115,13 +115,12 @@ namespace Laura
 	{
 		UpdateCameraUBO();
 		m_Shader->Bind();
-		std::cout << m_ViewportDims.x << " " << m_ViewportDims.y << std::endl;
-		m_Shader->setWorkGroupSizes(glm::uvec3(ceil(m_ViewportDims.x / 8),
-			                                   ceil(m_ViewportDims.y / 4),
+		m_Shader->setWorkGroupSizes(glm::uvec3(ceil(m_FrameResolution.x / 8),
+			                                   ceil(m_FrameResolution.y / 4),
 			                                   1));
 		m_Shader->Dispatch();
 
-		return m_ViewportTexture;
+		return m_FrameTexture;
 	}
 
 	void Renderer::EndScene()

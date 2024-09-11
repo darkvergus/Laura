@@ -4,6 +4,7 @@
 #include "EditorState.h"
 
 /// --- PANELS --- ///
+#include "EditorUI/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel.h"
 #include "EditorUI/InspectorPanel.h"
 
@@ -35,7 +36,7 @@ namespace Laura
 		// UI panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		InspectorPanel m_InspectorPanel;
-
+		ViewportPanel m_ViewportPanel;
 	};
 
 }

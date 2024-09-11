@@ -47,7 +47,7 @@ namespace Laura {
 		void UpdateRenderSettingsUBO();
 		RenderSettings renderSettings;
 		
-		void UpdateViewport(const glm::vec2& ViewportDims);
+		void SetFrameResolution(const glm::vec2& resolution);
 
 		// submit mesh has 3 roles
 		// 1. save the mesh data to some kind of data sturcture
@@ -80,12 +80,12 @@ namespace Laura {
 		void EndScene();
 
 	private:
-		glm::vec2 m_ViewportDims;
+		glm::vec2 m_FrameResolution;
 
 		std::shared_ptr<IComputeShader> m_Shader;
 
 		std::shared_ptr<ITexture2D> m_SkyboxTexture;
-		std::shared_ptr<IImage2D> m_ViewportTexture;
+		std::shared_ptr<IImage2D> m_FrameTexture;
 
 		std::shared_ptr<IUniformBuffer> m_CameraUBO, m_RenderSettingsUBO, m_EnvironmentUBO;
 		std::shared_ptr<IShaderStorageBuffer> m_TriangleMeshSSBO, m_BVHSSBO;

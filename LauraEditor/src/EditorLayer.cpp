@@ -61,9 +61,9 @@ namespace Laura
 		// These values represent the actual number of pixels that the renderer will process to produce the final image.
 		// Note: These dimensions are different from the size or aspect ratio of the ImGui viewport window in the editor.
 		// The camera's aspect ratio only stretches the image to fit the viewport window correctly
-		#define FRAME_WIDTH 1280.0f
-		#define FRAME_HEIGHT 720.0f
-		m_Renderer->UpdateViewport(glm::vec2(FRAME_WIDTH, FRAME_HEIGHT));
+		#define FRAME_WIDTH 300.0f
+		#define FRAME_HEIGHT 150.0f
+		m_Renderer->SetFrameResolution(glm::vec2(FRAME_WIDTH, FRAME_HEIGHT));
 
 		/// ------------- SCRIPTING -------------- ///
 
@@ -116,78 +116,44 @@ namespace Laura
 		m_Scene->OnUpdate();
 	}
 
-
+	// main rendering function called every frame
 	void EditorLayer::onImGuiRender()
 	{
 		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
 
 		m_SceneHierarchyPanel.OnImGuiRender(m_Scene, m_EditorState);
 		m_InspectorPanel.OnImGuiRender(m_Scene, m_EditorState);
+		
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				ImGui::MenuItem("New", "Ctrl+N");
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Edit"))
+			{
+				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+				ImGui::Separator();
+				if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+				if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMainMenuBar();
+		}
 
 		bool showDemoWindow = false;
 		ImGui::ShowDemoWindow(&showDemoWindow);
 
-		m_Renderer->renderSettings.accumulateFrames = true;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse);
-
-		glm::ivec2 viewportDims = glm::vec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
-		if (viewportDims != prevViewportWindowSize)
-		{
-			prevViewportWindowSize = viewportDims;
-
-			float viewportAspect = float(viewportDims.x) / float(viewportDims.y);
-			// check if the parent aspect is smaller or equal to camera aspect (width is the limiting factor so the window will span the entire width)
-			if (viewportAspect <= aspectRatio)
-			{
-				viewportSize.x = viewportDims.x; // width stays the same
-				viewportSize.y = ceil(viewportDims.x / aspectRatio); // calculate the height based on the aspect ratio
-			}
-			// (height is the limiting factor so the window will span the entire height)
-			else if (viewportAspect > aspectRatio)
-			{
-				viewportSize.y = viewportDims.y; // height stays the same
-				viewportSize.x = ceil(viewportDims.y * aspectRatio); // calculate the width based on the aspect ratio
-			}
-
-			topLeftTextureCoords.x = float(viewportDims.x - viewportSize.x) / 2.0f;
-			topLeftTextureCoords.y = float(viewportDims.y - viewportSize.y) / 2.0f;
-			// viewport offset
-			topLeftTextureCoords.x += ImGui::GetWindowPos().x;
-			topLeftTextureCoords.y += ImGui::GetWindowPos().y;
-
-			bottomRightTextureCoords.x = topLeftTextureCoords.x + viewportSize.x;
-			bottomRightTextureCoords.y = topLeftTextureCoords.y + viewportSize.y;
- 
-			m_Renderer->UpdateViewport(glm::vec2(viewportSize.x, viewportSize.y));
-			m_Renderer->renderSettings.accumulateFrames = false;
-			m_Renderer->UpdateRenderSettingsUBO();
-		}
-
-		// check if the viewport window position changed
-		glm::ivec2 viewportWindowPos = glm::ivec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-		if (viewportWindowPos != prevViewportWindowPos)
-		{
-			prevViewportWindowPos = viewportWindowPos;
-
-			topLeftTextureCoords.x = (viewportDims.x - viewportSize.x) / 2.0f;
-			topLeftTextureCoords.y = (viewportDims.y - viewportSize.y) / 2.0f;
-			// viewport offset
-			topLeftTextureCoords.x += viewportWindowPos.x;
-			topLeftTextureCoords.y += viewportWindowPos.y;
-
-			bottomRightTextureCoords.x = topLeftTextureCoords.x + viewportSize.x;
-			bottomRightTextureCoords.y = topLeftTextureCoords.y + viewportSize.y;
-		}
+		//m_Renderer->SetFrameResolution(glm::vec2(viewportSize.x, viewportSize.y));
+		//m_Renderer->renderSettings.accumulateFrames = false;
+		//m_Renderer->UpdateRenderSettingsUBO();
 
 		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
 
-		ImDrawList* drawList = ImGui::GetWindowDrawList();
-		drawList->AddImage((ImTextureID)RenderedFrame->GetID(), topLeftTextureCoords, bottomRightTextureCoords, { 0, 1 }, { 1, 0 });
-
-		ImGui::PopStyleVar();
-		ImGui::End();
+		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);
 	}
 
 	void EditorLayer::onDetach()

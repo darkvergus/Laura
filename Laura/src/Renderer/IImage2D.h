@@ -18,5 +18,6 @@ namespace Laura {
 		virtual ~IImage2D() {}
 		virtual void ChangeImageUnit(int imageUnit) = 0;
 		virtual int GetID() const = 0;
+		virtual glm::ivec2 GetDimensions() const = 0;
 	};
 }
