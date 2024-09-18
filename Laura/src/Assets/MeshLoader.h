@@ -8,6 +8,6 @@ namespace Laura
     namespace MeshLoader
     {
         // Loads a 3D mesh from various filetypes .obj .glb .gltf ...
-        std::vector<Triangle> loadMesh(const std::string& filepath);
+        std::shared_ptr<std::vector<Triangle>> loadMesh(const std::string& filepath);
     }
 }

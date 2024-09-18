@@ -13,6 +13,8 @@
 #include "Renderer/IUniformBuffer.h"
 #include "Renderer/IShaderStorageBuffer.h"
 
+#include "Assets/TextureLoader.h" // LoadedTexture struct
+
 namespace Laura {
 
 
@@ -40,7 +42,7 @@ namespace Laura {
 		// 3. load the rendererSettings information to a UBO with a binding point 2
 		// 4. load the default shader
 		// 5. load the default texture
-		void BeginScene(const Entity& camera, const Skybox& skybox);
+		void BeginScene(const Entity& camera, std::shared_ptr<LoadedTexture> skyboxTexture);
 
 		void UpdateCameraUBO();
 		void UpdateSkyboxUBO(const Skybox& skybox);
@@ -55,7 +57,7 @@ namespace Laura {
 		// 3. if the transform has changed set flag genTopLevelBVH = true/false
 		// (not gonna be called every frame, only when the mesh is added)
 
-		void Submit(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material);
+		void Submit(std::shared_ptr<std::vector<Triangle>> mesh, const TransformComponent& transform, const MaterialComponent& material);
 		// removes the mesh from the data structure and subsequently sets the genTLBVH=true
 		// (also not gonna be called every frame, only when the mesh is removed)
 		//void RemoveMesh(uint32_t meshID);

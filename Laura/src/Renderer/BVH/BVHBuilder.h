@@ -156,7 +156,7 @@ namespace Laura
             * @param heuristic The heuristic to use for partitioning the BVH nodes.
             * @return A BVH_data structure containing the data of the constructed BVH.
             */
-        BVH::BVH_data construct(const MeshComponent& meshComponent, const Heuristic heuristic);
+        BVH::BVH_data construct(std::shared_ptr<std::vector<Triangle>> mesh, const Heuristic heuristic);
 
         unsigned int getBVHTreeDepth(const std::vector<Node>& BVH, BVH::Node current_node, unsigned int height);
     }

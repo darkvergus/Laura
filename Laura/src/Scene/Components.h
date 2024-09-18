@@ -1,6 +1,9 @@
 #pragma once
 #include "glm/glm.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #include "Geometry/Triangle.h" // for mesh component
 #include "Renderer/Material.h" // for material component
@@ -10,35 +13,42 @@ namespace Laura
 
 	struct TransformComponent
 	{
-		TransformComponent() = default;
-		TransformComponent(const glm::mat4& transform)
-			: Transform(transform) {}
+	public:
+		TransformComponent();
+		operator glm::mat4() const;
 
-		glm::mat4 Transform{ 1.0f };
+		inline const glm::vec3& GetRotation() { return glm::degrees(m_Rotation); }
+		inline const glm::vec3& GetTranslation() { return m_Translation; }
+		inline const glm::vec3& GetScale() { return m_Scale; }
+
+		// Returns the 4x4 Local to World Matrix
+		glm::mat4 GetMatrix() const;
+
+		void SetRotation(const glm::vec3& angles);
+		void SetTranslation(const glm::vec3& translation);
+		void SetScale(const glm::vec3& scale);
+
+		void IncrementRotation(const glm::vec3& delta);
+		void IncrementTranslation(const glm::vec3& delta);
+		void IncrementScale(const glm::vec3& delta);
+
+	private:
+		mutable bool m_MatrixDirty;
+		mutable glm::mat4 m_ModelMatrix;
+
+		glm::vec3 m_Rotation;
+		glm::vec3 m_Translation;
+		glm::vec3 m_Scale;
 	};
-
-	namespace TransformHandler
-	{
-		// DOES NOT return a reference use TransformHandler::SetRotation() to set the rotation
-		glm::vec3 GetRotation(TransformComponent& transform);
-		// DOES NOT return a reference use TransformHandler::SetTranslation() to set the translation
-		glm::vec3 GetTranslation(TransformComponent& transform);
-		// DOES NOT return a reference use TransformHandler::SetScale() to set the scale
-		glm::vec3 GetScale(TransformComponent& transform);
-
-		void SetRotation(TransformComponent& transform, glm::vec3& angles);
-		void SetTranslation(TransformComponent& transform, const glm::vec3& translation);
-		void SetScale(TransformComponent& transform, const glm::vec3& scale);
-	}
-
 
 	struct MeshComponent
 	{
+	public:
 		MeshComponent() = default;
-		MeshComponent(const std::vector<Triangle>& mesh)
-			: mesh(mesh) {}
-
-		std::vector<Triangle> mesh;
+		inline uint32_t GetID() { return m_ID; }
+		inline void SetID(uint32_t id) { m_ID = id; }
+	private:
+		uint32_t m_ID;
 	};
 
 	struct MaterialComponent
@@ -56,12 +66,11 @@ namespace Laura
 	struct CameraComponent
 	{
 		CameraComponent() = default;
-		CameraComponent(float fov, float aspectRatio)
-			: fov(fov), aspectRatio(aspectRatio) {};
+		CameraComponent(float fov)
+			: fov(fov) {};
 		
 		bool isMain{ false };
 		float fov{ 90.0f };
-		float aspectRatio{ 16.0f/9.0f };
 		// since we transform the size of the screen in the compute shader to "normalized device coordinates" or NDC for short (-1, 1) 
 		// half of the screen width is 1. Therefore (screen width / 2) / tan(FOV in radians / 2) can be simplified to 1 / tan(FOV_rad / 2)
 		inline const float& GetFocalLength() const { return 1.0f/tan(glm::radians(fov)/2.0f); };

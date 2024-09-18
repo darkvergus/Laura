@@ -27,6 +27,8 @@ namespace Laura {
 
 		_ImGuiContextManager = std::make_shared<ImGuiContextManager>(_Window);
 		_ImGuiContextManager->Init();
+
+		_AssetManager = std::make_shared<AssetManager>();
 	}
 
 	void Application::run()

@@ -4,8 +4,8 @@
 namespace Laura
 {
 
-	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer)
-		: m_Renderer(renderer)
+	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<AssetManager> assetManager)
+		: m_Renderer(renderer), m_AssetManager(assetManager)
 	{
 		setLayerName("EditorLayer");
 		m_EditorState = new EditorState();
@@ -15,10 +15,12 @@ namespace Laura
 	{
 		m_Scene = std::make_shared<Scene>(); // Call the default constructor of the Scene class
 		// Setting up the Skybox
-		m_Scene->skybox.changeType(SkyboxType::SKYBOX_TEXTURE);
-		std::string texturePath = EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr";
-		m_Scene->skybox.setTexturePath(texturePath);
-
+		
+		// TODO make the api for the texture channels more user friendly and less error prone
+		// currently there is no way to catch these errors and they lead to hard to debug crashes
+		uint32_t skyboxTextureID = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
+		m_Scene->skybox = std::make_shared<Skybox>(skyboxTextureID);
+		
 
 		// Adding a CAMERA to the scene
 		Entity camera = m_Scene->CreateEntity();
@@ -27,7 +29,7 @@ namespace Laura
 			tag = std::string("Camera");
 		}
 		TransformComponent& cameraTransform = camera.AddComponent<TransformComponent>();
-		TransformHandler::SetTranslation(cameraTransform, { 0.0f, 40.0f, -200.0f });
+		cameraTransform.SetTranslation({ 0.0f, 40.0f, -200.0f });
 		CameraComponent cameraComponent = camera.AddComponent<CameraComponent>();
 		// Using the default values for the camera component
 		cameraComponent.fov = 30.0f;
@@ -37,18 +39,19 @@ namespace Laura
 		// Adding a 3D MODEL to the scene
 		Entity dragon = m_Scene->CreateEntity();
 		{
+			
 			std::string& tag = dragon.GetComponent<TagComponent>().Tag;
 			tag = std::string("Dragon");
+
+			MeshComponent& dragonMesh = dragon.AddComponent<MeshComponent>();
+			TransformComponent& dragonTransform = dragon.AddComponent<TransformComponent>();
+			MaterialComponent& dragonMaterial = dragon.AddComponent<MaterialComponent>();
+
+			uint32_t ID = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb"));
+			//uint32_t ID = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
+			//uint32_t ID = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
+			dragonMesh.SetID(ID);
 		}
-		MeshComponent& dragonMesh			= dragon.AddComponent<MeshComponent>();
-		TransformComponent& dragonTransform	= dragon.AddComponent<TransformComponent>();
-		MaterialComponent& dragonMaterial	= dragon.AddComponent<MaterialComponent>();
-		//TransformHandler::Translate(dragonTransform, { 0.0f, 0.0f, 0.0f });
-
-		dragonMesh.mesh = MeshLoader::loadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb"));
-		//dragonMesh.mesh = MeshLoader::loadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
-		//dragonMesh.mesh = MeshLoader::loadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
-
 		m_Renderer->renderSettings.raysPerPixel = 1;
 		m_Renderer->renderSettings.bouncesPerRay = 5;
 		m_Renderer->renderSettings.maxAABBIntersections = 10000;
@@ -63,7 +66,6 @@ namespace Laura
 		m_Renderer->SetFrameResolution(glm::vec2(FRAME_WIDTH, FRAME_HEIGHT));
 
 		/// ------------- SCRIPTING -------------- ///
-
 		// Test SCRIPT (will be in its own file in the future)
 		class TestScript : public Script
 		{
@@ -91,17 +93,17 @@ namespace Laura
 		}
 		testEntity.AddComponent<ScriptComponent>(new TestScript());
 		//m_Scene.DestroyEntity(testEntity); // testing the script's OnDestroy() function
-
 		/// ---------------------------------------- ///
 
 		m_Scene->OnStart();
 
 		// setting up the renderer
-		m_Renderer->BeginScene(camera, m_Scene->skybox);
+		std::shared_ptr<LoadedTexture> texture = m_AssetManager->GetTexture(skyboxTextureID);
+		m_Renderer->BeginScene(camera, texture);
 		MeshComponent dragon_mesh = dragon.GetComponent<MeshComponent>();
 		TransformComponent dragon_transform = dragon.GetComponent<TransformComponent>();
 		MaterialComponent dragon_material = dragon.GetComponent<MaterialComponent>();
-		m_Renderer->Submit(dragon_mesh, dragon_transform, dragon_material);
+		m_Renderer->Submit(m_AssetManager->GetMesh(dragon_mesh.GetID()), dragon_transform, dragon_material);
 	}
 
 	void EditorLayer::onEvent(Event* event)

@@ -26,5 +26,6 @@
 #include "Scene/Skybox.h" 
 //// ---------------- ////
 
+#include "Assets/AssetManager.h"
 #include "Assets/MeshLoader.h"
 #include "Assets/TextureLoader.h"

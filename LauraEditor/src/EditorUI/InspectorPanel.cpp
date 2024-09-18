@@ -1,4 +1,5 @@
 #include "EditorUI/InspectorPanel.h"
+#include <IconsFontAwesome6.h>
 
 namespace Laura
 {
@@ -27,10 +28,20 @@ namespace Laura
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			strcpy(buffer, tag.c_str());
-			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
+			if (ImGui::InputText("Tag Component", buffer, sizeof(buffer)))
 			{
 				tag = std::string(buffer);
 			}
+		}
+
+		/// CAMERA COMPOENENT UI //////////////////////////////////////////////////////////////
+		bool isCamera = entity.HasComponent<CameraComponent>();
+		if (isCamera)
+		{
+			ImGui::SeparatorText("Camera Component");
+			CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
+			ImGui::Checkbox("Main", &cameraComponent.isMain);
+			ImGui::DragFloat("FOV", &cameraComponent.fov, 0.1f, 10.0f, 130.0f, "%.1f");
 		}
 
 		/// TRANSFORM COMPONENT UI ////////////////////////////////////////////////////////////
@@ -38,76 +49,63 @@ namespace Laura
 		if (entity.HasComponent<TransformComponent>())
 		{
 			TransformComponent& transformComponent = entity.GetComponent<TransformComponent>();
-			glm::vec3 position = TransformHandler::GetTranslation(transformComponent);
-			glm::vec3 rotation = TransformHandler::GetRotation(transformComponent);
-			glm::vec3 scale = TransformHandler::GetScale(transformComponent);
 
-			ImGui::SeparatorText("Transform");
+			glm::vec3 position = transformComponent.GetTranslation();
+			glm::vec3 rotation = transformComponent.GetRotation();
+			glm::vec3 scale = transformComponent.GetScale();
+
+			ImGui::SeparatorText("Transform Component");
 
 			ImGui::Text("Position");
 			float sliders_width = 200;
 			ImGui::PushItemWidth(sliders_width / 3.0f);
 			ImGui::PushID("Position");
-			/// POSITION X ///
-			static bool updatePosition = false;
-			if (ImGui::DragFloat("X", &position.x, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updatePosition = true; }
+			
+			if (ImGui::DragFloat("X", &position.x, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetTranslation(position); }
 			ImGui::SameLine(0, 10);
-			/// POSITION Y ///
-			if (ImGui::DragFloat("Y", &position.y, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updatePosition = true; }
+			if (ImGui::DragFloat("Y", &position.y, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetTranslation(position); }
 			ImGui::SameLine(0, 10);
-			/// POSITION Z ///
-			if (ImGui::DragFloat("Z", &position.z, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updatePosition = true; }
+			if (ImGui::DragFloat("Z", &position.z, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetTranslation(position); }
+			
 			ImGui::PopItemWidth();
 			ImGui::PopID();
-			if (updatePosition)
-			{
-				TransformHandler::SetTranslation(transformComponent, position);
-				updatePosition = false;
-			}
 
 			ImGui::Text("Rotation");
 			ImGui::PushItemWidth(sliders_width / 3.0f);
-			static bool updateRotation = false;
 			ImGui::PushID("Rotation");
-			/// ROTATION X ///
-			if (ImGui::DragFloat("X", &rotation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updateRotation = true; }
-			ImGui::SameLine(0, 10);
-			/// ROTATION Y ///
-			if (ImGui::DragFloat("Y", &rotation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updateRotation = true; }
-			ImGui::SameLine(0, 10);
-			/// ROTATION Z ///
-			if (ImGui::DragFloat("Z", &rotation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updateRotation = true; }
-			ImGui::PopItemWidth();
-			ImGui::PopID();
-			if (updateRotation)
-			{
-				TransformHandler::SetRotation(transformComponent, rotation);
-				updateRotation = false;
-			}
 			
+			if (ImGui::DragFloat("X", &rotation.x, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetRotation(rotation); }
+			ImGui::SameLine(0, 10);
+			if (ImGui::DragFloat("Y", &rotation.y, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetRotation(rotation); }
+			ImGui::SameLine(0, 10);
+			if (ImGui::DragFloat("Z", &rotation.z, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetRotation(rotation); }
+			
+			ImGui::PopItemWidth();
+			ImGui::PopID();			
 
 			ImGui::Text("Scale");
 			ImGui::PushItemWidth(sliders_width / 3.0f);
-			static bool updateScale = false;
 			ImGui::PushID("Scale");
-			/// SCALE X ///
-			if( ImGui::DragFloat("X", &scale.x, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updateScale = true; }
+
+			if (isCamera){ ImGui::BeginDisabled(); }
+			if (ImGui::DragFloat("X", &scale.x, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetScale(scale); }
 			ImGui::SameLine(0, 10);
-			/// SCALE Y ///
-			if (ImGui::DragFloat("Y", &scale.y, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updateScale = true; }
+			if (ImGui::DragFloat("Y", &scale.y, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetScale(scale); }
 			ImGui::SameLine(0, 10);
-			/// SCALE Z ///
-			if (ImGui::DragFloat("Z", &scale.z, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { updateScale = true; }
+			if (ImGui::DragFloat("Z", &scale.z, 0.05f, -FLT_MAX, FLT_MAX, "%.3f")) { transformComponent.SetScale(scale); }
+			if (isCamera){ ImGui::EndDisabled(); }
 			ImGui::PopItemWidth();
 			ImGui::PopID();
-			if (updateScale)
-			{
-				TransformHandler::SetScale(transformComponent, scale);
-				updateScale = false;
-			}
 		}
 
-		/// CAMERA COMPONENT UI ////////////////////////////////////////////////////////////////
+		/// MESH COMPONENT UI /////////////////////////////////////////////////////////////////
+		if (entity.HasComponent<MeshComponent>())
+		{
+			MeshComponent& meshComponent = entity.GetComponent<MeshComponent>();
+			ImGui::SeparatorText("Mesh Component");		
+		}
+
+		/// MATERIAL COMPONENT UI /////////////////////////////////////////////////////////////
 
 
         ImGui::End();

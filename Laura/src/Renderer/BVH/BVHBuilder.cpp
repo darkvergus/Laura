@@ -321,9 +321,9 @@ namespace Laura {
         return output;
     }
 
-    BVH::BVH_data BVH::construct(const MeshComponent& meshComponent, const Heuristic heuristic) {
+    BVH::BVH_data BVH::construct(std::shared_ptr<std::vector<Triangle>> mesh, const Heuristic heuristic) {
 
-        std::vector<Triangle> triangles = meshComponent.mesh;
+        std::vector<Triangle> triangles = *mesh;
         uint32_t triangleCount = triangles.size();
 
         std::vector<unsigned int> triangle_indices;

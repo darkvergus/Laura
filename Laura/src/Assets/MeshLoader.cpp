@@ -10,7 +10,7 @@ namespace Laura
 {
     namespace MeshLoader
     {
-        std::vector<Triangle> loadMesh(const std::string& filepath)
+        std::shared_ptr<std::vector<Triangle>> loadMesh(const std::string& filepath)
         {
             bool hasNonTriangleFaces = false;
             std::vector<Triangle> triangleMesh;
@@ -21,7 +21,7 @@ namespace Laura
 
             if (!scene) {
                 LR_CORE_CRITICAL("Failed to load mesh: {}", filepath);
-                return std::vector<Triangle>(); // Return empty mesh
+                return nullptr; // Return empty mesh
             }
 
             for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
@@ -87,7 +87,7 @@ namespace Laura
 
             LR_CORE_INFO("Loaded {} triangles from mesh: {}", triangleMesh.size(), filepath);
 
-            return triangleMesh;
+            return std::make_shared<std::vector<Triangle>>(triangleMesh);
         }
     }
 }

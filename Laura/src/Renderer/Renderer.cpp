@@ -13,15 +13,14 @@ namespace Laura
 	{
 	}
 
-	void Renderer::BeginScene(const Entity& camera, const Skybox& skybox)
+	void Renderer::BeginScene(const Entity& camera, std::shared_ptr<LoadedTexture> skyboxTexture)
 	{
 		m_Camera = camera;
 
 		m_FrameTexture = IImage2D::Create(nullptr, m_FrameResolution.x, m_FrameResolution.y, 0, Image2DType::LR_READ_WRITE);
 
-		LoadedTexture tex = TextureLoader::loadTexture(skybox.getTexturePath(), 4);
-		m_SkyboxTexture = ITexture2D::Create(tex.data, tex.width, tex.height, 1);
-		TextureLoader::freeTexture(tex);
+		m_SkyboxTexture = ITexture2D::Create(skyboxTexture->data, skyboxTexture->width, skyboxTexture->height, 1);
+		
 
 		m_CameraUBO = IUniformBuffer::Create(80, 0, BufferUsageType::DYNAMIC_DRAW);
 		m_EnvironmentUBO = IUniformBuffer::Create(64, 1, BufferUsageType::DYNAMIC_DRAW);
@@ -32,30 +31,30 @@ namespace Laura
 		m_Shader->Bind();
 
 		UpdateCameraUBO();
-		UpdateSkyboxUBO(skybox);
+		//UpdateSkyboxUBO(skybox); // TODO: FOR now only supports a texture skybox
 		UpdateRenderSettingsUBO();
 	}
 
 	void Renderer::UpdateCameraUBO()
 	{
 		m_CameraUBO->Bind();
-		glm::mat4 transform = m_Camera.GetComponent<TransformComponent>().Transform;
+		glm::mat4 transform = m_Camera.GetComponent<TransformComponent>();
 		float focalLength = m_Camera.GetComponent<CameraComponent>().GetFocalLength();
 		m_CameraUBO->AddData(0, sizeof(glm::mat4), &transform);
 		m_CameraUBO->AddData(64, sizeof(float), &focalLength);
 		m_CameraUBO->Unbind();
 	}
 
-	void Renderer::UpdateSkyboxUBO(const Skybox& skybox)
-	{
-		m_EnvironmentUBO->Bind();
-		m_EnvironmentUBO->AddData(0, sizeof(glm::vec3), &skybox.getGroundColor());
-		m_EnvironmentUBO->AddData(16, sizeof(glm::vec3), &skybox.getHorizonColor());
-		m_EnvironmentUBO->AddData(32, sizeof(glm::vec3), &skybox.getZenithColor());
-		bool useGradient = (skybox.getType() == SkyboxType::SKYBOX_GRADIENT) ? true : false;
-		m_EnvironmentUBO->AddData(48, sizeof(bool), &useGradient);
-		m_EnvironmentUBO->Unbind();
-	}
+	//void Renderer::UpdateSkyboxUBO(const Skybox& skybox)
+	//{
+	//	m_EnvironmentUBO->Bind();
+	//	m_EnvironmentUBO->AddData(0, sizeof(glm::vec3), &skybox.getGroundColor());
+	//	m_EnvironmentUBO->AddData(16, sizeof(glm::vec3), &skybox.getHorizonColor());
+	//	m_EnvironmentUBO->AddData(32, sizeof(glm::vec3), &skybox.getZenithColor());
+	//	bool useGradient = (skybox.getType() == SkyboxType::SKYBOX_GRADIENT) ? true : false;
+	//	m_EnvironmentUBO->AddData(48, sizeof(bool), &useGradient);
+	//	m_EnvironmentUBO->Unbind();
+	//}
 
 	void Renderer::UpdateRenderSettingsUBO()
 	{
@@ -75,10 +74,10 @@ namespace Laura
 		m_FrameTexture = IImage2D::Create(nullptr, m_FrameResolution.x, m_FrameResolution.y, 0, Image2DType::LR_READ_WRITE);
 	}
 
-	void Renderer::Submit(const MeshComponent& meshComponent, const TransformComponent& transformComponent, const MaterialComponent& materialComponent)
+	void Renderer::Submit(std::shared_ptr<std::vector<Triangle>> mesh, const TransformComponent& transformComponent, const MaterialComponent& materialComponent)
 	{
 		// TODO: make the renderer utilize the transform and material components (currently only using the mesh component)
-		BVH::BVH_data meshBVH = BVH::construct(meshComponent.mesh, BVH::Heuristic::SURFACE_AREA_HEURISTIC_BUCKETS);
+		BVH::BVH_data meshBVH = BVH::construct(mesh, BVH::Heuristic::SURFACE_AREA_HEURISTIC_BUCKETS);
 
 		m_TriangleMeshSSBO = IShaderStorageBuffer::Create(sizeof(Triangle) * meshBVH.TRIANGLES_size, 3, BufferUsageType::STATIC_DRAW);
 		m_TriangleMeshSSBO->Bind();

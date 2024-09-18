@@ -1,64 +1,70 @@
 #include "Components.h"
 
-
 namespace Laura 
 {
-	namespace TransformHandler
+	/// TRANSFORM COMPOENENT ///////////////////////////////////////////////////////////////////
+
+	TransformComponent::TransformComponent()
+		: m_Rotation(0.0f), 
+		  m_Translation(0.0f), 
+		  m_Scale(1.0f), 
+		  m_ModelMatrix(1.0),
+		  m_MatrixDirty(true)
 	{
-		glm::vec3 GetTranslation(TransformComponent& transform)
-		{
-			return glm::vec3(transform.Transform[3]);
-		}
-
-		glm::vec3 GetScale(TransformComponent& transform)
-		{
-			glm::vec3 scale;
-			scale.x = glm::length(glm::vec3(transform.Transform[0])); // Length of the X axis
-			scale.y = glm::length(glm::vec3(transform.Transform[1])); // Length of the Y axis
-			scale.z = glm::length(glm::vec3(transform.Transform[2])); // Length of the Z axis
-			return scale;
-		}
-
-		glm::vec3 GetRotation(TransformComponent& transform)
-		{
-			glm::vec3 scale = GetScale(transform);
-
-			// Normalize the matrix columns to remove the scale component
-			glm::mat4 rotationMatrix = transform.Transform;
-
-			rotationMatrix[0] /= scale.x;
-			rotationMatrix[1] /= scale.y;
-			rotationMatrix[2] /= scale.z;
-
-			// Extract the Euler angles from the rotation matrix
-			glm::vec3 rotation;
-			rotation.x = atan2(rotationMatrix[1][2], rotationMatrix[2][2]);
-			rotation.y = atan2(-rotationMatrix[0][2], glm::sqrt(rotationMatrix[1][2] * rotationMatrix[1][2] + rotationMatrix[2][2] * rotationMatrix[2][2]));
-			rotation.z = atan2(rotationMatrix[0][1], rotationMatrix[0][0]);
-
-			return glm::degrees(rotation); // Convert to degrees if necessary
-		}
-
-		void SetRotation(TransformComponent& transform, glm::vec3& angles)
-		{
-			glm::mat4 rotation{1.0f};
-			
-			rotation = glm::rotate(rotation, glm::radians(angles.x), glm::vec3(1.0f, 0.0f, 0.0f));
-			rotation = glm::rotate(rotation, glm::radians(angles.y), glm::vec3(0.0f, 1.0f, 0.0f));
-			rotation = glm::rotate(rotation, glm::radians(angles.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			transform.Transform = rotation;
-		}
-
-		void SetTranslation(TransformComponent& transform, const glm::vec3& translation)
-		{
-			transform.Transform = glm::translate(glm::mat4(1.0f), translation);
-		}
-
-		void SetScale(TransformComponent& transform, const glm::vec3& scale)
-		{
-			transform = glm::scale(glm::mat4(1.0f), scale);
-		}
 	}
 
+	TransformComponent::operator glm::mat4() const
+	{
+		return GetMatrix();
+	}
+
+	glm::mat4 TransformComponent::GetMatrix() const
+	{
+		if (m_MatrixDirty)
+		{
+			glm::mat4 transMatrix = glm::translate(glm::mat4(1.0f), m_Translation);
+			glm::mat4 rotMatrix = glm::eulerAngleXYZ(m_Rotation.x, m_Rotation.y, m_Rotation.z);
+			glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), m_Scale);
+			m_ModelMatrix = transMatrix * rotMatrix * scaleMatrix;
+			m_MatrixDirty = false;
+		}
+		return m_ModelMatrix;
+	}
+
+	void TransformComponent::SetRotation(const glm::vec3& euler)
+	{
+		m_Rotation = glm::radians(euler);
+		m_MatrixDirty = true;
+	}
+
+	void TransformComponent::SetTranslation(const glm::vec3& translation)
+	{
+		m_Translation = translation;
+		m_MatrixDirty = true;
+	}
+
+	void TransformComponent::SetScale(const glm::vec3& scale)
+	{
+		m_Scale = scale;
+		m_MatrixDirty = true;
+	}
+
+	void TransformComponent::IncrementRotation(const glm::vec3& delta)
+	{
+		m_Rotation += glm::radians(delta);
+		m_MatrixDirty = true;
+	}
+
+	void TransformComponent::IncrementTranslation(const glm::vec3& delta)
+	{
+		m_Translation += delta;
+		m_MatrixDirty = true;
+	}
+
+	void TransformComponent::IncrementScale(const glm::vec3& delta)
+	{
+		m_Scale += delta;
+		m_MatrixDirty = true;
+	}
+	/////////////////////////////////////////////////////////////////////////////////////////////
 }
