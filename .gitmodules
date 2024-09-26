@@ -7,3 +7,6 @@
 [submodule "Laura/Thirdparty/assimp"]
 	path = Laura/Thirdparty/assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "Laura/Thirdparty/yaml-cpp"]
+	path = Laura/Thirdparty/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

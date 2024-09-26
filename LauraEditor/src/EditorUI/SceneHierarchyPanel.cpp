@@ -1,11 +1,12 @@
 #include "EditorUI/SceneHierarchyPanel.h"
+#include <IconsFontAwesome6.h>
 
 namespace Laura
 {
 
-    void SceneHierarchyPanel::OnImGuiRender(std::shared_ptr<Scene> scene, EditorState* editorState)
+    void SceneHierarchyPanel::OnImGuiRender(std::shared_ptr<Scene> scene, std::shared_ptr<EditorState> editorState)
     {
-        ImGui::Begin("Scene Hierarchy");
+        ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
 
         if (ImGui::BeginMenu("Add"))
         {
@@ -36,7 +37,9 @@ namespace Laura
                 std::string& tag = entity.GetComponent<TagComponent>().Tag;
                 
                 // flags applied to every TreeNode
-                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow 
+                                           | ImGuiTreeNodeFlags_OpenOnDoubleClick
+                                           | ImGuiTreeNodeFlags_SpanAvailWidth;
                 
                 // if the entity is selected, highlight it
                 if (entityID == editorState->selectedEntity)

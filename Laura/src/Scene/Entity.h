@@ -12,7 +12,7 @@ namespace Laura
 		~Entity();
 
 		template<typename T, typename... Args>
-		T& AddComponent(Args&&... args)
+		T& AddComponent(Args&&... args) const
 		{
 			return m_Registry->emplace<T>(m_EntityID, std::forward<Args>(args)...);
 		}
@@ -30,7 +30,7 @@ namespace Laura
 		}
 
 		template<typename T>
-		void RemoveComponent()
+		void RemoveComponent() const
 		{
 			m_Registry->remove<T>(m_EntityID);
 		}

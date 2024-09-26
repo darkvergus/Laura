@@ -10,6 +10,6 @@ namespace Laura
 		SceneHierarchyPanel() = default;
 		~SceneHierarchyPanel() = default;
 
-		void OnImGuiRender(std::shared_ptr<Scene> scene, EditorState* editorState);
+		void OnImGuiRender(std::shared_ptr<Scene> scene, std::shared_ptr<EditorState> editorState);
 	};
 }

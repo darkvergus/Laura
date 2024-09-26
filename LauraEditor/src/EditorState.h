@@ -10,12 +10,19 @@ namespace Laura
 		CENTERED
 	};
 
-	// Default values for the editor state
+	// Default values for the editor when first opened
+	// (the editor state will be serialized and saved)
 	struct EditorState
 	{
 		entt::entity selectedEntity = entt::null;
+		bool doubleConfirmDelete = true;
+		
 		/// VIEWPORT ///
 		bool ViewportSettingsPanelOpen = false;
 		ViewportMode viewportMode = ViewportMode::FIT_TO_VIEWPORT;
+		
+		/// THEMES ///
+		bool ThemeSettingsPanelOpen = false;
+		std::string ActiveThemeFilePath = "";
 	};
 }

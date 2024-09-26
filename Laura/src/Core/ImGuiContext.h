@@ -5,11 +5,11 @@
 
 namespace Laura {
 
-	class ImGuiContextManager
+	class ImGuiContext
 	{
 	public:
-		ImGuiContextManager(std::shared_ptr<IWindow> window);
-		virtual ~ImGuiContextManager();
+		ImGuiContext(std::shared_ptr<IWindow> window);
+		virtual ~ImGuiContext();
 
 		void Init();
 		void BeginFrame();
@@ -17,6 +17,8 @@ namespace Laura {
 
 	private:
 		std::shared_ptr<IWindow> m_Window;
+
+		void SetLauraDarkTheme();
 	};
 
 }

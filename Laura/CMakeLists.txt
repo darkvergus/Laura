@@ -27,6 +27,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/assimp")				# Model loa
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/spdlog")				# Logging/Debugging
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/entt")				    # ECS
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/font-awesome-headers") #Icons
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/yaml-cpp")             #YAML Serialization
 
 add_library(LauraEngine STATIC)
 set_property(TARGET LauraEngine PROPERTY CXX_STANDARD 20)
@@ -40,16 +41,16 @@ target_precompile_headers(lrpchLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch
 target_link_libraries(lrpchLib PUBLIC glm spdlog::spdlog)
 
 # only these should be public
-target_link_libraries(LauraEngine PUBLIC glm imgui spdlog::spdlog entt fontAwesome) 
+target_link_libraries(LauraEngine PUBLIC glm imgui spdlog::spdlog entt fontAwesome yaml-cpp) 
 # these should be private but it does not work with private for some reason
 target_link_libraries(LauraEngine PUBLIC assimp glfw libglew_static stb_image stb_truetype) 
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/EngineResources/")
-    message(STATUS "LR_RESOURCES_PATH: ${CMAKE_CURRENT_SOURCE_DIR}/src/EngineResources/")
+    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/res/")
+    message(STATUS "LR_RESOURCES_PATH: ${CMAKE_CURRENT_SOURCE_DIR}/src/res/")
 elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="./EngineResources/")
-    message(STATUS "LR_RESOURCES_PATH: ./resources/ (put EngineResources next to the .exe file)")
+    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="./res/")
+    message(STATUS "LR_RESOURCES_PATH: ./resources/ (put res folder next to the .exe file)")
 else()
 	message(!!!! ERROR "Unsupported build type: ${CMAKE_BUILD_TYPE}" !!!!)
 endif()

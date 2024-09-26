@@ -25,7 +25,7 @@ namespace Laura {
 		_RendererAPI = IRendererAPI::Create();
 		_Renderer = std::make_shared<Renderer>();
 
-		_ImGuiContextManager = std::make_shared<ImGuiContextManager>(_Window);
+		_ImGuiContextManager = std::make_shared<ImGuiContext>(_Window);
 		_ImGuiContextManager->Init();
 
 		_AssetManager = std::make_shared<AssetManager>();

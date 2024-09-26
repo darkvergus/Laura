@@ -4,7 +4,7 @@
 
 #include "Core/IWindow.h"
 #include "Core/LayerStack.h"
-#include "Core/ImGuiContextManager.h"
+#include "Core/ImGuiContext.h"
 #include "Core/DeltaTime.h"
 
 #include "Renderer/Renderer.h"
@@ -28,7 +28,7 @@ namespace Laura {
     protected:
         std::shared_ptr<IWindow> _Window;
         std::shared_ptr<LayerStack> _LayerStack;
-        std::shared_ptr <ImGuiContextManager> _ImGuiContextManager;
+        std::shared_ptr <ImGuiContext> _ImGuiContextManager;
         std::shared_ptr<IRendererAPI> _RendererAPI;
         std::shared_ptr<Renderer> _Renderer;
         std::shared_ptr<AssetManager> _AssetManager;

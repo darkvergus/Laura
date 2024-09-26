@@ -1,14 +1,16 @@
 #include "EditorLayer.h"
 
-
 namespace Laura
 {
 
 	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<AssetManager> assetManager)
-		: m_Renderer(renderer), m_AssetManager(assetManager)
+		: m_Renderer(renderer), 
+		m_AssetManager(assetManager),
+		m_EditorState(std::make_shared<EditorState>()),
+		m_ThemeManager(std::make_shared<ThemeManager>()),
+		m_InspectorPanel(m_EditorState, m_ThemeManager)
 	{
 		setLayerName("EditorLayer");
-		m_EditorState = new EditorState();
 	}
 
 	void EditorLayer::onAttach()
@@ -118,10 +120,7 @@ namespace Laura
 	// main rendering function called every frame
 	void EditorLayer::onImGuiRender()
 	{
-		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_AutoHideTabBar);
-
-		m_SceneHierarchyPanel.OnImGuiRender(m_Scene, m_EditorState);
-		m_InspectorPanel.OnImGuiRender(m_Scene, m_EditorState);
+		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 		
 		if (ImGui::BeginMainMenuBar())
 		{
@@ -130,6 +129,7 @@ namespace Laura
 				ImGui::MenuItem("New", "Ctrl+N");
 				ImGui::EndMenu();
 			}
+
 			if (ImGui::BeginMenu("Edit"))
 			{
 				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
@@ -140,25 +140,33 @@ namespace Laura
 				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Settings"))
+			{
+				if (ImGui::MenuItem("Themes")) { m_EditorState->ThemeSettingsPanelOpen = true; }
+				ImGui::EndMenu();
+			}
+
 			ImGui::EndMainMenuBar();
 		}
 
 		bool showDemoWindow = false;
 		ImGui::ShowDemoWindow(&showDemoWindow);
+		m_SceneHierarchyPanel.OnImGuiRender(m_Scene, m_EditorState);
+		m_InspectorPanel.OnImGuiRender(m_Scene);
+		if (m_EditorState->ThemeSettingsPanelOpen) { m_ThemesPanel.OnImGuiRender(m_EditorState, m_ThemeManager); }
 
 		//m_Renderer->SetFrameResolution(glm::vec2(viewportSize.x, viewportSize.y));
 		//m_Renderer->renderSettings.accumulateFrames = false;
 		//m_Renderer->UpdateRenderSettingsUBO();
 
 		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
-
 		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);
 	}
 
 	void EditorLayer::onDetach()
 	{
 		m_Scene->OnShutdown();
-		delete m_EditorState;
 	}
 
 }

@@ -6,7 +6,11 @@
 /// --- PANELS --- ///
 #include "EditorUI/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel.h"
-#include "EditorUI/InspectorPanel.h"
+#include "EditorUI/Inspector/InspectorPanel.h"
+#include "EditorUI/ThemesPanel.h"
+
+/// --- Theme Manager --- ///
+#include "EditorTheme.h"
 
 namespace Laura
 {
@@ -28,17 +32,24 @@ namespace Laura
 		float aspectRatio;
 
 	private:
+		// > EDITOR RELATED < //
 		// The Editor Layer owns the Editor State (and deletes it)
-		EditorState* m_EditorState;
+		std::shared_ptr<EditorState> m_EditorState;
+		// contains and manages the ThemeData
+		std::shared_ptr<ThemeManager> m_ThemeManager;
+		// UI panels
+		SceneHierarchyPanel m_SceneHierarchyPanel;
+		InspectorPanel m_InspectorPanel;
+		ViewportPanel m_ViewportPanel;
+		ThemesPanel m_ThemesPanel;
+
+
+		// > ENGINE RELATED < //
 		// The Editor Layer manages the Scenes
 		// It has to manage the LOADING and UNLOADING of scenes
 		// UI panels only work with the active scene
 		std::shared_ptr<Scene> m_Scene;
 
-		// UI panels
-		SceneHierarchyPanel m_SceneHierarchyPanel;
-		InspectorPanel m_InspectorPanel;
-		ViewportPanel m_ViewportPanel;
 	};
 
 }

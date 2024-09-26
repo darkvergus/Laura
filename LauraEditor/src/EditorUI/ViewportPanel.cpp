@@ -1,20 +1,23 @@
 #include "ViewportPanel.h"
 #include <IconsFontAwesome6.h>
+#include <imgui_internal.h>
 namespace Laura
 {
-	void ViewportPanel::OnImGuiRender(std::shared_ptr<IImage2D> image, EditorState* editorState)
+	void ViewportPanel::OnImGuiRender(std::shared_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState)
 	{
-		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoScrollbar |
-												ImGuiWindowFlags_NoTitleBar | 
-												ImGuiWindowFlags_NoCollapse |
-												ImGuiWindowFlags_MenuBar;
+		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoCollapse;
+		
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImVec4 originalWindowBG = style.Colors[ImGuiCol_WindowBg];
+		style.Colors[ImGuiCol_WindowBg] = style.Colors[ImGuiCol_TitleBg]; // make the background blend with the titlebar
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 }); // remove the border padding
-		ImGui::Begin("ViewportPanel", nullptr, ViewportFlags);
+		ImGui::Begin(ICON_FA_EYE " Viewport", nullptr, ViewportFlags);
+
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		
 		ForceUpdate = false;
 
-		int MenuHeight = DrawRenderSettingsMenu(editorState);
 		DrawViewportSettingsPanel(editorState);
 
 		if (image == nullptr)
@@ -27,7 +30,7 @@ namespace Laura
 		
 		ImageDimensions = image->GetDimensions();
 		WindowDimensions = glm::ivec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
-		TLWindowPosition = glm::ivec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + MenuHeight);
+		TLWindowPosition = glm::ivec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
 
 		bool DimensionsChanged = (ImageDimensions != m_PrevImageDimensions || WindowDimensions != m_PrevWindowDimensions);
 		bool PositionChanged = (TLWindowPosition != m_PrevWindowPosition);
@@ -97,50 +100,30 @@ namespace Laura
 		ImVec2 BRImVec = ImVec2(m_BottomRightImageCoords.x, m_BottomRightImageCoords.y);
 		drawList->AddImage((ImTextureID)image->GetID(), TLImVec, BRImVec, { 0, 1 }, { 1, 0 });
 
-		ImGui::PopStyleVar();
-		ImGui::End();
-	}
-
-	int Laura::ViewportPanel::DrawRenderSettingsMenu(EditorState* editorState)
-	{
-		ImGuiStyle& style = ImGui::GetStyle();
-
-		// Directly set FramePadding
-		style.FramePadding = ImVec2(0.0f, 6.0f);
-		ImGui::BeginMenuBar();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.5f, 0.5f, 0.5f, 0.35f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.9f, 0.9f, 0.5f));
-		ImGui::AlignTextToFramePadding();
-		ImGui::Text("Viewport");
-
-		float buttonWidth = ImGui::CalcTextSize(ICON_FA_GEAR).x + ImGui::GetStyle().FramePadding.x * 2;
-		float windowWidth = ImGui::GetWindowWidth();
-		float availableWidth = windowWidth - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
-			
-		ImGui::SameLine(availableWidth);
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 5));
-		if (ImGui::Button(ICON_FA_GEAR))
+		ImVec2 panelDims = ImGui::GetContentRegionAvail();
+		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
+		ImGui::Spacing();
+		ImGui::SameLine(panelDims.x - lineHeight);
+		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, {lineHeight, lineHeight}))
 		{
 			editorState->ViewportSettingsPanelOpen = true;
 		}
-		static int MenuHeight = ImGui::GetFrameHeight();
+
 		ImGui::PopStyleVar();
-		ImGui::EndMenuBar();
-		ImGui::PopStyleColor(3);
-		return MenuHeight;
+		ImGui::End();
+		style.Colors[ImGuiCol_WindowBg] = originalWindowBG;
 	}
 
-	void ViewportPanel::DrawViewportSettingsPanel(EditorState* editorState)
+	void ViewportPanel::DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState)
 	{
 		if (!editorState->ViewportSettingsPanelOpen)
 			return;
 
 		static ImGuiWindowFlags ViewportSettingsFlags = ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_NoCollapse;
-
-		ImGui::Begin("Viewport Settings", &editorState->ViewportSettingsPanelOpen, ViewportSettingsFlags);
+			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+		
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &editorState->ViewportSettingsPanelOpen, ViewportSettingsFlags);
 		ImGui::Text("Viewport Mode");
 		
 		if (
@@ -150,7 +133,7 @@ namespace Laura
 		){
 			ForceUpdate = true;
 		}
-
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 }
