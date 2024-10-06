@@ -1,5 +1,7 @@
+#pragma once
 #include "Laura.h"
 #include "EditorTheme.h"
+#include <imgui_internal.h>
 
 namespace Laura
 {

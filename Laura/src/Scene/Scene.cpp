@@ -12,12 +12,14 @@ namespace Laura
 		delete m_Registry;
 	}
 
-	Entity Scene::CreateEntity()
+	Entity& Scene::CreateEntity()
 	{
 		// constructs a naked entity with no components and returns its identifier
 		entt::entity entityID = m_Registry->create();
 		Entity entity(entityID, m_Registry);
 		entity.AddComponent<TagComponent>("EmptyEntity");
+		m_Registry->remove<TagComponent>(entityID);
+		entity.AddComponent<TagComponent>("Empty Entity");
 		return entity;
 	}
 

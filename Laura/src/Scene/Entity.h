@@ -1,5 +1,6 @@
 #pragma once
 #include "entt/entt.hpp"
+#include "lrpch.h"
 
 namespace Laura
 {
@@ -32,7 +33,23 @@ namespace Laura
 		template<typename T>
 		void RemoveComponent() const
 		{
-			m_Registry->remove<T>(m_EntityID);
+			if (!m_Registry)
+			{
+				LR_CORE_CRITICAL("Registry is null");
+				return;
+			}
+
+			if (!m_Registry->valid(m_EntityID)) 
+			{
+				LR_CORE_CRITICAL("Entity is not valid");
+				return;
+			}
+
+			if (m_Registry->all_of<T>(m_EntityID))
+			{
+				m_Registry->remove<T>(m_EntityID);
+			}
+
 		}
 
 		inline entt::entity GetID() const { return m_EntityID; }

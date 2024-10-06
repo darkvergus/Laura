@@ -95,7 +95,8 @@ namespace Laura
 			tag = std::string("TestScript");
 		}
 		testEntity.AddComponent<ScriptComponent>(new TestScript());
-		//m_Scene.DestroyEntity(testEntity); // testing the script's OnDestroy() function
+		testEntity.RemoveComponent<ScriptComponent>();
+		m_Scene->DestroyEntity(testEntity); // testing the script's OnDestroy() function
 		/// ---------------------------------------- ///
 
 		m_Scene->OnStart();

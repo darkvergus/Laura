@@ -16,6 +16,8 @@ namespace Laura
         if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add"))
         {
             if (ImGui::MenuItem("Empty")) { scene->CreateEntity(); }
+            
+            ImGui::BeginDisabled(true); // Not implemented yet
             if (ImGui::BeginMenu("3D Object"))
             {
                 if (ImGui::MenuItem("Sphere")) {}
@@ -25,6 +27,7 @@ namespace Laura
             if (ImGui::MenuItem("2D Plane")) {}
             if (ImGui::MenuItem("Camera")) {}
             if (ImGui::MenuItem("3D Mesh")) {}
+            ImGui::EndDisabled();
 
             ImGui::EndMenu();
         }
@@ -33,6 +36,7 @@ namespace Laura
         if(!activeRegistry)
 		{
 			ImGui::End();
+            LR_CORE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
 			return;
 		}
         
@@ -41,62 +45,46 @@ namespace Laura
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow 
-                                    | ImGuiTreeNodeFlags_OpenOnDoubleClick
-                                    | ImGuiTreeNodeFlags_SpanAvailWidth
-                                    | ImGuiTreeNodeFlags_AllowItemOverlap
-                                    | ImGuiTreeNodeFlags_Framed
-                                    | ImGuiTreeNodeFlags_FramePadding;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick
+                                    | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap
+                                    | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
+        static bool destroyEntity = false; // since you can only delete one entity at a time the fact that this is used in the loop is fine
+        /// ITERATE OVER ENTITIES /////////////////////////////////////////////////////////////
         auto view = activeRegistry->view<entt::entity>();
         for (auto entityID : view)
         {
-            bool nodeOpen = false;
-            // Get the TAG of the entity (used to display in the hierarchy)
+            bool entityChildrenOpen = false;
             Entity entity(entityID, activeRegistry);
             std::string& tag = entity.GetComponent<TagComponent>().Tag;
-            // if the entity is selected, highlight it
+
+            // display selected entity
             if (entityID == m_EditorState->selectedEntity)
             {
                 m_ThemeManager->ImGuiSet(ImGuiCol_Header, m_ThemeManager->GetActiveTheme()->SelectedHeader);
-                nodeOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
+                entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
                 ImGui::SameLine(panelDims.x - lineHeight * 0.5);
- 
-                std::cout << "Testing delete entity\n";
-                if(!m_EditorState->doubleConfirmDelete)
-				{
-                    if (ImGui::Button(ICON_FA_TRASH_CAN))
-                    {
-                        scene->DestroyEntity(entity);
-                    }
-				}
-				else
-				{
-                    if (ImGui::Button(ICON_FA_TRASH_CAN))
-                    {
-                        ImGui::OpenPopup(ICON_FA_TRASH_CAN " Delete Entity");
-                    }
-                    // will only execute if the OpenPopup function was called
-                    if (OpenConfirmationPopup(ICON_FA_TRASH_CAN " Delete Entity", "Are you sure you want to delete this entity?", m_ThemeManager))
-                    {
-                        scene->DestroyEntity(entity);
-                    }
-				}
 
-                
+                if (ImGui::Button(ICON_FA_TRASH_CAN)) { destroyEntity = true; }
+
+                ConfirmAndExecute(destroyEntity, ICON_FA_TRASH_CAN " Delete Entity", "Are you sure you want to delete this entity?", [&]() {
+                        scene->DestroyEntity(entity);
+                        m_EditorState->selectedEntity = entt::null;
+                    }, m_ThemeManager, m_EditorState);
+
                 m_ThemeManager->ImGuiSet(ImGuiCol_Header, m_ThemeManager->GetActiveTheme()->DefaultHeader);
 			}
-			else
+			else // display non-selected entity
 			{
-                // display a non selected entity
-				nodeOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
+				entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
 			}
+
             if (ImGui::IsItemClicked())
             {
                 m_EditorState->selectedEntity = entityID;
             }
-            // display any children entities (if any)
-            if (nodeOpen)
+
+            if (entityChildrenOpen)
             {
                 // TODO: Child entity system
                 ImGui::BulletText("This is a testing text.");
@@ -111,7 +99,6 @@ namespace Laura
 		}
 
         ImGui::PopStyleVar();
-        
         ImGui::End();
     }
 }

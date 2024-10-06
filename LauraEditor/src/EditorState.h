@@ -15,7 +15,7 @@ namespace Laura
 	struct EditorState
 	{
 		entt::entity selectedEntity = entt::null;
-		bool doubleConfirmDelete = true;
+		bool doubleConfirmation = true;
 		
 		/// VIEWPORT ///
 		bool ViewportSettingsPanelOpen = false;

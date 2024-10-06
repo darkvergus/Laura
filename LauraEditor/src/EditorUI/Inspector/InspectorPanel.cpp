@@ -1,98 +1,9 @@
 #include "EditorUI/Inspector/InspectorPanel.h"
-#include <IconsFontAwesome6.h>
-#include <imgui_internal.h>
 #include "EditorUI/Inspector/TransformUI.h"
+
 
 namespace Laura
 {
-	template<typename T, typename UILambda>
-	inline void InspectorPanel::DrawComponent(const std::string& TreenodeTitle, Entity entity, UILambda uiLambda, bool removable)
-	{
-		const ImGuiTreeNodeFlags treenodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap 
-											   | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
-		if (entity.HasComponent<T>())
-		{
-			// unique id for each component (entity id + component type)
-			std::string idStr = std::to_string((uint64_t)entity.GetID()) + TreenodeTitle;
-			ImGui::PushID(idStr.c_str());
-
-			ImVec2 panelDims = ImGui::GetContentRegionAvail();
-			float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
-
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
-			bool open = ImGui::TreeNodeEx(TreenodeTitle.c_str(), treenodeFlags);
-			ImGui::SameLine(panelDims.x - 1.5*lineHeight - 0.2);
-
-			if (removable)
-			{
-				if (!m_EditorState->doubleConfirmDelete)
-				{
-					if (ImGui::Button(ICON_FA_TRASH_CAN))
-					{
-						entity.RemoveComponent<T>();
-					}
-				}
-				else
-				{
-					if (ImGui::Button(ICON_FA_TRASH_CAN))
-					{
-						ImGui::OpenPopup(ICON_FA_TRASH_CAN " Delete Component");
-					}
-					ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
-					if (ImGui::BeginPopupModal(ICON_FA_TRASH_CAN " Delete Component", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-					{
-						ImGui::Text("Are you sure you want to delete this component?");
-
-						float panelWidth = ImGui::GetContentRegionAvail().x;
-						float buttonWidth = panelWidth * 0.5f - 5.0f;
-
-						ImGui::Dummy({ 5.0f, 0.0f });
-						m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->ButtonGray);
-						if (ImGui::Button("Yes", ImVec2(buttonWidth, 0)))
-						{
-							entity.RemoveComponent<T>();
-							ImGui::CloseCurrentPopup();
-						}
-						ImGui::SameLine();
-						if (ImGui::Button("No", ImVec2(buttonWidth, 0)))
-						{
-							ImGui::CloseCurrentPopup();
-						}
-						m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->DefaultButton);
-						ImGui::EndPopup();
-					}
-					ImGui::PopStyleVar();
-				}	
-			}
-
-			ImGui::SameLine(panelDims.x - lineHeight * 0.5);
-			if (ImGui::Button(ICON_FA_GEARS))
-			{
-				ImGui::OpenPopup("ComponentSettings");
-			}
-			ImGui::PopStyleVar();
-
-			if (ImGui::BeginPopup("ComponentSettings"))
-			{
-				if (ImGui::MenuItem("Reset"))
-				{
-					entity.RemoveComponent<T>();
-					entity.AddComponent<T>();
-				}
-				ImGui::EndPopup();
-			}
-
-			if (open)
-			{
-				uiLambda(entity);
-				ImGui::TreePop();
-				ImGui::Spacing();
-			}
-
-			ImGui::PopID();
-		}
-	}
-
 	/// INSPECTOR PANEL METHODS //////////////////////////////////////////////////////////////
 	InspectorPanel::InspectorPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ThemeManager> themeManager)
 		: m_EditorState(editorState), m_ThemeManager(themeManager)
@@ -161,10 +72,11 @@ namespace Laura
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));
-		ImGui::SetCursorPosX(panelDims.x / 4);
+		ImGui::SetCursorPosX(panelDims.x / 6);
 		bool popupOpened = false;
 		m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->AddComponentButton);
-		if(ImGui::Button("Add Component", {panelDims.x / 2, lineHeight}))
+		float buttonWidth = panelDims.x * (2.0f / 3.0f);
+		if(ImGui::Button("Add Component", {buttonWidth, lineHeight}))
 		{
 			popupOpened = true;
 			ImGui::OpenPopup("AddComponent");
@@ -179,15 +91,15 @@ namespace Laura
 				ImVec2(FLT_MAX, 300.0f) // if the popup contains too many compnents, adds a scrollbar
 			);
 			ImGui::SetNextWindowPos(ImVec2(addButtonPos.x, addButtonPos.y + addButtonSize.y));
-			ImGui::SetNextWindowSize(ImVec2(panelDims.x / 2, 0.0f));
+			ImGui::SetNextWindowSize(ImVec2(buttonWidth, 0.0f));
 		}
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			ImGui::Selectable(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT " Transform", false);
-			ImGui::Selectable(ICON_FA_VIDEO " Camera Component", false);
-			ImGui::Selectable(ICON_FA_CUBE " Mesh Component", false);
-			ImGui::Selectable(ICON_FA_LAYER_GROUP " Material Component", false);
-			ImGui::Selectable(ICON_FA_FILE_CODE " Script", false);
+			AddComponentSelectable<TransformComponent>	(entity, "Transform", ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT);
+			AddComponentSelectable<CameraComponent>		(entity, "Camera", ICON_FA_VIDEO);
+			AddComponentSelectable<MeshComponent>		(entity, "Mesh", ICON_FA_CUBE);
+			AddComponentSelectable<MaterialComponent>	(entity, "Material", ICON_FA_LAYER_GROUP);
+			AddComponentSelectable<ScriptComponent>		(entity, "Script", ICON_FA_FILE_CODE);
 			ImGui::EndPopup();
 		}
 		// ensure that there is always some space under the Add Component button when scrolling to display the popup
