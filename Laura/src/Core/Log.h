@@ -12,11 +12,11 @@ namespace Laura {
 		static void Init();
 
 		inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
-		inline static std::shared_ptr<spdlog::logger>& GetAppLogger() { return s_AppLogger; }
+		inline static std::shared_ptr<spdlog::logger>& GetEditorLogger() { return s_EditorLogger; }
 
 	private:
 		static std::shared_ptr<spdlog::logger> s_CoreLogger;
-		static std::shared_ptr<spdlog::logger> s_AppLogger;
+		static std::shared_ptr<spdlog::logger> s_EditorLogger;
 	};
 }
 
@@ -26,8 +26,8 @@ namespace Laura {
 #define LR_CORE_ERROR(...)    ::Laura::Log::GetCoreLogger()->error(__VA_ARGS__)
 #define LR_CORE_CRITICAL(...) ::Laura::Log::GetCoreLogger()->critical(__VA_ARGS__)
 
-#define LR_APP_TRACE(...)    ::Laura::Log::GetAppLogger()->trace(__VA_ARGS__)
-#define LR_APP_INFO(...)     ::Laura::Log::GetAppLogger()->info(__VA_ARGS__)
-#define LR_APP_WARN(...)     ::Laura::Log::GetAppLogger()->warn(__VA_ARGS__)
-#define LR_APP_ERROR(...)    ::Laura::Log::GetAppLogger()->error(__VA_ARGS__)
-#define LR_APP_CRITICAL(...) ::Laura::Log::GetAppLogger()->critical(__VA_ARGS__)
+#define LR_EDITOR_TRACE(...)    ::Laura::Log::GetEditorLogger()->trace(__VA_ARGS__)
+#define LR_EDITOR_INFO(...)     ::Laura::Log::GetEditorLogger()->info(__VA_ARGS__)
+#define LR_EDITOR_WARN(...)     ::Laura::Log::GetEditorLogger()->warn(__VA_ARGS__)
+#define LR_EDITOR_ERROR(...)    ::Laura::Log::GetEditorLogger()->error(__VA_ARGS__)
+#define LR_EDITOR_CRITICAL(...) ::Laura::Log::GetEditorLogger()->critical(__VA_ARGS__)

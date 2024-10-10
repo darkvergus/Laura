@@ -5,6 +5,15 @@ namespace Laura {
 
 	LayerStack::~LayerStack()
 	{
+		for (std::shared_ptr<ILayer> layer : m_Layers)
+		{
+			layer->onDetach();
+		}
+
+		for (std::shared_ptr<ILayer> overlay : m_Overlays)
+		{
+			overlay->onDetach();
+		}
 	}
 
 

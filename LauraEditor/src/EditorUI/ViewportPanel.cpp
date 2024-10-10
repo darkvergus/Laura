@@ -35,7 +35,7 @@ namespace Laura
 		bool DimensionsChanged = (ImageDimensions != m_PrevImageDimensions || WindowDimensions != m_PrevWindowDimensions);
 		bool PositionChanged = (TLWindowPosition != m_PrevWindowPosition);
 
-		if (editorState->viewportMode == ViewportMode::CENTERED)
+		if (editorState->persistent.viewportMode == ViewportMode::CENTERED)
 		{
 			if (DimensionsChanged || PositionChanged || ForceUpdate)
 			{
@@ -45,7 +45,7 @@ namespace Laura
 			}
 		}
 
-		if (editorState->viewportMode == ViewportMode::STRETCH_TO_VIEWPORT)
+		if (editorState->persistent.viewportMode == ViewportMode::STRETCH_TO_VIEWPORT)
 		{
 			if (DimensionsChanged || PositionChanged || ForceUpdate)
 			{
@@ -54,7 +54,7 @@ namespace Laura
 			}
 		}
 
-		if (editorState->viewportMode == ViewportMode::FIT_TO_VIEWPORT)
+		if (editorState->persistent.viewportMode == ViewportMode::FIT_TO_VIEWPORT)
 		{
 			// if the ViewportPanel has been resized or the renderer output image size has been changed
 
@@ -106,7 +106,7 @@ namespace Laura
 		ImGui::SameLine(panelDims.x - lineHeight);
 		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, {lineHeight, lineHeight}))
 		{
-			editorState->ViewportSettingsPanelOpen = true;
+			editorState->temp.ViewportSettingsPanelOpen = true;
 		}
 
 		ImGui::PopStyleVar();
@@ -116,20 +116,20 @@ namespace Laura
 
 	void ViewportPanel::DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState)
 	{
-		if (!editorState->ViewportSettingsPanelOpen)
+		if (!editorState->temp.ViewportSettingsPanelOpen)
 			return;
 
 		static ImGuiWindowFlags ViewportSettingsFlags = ImGuiWindowFlags_NoDocking |
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
-		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &editorState->ViewportSettingsPanelOpen, ViewportSettingsFlags);
+		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &editorState->temp.ViewportSettingsPanelOpen, ViewportSettingsFlags);
 		ImGui::Text("Viewport Mode");
 		
 		if (
-		ImGui::RadioButton("Centered", (int*)&editorState->viewportMode, (int)ViewportMode::CENTERED) ||
-		ImGui::RadioButton("Stretch to Viewport", (int*)&editorState->viewportMode, (int)ViewportMode::STRETCH_TO_VIEWPORT) ||
-		ImGui::RadioButton("Fit to Viewport", (int*)&editorState->viewportMode, (int)ViewportMode::FIT_TO_VIEWPORT)
+		ImGui::RadioButton("Centered", (int*)&editorState->persistent.viewportMode, (int)ViewportMode::CENTERED) ||
+		ImGui::RadioButton("Stretch to Viewport", (int*)&editorState->persistent.viewportMode, (int)ViewportMode::STRETCH_TO_VIEWPORT) ||
+		ImGui::RadioButton("Fit to Viewport", (int*)&editorState->persistent.viewportMode, (int)ViewportMode::FIT_TO_VIEWPORT)
 		){
 			ForceUpdate = true;
 		}

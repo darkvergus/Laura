@@ -5,7 +5,7 @@
 namespace Laura {
 
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
-	std::shared_ptr<spdlog::logger> Log::s_AppLogger;
+	std::shared_ptr<spdlog::logger> Log::s_EditorLogger;
 
 	void Log::Init()
 	{
@@ -13,8 +13,8 @@ namespace Laura {
 		Log::s_CoreLogger = spdlog::stdout_color_mt("Core");
 		Log::s_CoreLogger->set_level(spdlog::level::trace);
 
-		Log::s_AppLogger = spdlog::stdout_color_mt("App");
-		Log::s_AppLogger->set_level(spdlog::level::trace);
+		Log::s_EditorLogger = spdlog::stdout_color_mt("App");
+		Log::s_EditorLogger->set_level(spdlog::level::trace);
 	}
 
 }

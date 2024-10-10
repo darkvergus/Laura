@@ -7,10 +7,10 @@
 #include "EditorUI/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel.h"
 #include "EditorUI/Inspector/InspectorPanel.h"
-#include "EditorUI/ThemesPanel.h"
 
 /// --- Theme Manager --- ///
-#include "EditorTheme.h"
+#include "EditorUI/Themes/EditorTheme.h"
+#include "EditorUI/Themes/ThemesPanel.h"
 
 namespace Laura
 {

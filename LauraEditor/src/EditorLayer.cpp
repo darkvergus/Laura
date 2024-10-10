@@ -14,8 +14,19 @@ namespace Laura
 		setLayerName("EditorLayer");
 	}
 
+
 	void EditorLayer::onAttach()
 	{
+		deserializeState(m_EditorState); // load the persistent part of editor state from the file
+		std::string statusMessage;
+		if (!m_ThemeManager->LoadTheme(m_EditorState->persistent.ThemeFilePath, statusMessage))
+		{
+			LR_EDITOR_WARN("Failed to load theme: {0}", statusMessage);
+		}
+		m_ThemeManager->ApplyThemeColors(); // sets the imguis style based on the current theme (default if no theme is loaded)
+
+		
+
 		m_Scene = std::make_shared<Scene>(); // Call the default constructor of the Scene class
 		// Setting up the Skybox
 		
@@ -74,17 +85,17 @@ namespace Laura
 		{
 			virtual void OnCreate() override 
 			{
-				LR_APP_INFO("TestScript::OnCreate (called in scene.OnStart())");
+				LR_EDITOR_INFO("TestScript::OnCreate (called in scene.OnStart())");
 			}
 
 			virtual void OnUpdate() override
 			{
-				LR_APP_INFO("TestScript::OnUpdate (this should get called every frame)");
+				LR_EDITOR_INFO("TestScript::OnUpdate (this should get called every frame)");
 			}
 
 			virtual void OnDestroy() override
 			{
-				LR_APP_INFO("TestScript::OnDestroy (called once the entity gets destroyed)");
+				LR_EDITOR_INFO("TestScript::OnDestroy (called once the entity gets destroyed)");
 			}
 		};
 		
@@ -145,7 +156,7 @@ namespace Laura
 
 			if (ImGui::BeginMenu("Settings"))
 			{
-				if (ImGui::MenuItem("Themes")) { m_EditorState->ThemeSettingsPanelOpen = true; }
+				if (ImGui::MenuItem("Themes")) { m_EditorState->temp.ThemeSettingsPanelOpen = true; }
 				ImGui::EndMenu();
 			}
 
@@ -156,7 +167,7 @@ namespace Laura
 		ImGui::ShowDemoWindow(&showDemoWindow);
 		m_SceneHierarchyPanel.OnImGuiRender(m_Scene);
 		m_InspectorPanel.OnImGuiRender(m_Scene);
-		if (m_EditorState->ThemeSettingsPanelOpen) { m_ThemesPanel.OnImGuiRender(m_EditorState, m_ThemeManager); }
+		if (m_EditorState->temp.ThemeSettingsPanelOpen) { m_ThemesPanel.OnImGuiRender(m_EditorState, m_ThemeManager); }
 
 		//m_Renderer->SetFrameResolution(glm::vec2(viewportSize.x, viewportSize.y));
 		//m_Renderer->renderSettings.accumulateFrames = false;
@@ -169,6 +180,7 @@ namespace Laura
 	void EditorLayer::onDetach()
 	{
 		m_Scene->OnShutdown();
+		serializeState(m_EditorState); // save the persistent part of the editor state to the file
+		std::cout << "OnDetach has been called\n";
 	}
-
 }

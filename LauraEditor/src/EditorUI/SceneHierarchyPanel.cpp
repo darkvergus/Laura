@@ -59,7 +59,7 @@ namespace Laura
             std::string& tag = entity.GetComponent<TagComponent>().Tag;
 
             // display selected entity
-            if (entityID == m_EditorState->selectedEntity)
+            if (entityID == m_EditorState->temp.selectedEntity)
             {
                 m_ThemeManager->ImGuiSet(ImGuiCol_Header, m_ThemeManager->GetActiveTheme()->SelectedHeader);
                 entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
@@ -69,7 +69,7 @@ namespace Laura
 
                 ConfirmAndExecute(destroyEntity, ICON_FA_TRASH_CAN " Delete Entity", "Are you sure you want to delete this entity?", [&]() {
                         scene->DestroyEntity(entity);
-                        m_EditorState->selectedEntity = entt::null;
+                        m_EditorState->temp.selectedEntity = entt::null;
                     }, m_ThemeManager, m_EditorState);
 
                 m_ThemeManager->ImGuiSet(ImGuiCol_Header, m_ThemeManager->GetActiveTheme()->DefaultHeader);
@@ -81,7 +81,7 @@ namespace Laura
 
             if (ImGui::IsItemClicked())
             {
-                m_EditorState->selectedEntity = entityID;
+                m_EditorState->temp.selectedEntity = entityID;
             }
 
             if (entityChildrenOpen)
@@ -95,7 +95,7 @@ namespace Laura
         // Deselect the selected entity if the user clicks in the window but outside of any tree node
         if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 		{
-			m_EditorState->selectedEntity = entt::null;
+			m_EditorState->temp.selectedEntity = entt::null;
 		}
 
         ImGui::PopStyleVar();

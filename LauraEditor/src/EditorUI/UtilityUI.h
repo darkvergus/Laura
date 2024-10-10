@@ -1,6 +1,6 @@
 #pragma once
 #include "Laura.h"
-#include "EditorTheme.h"
+#include "EditorUI/Themes/EditorTheme.h"
 #include "EditorState.h"
 
 namespace Laura
@@ -17,7 +17,7 @@ namespace Laura
 			return;
 		}
 
-		if (!editorState->doubleConfirmation)
+		if (!editorState->persistent.doubleConfirmation)
 		{
 			onConfirm();
 			execute = false;

@@ -8,70 +8,114 @@ namespace Laura
         m_ActiveTheme = std::make_shared<Theme>();
     }
 
-	bool ThemeManager::SerializeTheme(std::shared_ptr<Theme> theme, const std::string& filepath)
+
+
+
+	bool ThemeManager::SerializeTheme(std::shared_ptr<Theme> theme, const std::string& filepath, std::string& statusMessage)
 	{
-        if (!filepath.ends_with(".lauratheme"))
+        // Check for the correct file extension
+        if (!filepath.ends_with(LR_THEME_FILE_EXTENSION))
         {
-            LR_APP_WARN("Invalid file extension for theme file: {0}", filepath);
+            statusMessage = "Invalid file extension for theme file: " + filepath;
             return false;
         }
 
+        // Create a file and Check for permission issues, non-existent directory, or another I/O error
 		std::ofstream fout(filepath);
-		if (!fout.is_open()) {
-			LR_APP_CRITICAL("Could not open file for writing: {0}", filepath);
+		if (!fout.is_open()) 
+        {
+            statusMessage = "Could not open file for writing: " + filepath;
             return false;
         }
 
-		YAML::Node node = YAML::convert<Theme>::encode(*theme);
-		
+        YAML::Node node;
+        // Serialize the theme to YAML
+        try
+        {
+             node = YAML::convert<Theme>::encode(*theme);
+        }
+        catch (const YAML::RepresentationException& e)
+        {
+            statusMessage = "YAML representation error (make sure the file is valid): " + filepath + ", error: " + e.what();
+			return false;
+		}
+		catch (const std::exception& e)
+        {
+            statusMessage = "Unknown error occurred while saving file: " + filepath + ", error: " + e.what();
+			return false;
+		}
+
         fout << node;
         return true;
 	}
 
-	bool ThemeManager::DeserializeTheme(std::shared_ptr<Theme> themeOut, const std::string& filepath)
+
+
+
+	bool ThemeManager::DeserializeTheme(std::shared_ptr<Theme> themeOut, const std::string& filepath, std::string& statusMessage)
 	{
-        if (!filepath.ends_with(".lauratheme"))
+        // Check for the correct file extension
+        if (!filepath.ends_with(LR_THEME_FILE_EXTENSION))
         {
-			LR_APP_WARN("Invalid file extension for theme file: {0}", filepath);
+            statusMessage = "Invalid file extension for theme file: " + filepath;
 			return false;
 		}
         
+        // Check if the file exists and can be opened
         std::ifstream file(filepath);
-        if (!file.is_open()) {
-            LR_APP_WARN("Could not open file: {0}", filepath);
+        if (!file.is_open()) 
+        {
+            statusMessage = "Could not open file: " + filepath;
             return false;
         }
         file.close();
 	
         YAML::Node node;
-        try {
+        try 
+        {
             node = YAML::LoadFile(filepath);
         }
-        catch (const YAML::BadFile& e) {
-            LR_APP_WARN("Failed to load file: {0}, error: {1}", filepath, e.what());
+        catch (const YAML::BadFile& e) 
+        {
+            statusMessage = "Failed to load file: " + filepath;
             return false;
         }
-        catch (const YAML::ParserException& e) {
-            LR_APP_WARN("YAML parsing error in file: {0}, error: {1}", filepath, e.what());
+        catch (const YAML::ParserException& e) 
+        {
+            statusMessage = "Failed to parse file: " + filepath;
             return false;
         }
-        catch (const std::exception& e) {
-            LR_APP_WARN("Unknown error occurred while loading file: {0}, error: {1}", filepath, e.what());
+        catch (const std::exception& e) 
+        {
+            statusMessage = "Unknown error occurred while loading file: " + filepath + ", error: " + e.what();
             return false;
         }
 
-		Theme theme;
-
-		if (!YAML::convert<Theme>::decode(node, theme)) {
-			LR_APP_WARN("Could not deserialize theme from file (invalid file content): {0}", filepath);
-            return false;
+		Theme theme; // Temporary theme object
+        try
+        {
+            YAML::convert<Theme>::decode(node, theme);
+        }
+        catch (const YAML::RepresentationException& e) 
+        {
+			statusMessage = "YAML representation error (make sure the file is valid): " + filepath + ", error: " + e.what();
+			return false;
 		}
-
-        *themeOut = theme;
-		return true;
+		catch (const std::exception& e) 
+        {
+            statusMessage = "Unknown error occurred while loading file: " + filepath + ", error: " + e.what();
+			return false;
+		}
+        *themeOut = theme; // Copy the temporary theme to the active theme after catching exceptions
+		
+        return true;
 	}
 
-    void ThemeManager::SetThemeDefaults()
+
+
+
+
+    void ThemeManager::ApplyThemeColors()
     {
         ImVec4* colors = ImGui::GetStyle().Colors;
 
@@ -123,5 +167,4 @@ namespace Laura
         colors[ImGuiCol_Text] = m_ActiveTheme->DefaultText;
         colors[ImGuiCol_TextDisabled] = m_ActiveTheme->DefaultTextDisabled;
     }
-
 }

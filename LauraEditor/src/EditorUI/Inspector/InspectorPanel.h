@@ -4,7 +4,7 @@
 
 #include "Laura.h"
 #include "EditorState.h"
-#include "EditorTheme.h"
+#include "EditorUI/Themes/EditorTheme.h"
 #include "EditorUI/UtilityUI.h"
 
 namespace Laura

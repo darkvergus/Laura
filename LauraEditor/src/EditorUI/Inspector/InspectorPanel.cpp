@@ -13,7 +13,7 @@ namespace Laura
     void InspectorPanel::OnImGuiRender(std::shared_ptr<Scene> scene)
     {
 		ImGui::SetNextWindowSizeConstraints({ 350, 50 }, {FLT_MAX, FLT_MAX});
-        if (m_EditorState->selectedEntity == entt::null)
+        if (m_EditorState->temp.selectedEntity == entt::null)
 		{
 			ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
 			ImGui::End();
@@ -21,7 +21,7 @@ namespace Laura
 		}
 
         entt::registry* activeRegistry = scene->Get();
-        entt::entity selectedEntity = m_EditorState->selectedEntity;
+        entt::entity selectedEntity = m_EditorState->temp.selectedEntity;
         Entity entity(selectedEntity, activeRegistry); // convert to Laura Entity
 
         ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");

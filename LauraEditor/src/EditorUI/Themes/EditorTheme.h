@@ -5,6 +5,8 @@
 
 namespace Laura
 {
+	#define LR_THEME_FILE_EXTENSION ".lrtheme"
+	
 	struct Theme
 	{
 		// Backgrounds
@@ -77,10 +79,10 @@ namespace Laura
 	public:
 		ThemeManager();
 
-		inline bool LoadTheme(const std::string& filepath)
+		inline bool LoadTheme(const std::string& filepath, std::string& statusMessage)
 		{
-			bool success = DeserializeTheme(m_ActiveTheme, filepath);
-			SetThemeDefaults();
+			bool success = DeserializeTheme(m_ActiveTheme, filepath, statusMessage);
+			ApplyThemeColors();
 			return success;
 		}
 
@@ -90,13 +92,13 @@ namespace Laura
 			ImGui::GetStyle().Colors[widget] = color;
 		}
 
-		// sets the currently active colors for ImGui widgets to defalut valuse of the currently active theme
-		void SetThemeDefaults();
+		// sets the currently active colors for ImGui widgets to defalut values of the currently active theme
+		void ApplyThemeColors();
 
 		// will generate a .lrtheme file at the specified filepath with the default theme values
-		inline bool GenerateDefaultThemeFile(const std::string& filepath)
+		inline bool GenerateDefaultThemeFile(const std::string& filepath, std::string& statusMessage)
 		{
-			return SerializeTheme(std::make_shared<Theme>(), filepath);
+			return SerializeTheme(std::make_shared<Theme>(), filepath, statusMessage);
 		}
 
 		inline std::shared_ptr<const Theme> GetActiveTheme() { return m_ActiveTheme; }
@@ -105,9 +107,9 @@ namespace Laura
 
 	private:
 		// Serializes the theme and saves it to a .lauratheme file at the filepath
-		bool SerializeTheme(std::shared_ptr<Theme> theme, const std::string& filepath);
+		bool SerializeTheme(std::shared_ptr<Theme> theme, const std::string& filepath, std::string& statusMessage);
 		// Deserializes the theme from a .lauratheme file at the filepath and outputs it to themeOut
-		bool DeserializeTheme(std::shared_ptr<Theme> themeOut, const std::string& filepath);
+		bool DeserializeTheme(std::shared_ptr<Theme> themeOut, const std::string& filepath, std::string& statusMessage);
 	};
 }
 
