@@ -36,7 +36,7 @@ namespace Laura
 		// TODO make the api for the texture channels more user friendly and less error prone
 		// currently there is no way to catch these errors and they lead to hard to debug crashes
 		GUID skyboxTextureID = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
-		m_Scene->skyboxID = skyboxTextureID;
+		m_Scene->skyboxGUID = skyboxTextureID;
 		// asset manager just loads the texture and returns the ID
 		// the Skybox class stores this texture
 		//m_Scene->skybox = std::make_shared<Skybox>(skyboxTextureID);

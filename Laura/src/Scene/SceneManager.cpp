@@ -30,7 +30,7 @@ namespace Laura
 				if (newMeshGuidToIndexMap.find(meshGUID) == newMeshGuidToIndexMap.end())
 				{
 					newMeshGuidToIndexMap[meshGUID] = meshIdx;
-					rScene->uniqueMeshList.push_back(*assetManager->GetMesh(meshGUID)); // TODO: This should not copy the mesh
+					rScene->uniqueMeshList.push_back(assetManager->GetMesh(meshGUID)); // TODO: This should not copy the mesh
 					rScene->uniqueBvhList.push_back(assetManager->GetBVH(meshGUID));
 					meshIdx++;
 				}
@@ -60,7 +60,6 @@ namespace Laura
 				}
 			}
 
-			// 
 			if (e.HasComponent<MeshComponent>())
 			{
 				GUID meshGUID = e.GetComponent<MeshComponent>().GetID();

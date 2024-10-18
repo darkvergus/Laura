@@ -40,7 +40,7 @@ namespace Laura
 			UpdateSkyboxUBO(rScene->skyboxID);
 		}
 
-		if (rScene->updateMeshes || rScene->updateMaterials || rScene->transformsDirty)
+		if (rScene->meshesDirty || rScene->updateMaterials || rScene->transformsDirty)
 		{
 			for (Entity& model : rScene->models)
 			{
