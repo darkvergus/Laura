@@ -51,18 +51,13 @@ namespace Laura
 		void SetFrameResolution(const glm::vec2& resolution);
 
 	private:
-		void UpdateCameraUBO(glm::mat4 transform, float focalLength);
-		void UpdateSkyboxUBO(std::shared_ptr<LoadedTexture> skyboxTex);
-		void UpdateRenderSettingsUBO();
-		void Submit(const Entity& model);
-
 		glm::vec2 m_FrameResolution;
 
 		std::shared_ptr<IComputeShader> m_Shader;
 		std::shared_ptr<ITexture2D> m_SkyboxTexture;
 		std::shared_ptr<IImage2D> m_Frame;
-		std::shared_ptr<IUniformBuffer> m_CameraUBO, m_RenderSettingsUBO, m_EnvironmentUBO;
-		std::shared_ptr<IShaderStorageBuffer> m_TriangleMeshSSBO, m_BVHSSBO;
+		std::shared_ptr<IUniformBuffer> m_CameraUBO, m_RenderSettingsUBO, m_EnvironmentUBO, m_ObjectsMetadataUBO;
+		std::shared_ptr<IShaderStorageBuffer> m_TransformsSSBO, m_ContinuousMeshesSSBO, m_ContinuousBvhsSSBO, m_MeshMappingsSSBO, m_MeshSizesSSBO, m_BvhMappingsSSBO, m_BVHSizesSSBO;
 
 		uint32_t m_AccumulateFrameCount;
 		bool m_SceneValid;

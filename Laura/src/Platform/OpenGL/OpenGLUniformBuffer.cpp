@@ -21,7 +21,8 @@ namespace Laura
 
 	void OpenGLUniformBuffer::Unbind()
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		GLCall(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+		GLCall(glMemoryBarrier(GL_UNIFORM_BARRIER_BIT));
 	}
 
 	void OpenGLUniformBuffer::AddData(uint32_t offset, uint32_t dataSize, const void* data)

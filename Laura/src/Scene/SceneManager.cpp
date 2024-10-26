@@ -58,6 +58,7 @@ namespace Laura
 				entityList.push_back(e); // this entity is valid for rendering so we add it to the entity array
 			}
 		}
+		rScene->objectCount = entityList.size();
 
 		/// SORTING ///////////////////////////////////////////////////////////////////////
 		// After collecting the entities and mesh GUIDs, we sort them to ensure a stable, predictable order.
@@ -72,39 +73,54 @@ namespace Laura
 				return e1.GetComponent<GUIDComponent>().guid < e2.GetComponent<GUIDComponent>().guid;
 			});
 
+
+		std::vector<uint32_t> meshMappingsIndexed;
 		/// SET INDEX MAPPINGS ////////////////////////////////////////////////////////////
 		for (Entity e : entityList)
 		{
 			auto meshIterator = std::lower_bound(meshGuidList.begin(), meshGuidList.end(), e.GetComponent<MeshComponent>().guid);
-			int meshIndex = std::distance(meshGuidList.begin(), meshIterator);
-			rScene->meshMappings.push_back(meshIndex);
+			uint32_t meshIndex = std::distance(meshGuidList.begin(), meshIterator);
+			meshMappingsIndexed.push_back(meshIndex);
 
 			auto materialIterator = std::lower_bound(materialGuidList.begin(), materialGuidList.end(), e.GetComponent<MaterialComponent>().guid);
-			int materialIndex = std::distance(materialGuidList.begin(), materialIterator);
+			uint32_t materialIndex = std::distance(materialGuidList.begin(), materialIterator);
 			rScene->materialMappings.push_back(materialIndex);
 
 			rScene->transforms.push_back(e.GetComponent<TransformComponent>().GetMatrix());
 		}
 
-		/// PASS MESH BVH AND MATERIAL DATA TO RSCENE /////////////////////////////////////
+		std::vector<uint32_t> meshIndicesSized;
+		std::vector<uint32_t> bvhIndicesSized;
+		uint32_t prevMeshIndexSized = 0, prevBvhIndexSized = 0;
 		for (GUID guid : meshGuidList)
 		{
 			std::shared_ptr<std::vector<Triangle>> mesh = m_AssetManager->GetMesh(guid);
+			rScene->continuousMeshes.insert(rScene->continuousMeshes.end(), mesh->begin(), mesh->end());
+			meshIndicesSized.push_back(prevMeshIndexSized);
+			prevMeshIndexSized += mesh->size();
+
 			std::shared_ptr<BVH::BVH_data> meshBVH = m_AssetManager->GetBVH(guid);
-			rScene->meshes.push_back(mesh);
-			rScene->BVHs.push_back(meshBVH);
+			rScene->continuousBVHs.insert(rScene->continuousBVHs.end(), meshBVH->BVH.begin(), meshBVH->BVH.end());
+			bvhIndicesSized.push_back(prevBvhIndexSized);
+			prevBvhIndexSized += meshBVH->BVH_size;
 		}
+		for (size_t i = 0; i < meshMappingsIndexed.size(); i++)
+		{
+			rScene->bvhMappings.push_back(bvhIndicesSized[meshMappingsIndexed[i]]);
+			rScene->meshMappings.push_back(meshIndicesSized[meshMappingsIndexed[i]]);
+		}
+
 		for (GUID guid : materialGuidList)
 		{
 			std::shared_ptr<Material> material = m_AssetManager->GetMaterial(guid);
-			rScene->materials.push_back(material);
+			rScene->continuousMaterials.push_back(*material);
 		}
 
 		/// CHECK FLAGS ////////////////////////////////////////////////////////////////////
 		rScene->meshesDirty = false;
 		rScene->materialsDirty = false;
 
-		for (int i =0; i < rScene->meshMappings.size(); i++)
+		for (size_t i = 0; i < rScene->meshMappings.size(); i++)
 		{
 			if (i >= m_Cached_MeshMappings.size() || m_Cached_MeshMappings[i] != rScene->meshMappings[i])
 			{
@@ -112,7 +128,7 @@ namespace Laura
 				break;
 			}
 		}
-		for (int i = 0; i < rScene->materialMappings.size(); i++)
+		for (size_t i = 0; i < rScene->materialMappings.size(); i++)
 		{
 			if (i >= m_Cached_MaterialMappings.size() || m_Cached_MaterialMappings[i] != rScene->materialMappings[i])
 			{

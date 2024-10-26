@@ -64,10 +64,38 @@ namespace Laura
 			dragonMesh.guid = guid;
 		}
 
+		{
+			Entity sponza_e = m_Scene->CreateEntity();
+			std::string& tag = sponza_e.GetComponent<TagComponent>().Tag;
+			tag = std::string("Bunny");
+			MeshComponent& sponzaMesh = sponza_e.AddComponent<MeshComponent>();
+			TransformComponent& sponzaTransform = sponza_e.AddComponent<TransformComponent>();
+			MaterialComponent& sponzaMaterial = sponza_e.AddComponent<MaterialComponent>();
+			// TODO: this should be loaded upon opening the editor - asset manager should keep track of the assets to be loaded (serialize/deserialize them)
+			GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
+			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
+			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
+			sponzaMesh.guid = guid;
+		}
+
+		{
+			Entity sponza_e = m_Scene->CreateEntity();
+			std::string& tag = sponza_e.GetComponent<TagComponent>().Tag;
+			tag = std::string("Sponza");
+			MeshComponent& sponzaMesh = sponza_e.AddComponent<MeshComponent>();
+			TransformComponent& sponzaTransform = sponza_e.AddComponent<TransformComponent>();
+			MaterialComponent& sponzaMaterial = sponza_e.AddComponent<MaterialComponent>();
+			// TODO: this should be loaded upon opening the editor - asset manager should keep track of the assets to be loaded (serialize/deserialize them)
+			GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
+			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
+			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
+			sponzaMesh.guid = guid;
+		}
+
 		m_Renderer->renderSettings.raysPerPixel = 1;
-		m_Renderer->renderSettings.bouncesPerRay = 5;
-		m_Renderer->renderSettings.maxAABBIntersections = 10000;
-		m_Renderer->renderSettings.displayBVH = false;
+		m_Renderer->renderSettings.bouncesPerRay = 0;
+		m_Renderer->renderSettings.maxAABBIntersections = 500;
+		m_Renderer->renderSettings.displayBVH = true;
 
 		// The FRAME_WIDTH and FRAME_HEIGHT define the dimensions of the render frame.
 		// These values represent the actual number of pixels that the renderer will process to produce the final image.

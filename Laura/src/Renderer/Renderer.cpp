@@ -1,19 +1,21 @@
 #include "renderer/Renderer.h"
 #include "Assets/TextureLoader.h"
 #include "Renderer/BVH/BVHBuilder.h"
+#include "GL/glew.h"
 
 namespace Laura 
 {
 	void Renderer::Init()
 	{
+		m_Shader = IComputeShader::Create(LR_RESOURCES_PATH "Shaders/RayTracingDefault.comp", glm::uvec3(1));
+		m_Shader->Bind();
+		
 		m_Frame = IImage2D::Create(nullptr, m_FrameResolution.x, m_FrameResolution.y, 0, Image2DType::LR_READ_WRITE);
 
 		m_CameraUBO = IUniformBuffer::Create(80, 0, BufferUsageType::DYNAMIC_DRAW);
-		m_RenderSettingsUBO = IUniformBuffer::Create(32, 2, BufferUsageType::DYNAMIC_DRAW);
-		//m_EnvironmentUBO = IUniformBuffer::Create(64, 1, BufferUsageType::DYNAMIC_DRAW);
-
-		m_Shader = IComputeShader::Create(LR_RESOURCES_PATH "Shaders/RayTracingDefault.comp", glm::uvec3(1));
-		m_Shader->Bind();
+		m_RenderSettingsUBO = IUniformBuffer::Create(32, 1, BufferUsageType::DYNAMIC_DRAW);
+		m_ObjectsMetadataUBO = IUniformBuffer::Create(16, 2, BufferUsageType::STATIC_DRAW);
+		//m_EnvironmentUBO = IUniformBuffer::Create(64, 3, BufferUsageType::DYNAMIC_DRAW);
 	}
 
 	void Renderer::SetFrameResolution(const glm::vec2& resolution)
@@ -24,11 +26,23 @@ namespace Laura
 
 	void Renderer::SubmitScene(std::shared_ptr<RenderableScene> rScene)
 	{
-		m_SceneValid = rScene->isValid; // this flag determines if the renderer will try to render the scene upon RenderScene() call
-		// we still try to update parts which are valid
+		// this flag determines if the renderer will try to render the scene upon RenderScene() call we still try to update parts which are valid
+		m_SceneValid = rScene->isValid; 
 
-		UpdateRenderSettingsUBO();
-		UpdateCameraUBO(rScene->cameraTransform, rScene->cameraFocalLength);
+		m_AccumulateFrameCount = (!renderSettings.accumulateFrames) ? 0 : m_AccumulateFrameCount++; //TODO: this should not be in the renderer
+
+		m_RenderSettingsUBO->Bind();
+		m_RenderSettingsUBO->AddData(0, sizeof(uint32_t), &renderSettings.raysPerPixel);
+		m_RenderSettingsUBO->AddData(4, sizeof(uint32_t), &renderSettings.bouncesPerRay);
+		m_RenderSettingsUBO->AddData(8, sizeof(uint32_t), &renderSettings.maxAABBIntersections);
+		m_RenderSettingsUBO->AddData(12, sizeof(uint32_t), &m_AccumulateFrameCount);
+		m_RenderSettingsUBO->AddData(16, sizeof(bool), &renderSettings.displayBVH);
+		m_RenderSettingsUBO->Unbind();
+
+		m_CameraUBO->Bind();
+		m_CameraUBO->AddData(0, sizeof(glm::mat4), &rScene->cameraTransform);
+		m_CameraUBO->AddData(64, sizeof(float), &rScene->cameraFocalLength);
+		m_CameraUBO->Unbind();
 		
 		if (rScene->skyboxDirty)
 		{
@@ -37,64 +51,33 @@ namespace Laura
 
 		if (rScene->meshesDirty)
 		{
-			//for (Entity& model : rScene->models)
-			//{
-			//	Submit(model);
-			//}
-			//std::cout << "Submitting model to renderer" << std::endl;
-			//// TODO: make the renderer utilize the transform and material components (currently only using the mesh component)
+			m_ObjectsMetadataUBO->Bind();
+			m_ObjectsMetadataUBO->AddData(0, sizeof(uint32_t), &rScene->objectCount);
+			m_ObjectsMetadataUBO->Unbind();
 			
-			std::shared_ptr<std::vector<Triangle>> mesh = rScene->meshes[0];
-			std::shared_ptr<BVH::BVH_data> meshBVH = rScene->BVHs[0];
-			
-			m_TriangleMeshSSBO = IShaderStorageBuffer::Create(sizeof(Triangle) * meshBVH->TRIANGLES_size, 3, BufferUsageType::STATIC_DRAW);
-			m_TriangleMeshSSBO->Bind();
-			m_TriangleMeshSSBO->AddData(0, sizeof(Triangle) * meshBVH->TRIANGLES_size, meshBVH->TRIANGLES.data());
-			m_TriangleMeshSSBO->Unbind();
-			
-			m_BVHSSBO = IShaderStorageBuffer::Create(sizeof(BVH::Node) * meshBVH->BVH_size, 4, BufferUsageType::STATIC_DRAW);
-			m_BVHSSBO->Bind();
-			m_BVHSSBO->AddData(0, sizeof(BVH::Node) * meshBVH->BVH_size, meshBVH->BVH.data());
-			m_BVHSSBO->Unbind();
+			m_TransformsSSBO = IShaderStorageBuffer::Create(sizeof(glm::mat4) * rScene->transforms.size(), 4, BufferUsageType::DYNAMIC_DRAW);
+			m_TransformsSSBO->Bind();
+			m_TransformsSSBO->AddData(0, sizeof(glm::mat4) * rScene->transforms.size(), rScene->transforms.data());
+			m_TransformsSSBO->Unbind();
+
+			m_ContinuousMeshesSSBO = IShaderStorageBuffer::Create(sizeof(Triangle) * rScene->continuousMeshes.size(), 5, BufferUsageType::STATIC_DRAW);
+			m_ContinuousMeshesSSBO->Bind();
+			m_ContinuousMeshesSSBO->AddData(0, sizeof(Triangle) * rScene->continuousMeshes.size(), rScene->continuousMeshes.data());
+			m_ContinuousMeshesSSBO->Unbind();
+			m_MeshMappingsSSBO = IShaderStorageBuffer::Create(sizeof(uint32_t) * rScene->meshMappings.size(), 6, BufferUsageType::STATIC_DRAW);
+			m_MeshMappingsSSBO->Bind();
+			m_MeshMappingsSSBO->AddData(0, sizeof(uint32_t) * rScene->meshMappings.size(), rScene->meshMappings.data());
+			m_MeshMappingsSSBO->Unbind();
+
+			m_ContinuousBvhsSSBO = IShaderStorageBuffer::Create(sizeof(BVH::Node) * rScene->continuousBVHs.size(), 7, BufferUsageType::STATIC_DRAW);
+			m_ContinuousBvhsSSBO->Bind();
+			m_ContinuousBvhsSSBO->AddData(0, sizeof(BVH::Node) * rScene->continuousBVHs.size(), rScene->continuousBVHs.data());
+			m_ContinuousBvhsSSBO->Unbind();
+			m_BvhMappingsSSBO = IShaderStorageBuffer::Create(sizeof(uint32_t) * rScene->bvhMappings.size(), 8, BufferUsageType::STATIC_DRAW);
+			m_BvhMappingsSSBO->Bind();
+			m_BvhMappingsSSBO->AddData(0, sizeof(uint32_t) * rScene->bvhMappings.size(), rScene->bvhMappings.data());
+			m_BvhMappingsSSBO->Unbind();
 		}
-	}
-
-	void Renderer::UpdateCameraUBO(glm::mat4 transform, float focalLength)
-	{
-		m_CameraUBO->Bind();
-		m_CameraUBO->AddData(0, sizeof(glm::mat4), &transform);
-		m_CameraUBO->AddData(64, sizeof(float), &focalLength);
-		m_CameraUBO->Unbind();
-	}
-
-	void Renderer::UpdateSkyboxUBO(std::shared_ptr<LoadedTexture> skyboxTex)
-	{
-		
-
-		//m_EnvironmentUBO->Bind();
-		//m_EnvironmentUBO->AddData(0, sizeof(glm::vec3), &skybox.getGroundColor());
-		//m_EnvironmentUBO->AddData(16, sizeof(glm::vec3), &skybox.getHorizonColor());
-		//m_EnvironmentUBO->AddData(32, sizeof(glm::vec3), &skybox.getZenithColor());
-		//bool useGradient = (skybox.getType() == SkyboxType::SKYBOX_GRADIENT) ? true : false;
-		//m_EnvironmentUBO->AddData(48, sizeof(bool), &useGradient);
-		//m_EnvironmentUBO->Unbind();
-	}
-
-	void Renderer::UpdateRenderSettingsUBO()
-	{
-		m_RenderSettingsUBO->Bind();
-		m_RenderSettingsUBO->AddData(0, sizeof(uint32_t), &renderSettings.raysPerPixel);
-		m_RenderSettingsUBO->AddData(4, sizeof(uint32_t), &renderSettings.bouncesPerRay);
-		m_RenderSettingsUBO->AddData(8, sizeof(uint32_t), &renderSettings.maxAABBIntersections);
-		m_AccumulateFrameCount = (!renderSettings.accumulateFrames) ? 0 : m_AccumulateFrameCount++; //TODO: this should not be in the renderer
-		m_RenderSettingsUBO->AddData(12, sizeof(uint32_t), &m_AccumulateFrameCount);
-		m_RenderSettingsUBO->AddData(16, sizeof(bool), &renderSettings.displayBVH);
-		m_RenderSettingsUBO->Unbind();
-	}
-
-	void Renderer::Submit(const Entity& model)
-	{
-		
 	}
 
 	std::shared_ptr<IImage2D> Renderer::RenderScene()
@@ -106,7 +89,17 @@ namespace Laura
 			                                   ceil(m_FrameResolution.y / 4),
 			                                   1));
 		m_Shader->Dispatch();
-
 		return m_Frame;
 	}
+
+	//void Renderer::UpdateSkyboxUBO(std::shared_ptr<LoadedTexture> skyboxTex)
+	//{
+	//	m_EnvironmentUBO->Bind();
+	//	m_EnvironmentUBO->AddData(0, sizeof(glm::vec3), &skybox.getGroundColor());
+	//	m_EnvironmentUBO->AddData(16, sizeof(glm::vec3), &skybox.getHorizonColor());
+	//	m_EnvironmentUBO->AddData(32, sizeof(glm::vec3), &skybox.getZenithColor());
+	//	bool useGradient = (skybox.getType() == SkyboxType::SKYBOX_GRADIENT) ? true : false;
+	//	m_EnvironmentUBO->AddData(48, sizeof(bool), &useGradient);
+	//	m_EnvironmentUBO->Unbind();
+	//}
 }

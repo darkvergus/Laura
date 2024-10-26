@@ -122,7 +122,21 @@ layout (std140, binding = 0) uniform CameraUBO
     float u_FocalLength;
 };
 
-layout (std140, binding = 1) uniform EnvironmentUBO
+layout (std140, binding = 1) uniform RenderSettingsUBO
+{
+    uint u_RaysPerPixel;
+    uint u_BouncesPerRay;
+    uint u_heatmap_color_limit;
+    uint u_numAccumulatedFrames;
+    bool u_displayBVH;
+};
+
+layout (std140, binding = 2) uniform ObjectsMetadataUBO
+{
+	uint u_objectCount;
+};
+
+layout (std140, binding = 3) uniform EnvironmentUBO
 {
 	vec3 u_SkyboxGroundColor;
 	vec3 u_SkyboxHorizonColor;
@@ -130,32 +144,43 @@ layout (std140, binding = 1) uniform EnvironmentUBO
     bool u_UseGradient;
 };
 
-layout (std140, binding = 2) uniform RenderSettingsUBO
-{
-    uint u_RaysPerPixel;
-    uint u_BouncesPerRay;
-    uint u_heatmap_color_limit;
-    uint u_numAccumulatedFrames;
-    bool u_displayBVH;
 
+/** Transforms SSBO stores the transformation matrices of the objects in the scene.
+ * The transformation matrices are used to transform the vertices of the objects from object space to world space.
+ */
+layout (std140, binding = 4) buffer SSBO_Transforms
+{
+	mat4 Transforms[];
 };
 
-/** The MESH_buffer SSBO stores the triangles that make up the mesh in the scene.
- * The triangles are stored in an array of Triangle structs, where each Triangle struct contains the vertices of the triangle, the normals at each vertex, and the material properties of the triangle.
+/** Mesh related SSBOs 
+ *  - SSBO_Meshes stores the vertices of the meshes
+ *  - SSBO_MeshMappings stores the indices of the meshes
  */
-layout (std140, binding = 3) buffer MESH_buffer
+layout (std140, binding = 5) buffer SSBO_ContinuousMeshes
 {
-    Triangle MESH[];
+    Triangle continuousMeshes[];
+};
+layout (std430, binding = 6) buffer SSBO_MeshMappings
+{
+	int meshMappings[];
 };
 
 /** The BVH_buffer SSBO stores the nodes of the Bounding Volume Hierarchy (BVH) tree that organizes the triangles in the scene.
  * The BVH tree is used to optimize ray-triangle intersection tests by reducing the number of triangles that need to be checked for intersection with a given ray.
  * The BVH tree is stored in an array of BVHNode structs, where each BVHNode struct contains information about the bounding box of the node, as well as references to the child nodes or the triangles contained in the node.
  */
-layout (std140, binding = 4) buffer BVH_buffer
+layout (std140, binding = 7) buffer SSBO_ContinuousBVHs
 {
-    BVHNode BVH[];
+    BVHNode continuousBvhs[];
 };
+
+layout (std430, binding = 8) buffer SSBO_BvhMappings
+{
+	int bvhMappings[];
+};
+
+
 
 /** The function getCurrentState calculates a unique state value based on the texel coordinates and the number of accumulated frames.
  * The state value is used to generate random numbers for sampling in the shader.
@@ -406,7 +431,7 @@ HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri)
  * If the ray intersects a leaf node, the function checks for intersections with the primitives contained in the node.
  * If the ray intersects a primitive, the function updates the closest intersection found so far.
  */
-void BVH_traverse(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
+void BVH_traverse(Ray ray, int meshIndex, int bvhIndex, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
 {
     // A stack is initialized to keep track of the BVH nodes that need to be checked.
     int stack_elements[MAX_STACK_SIZE];
@@ -430,7 +455,7 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_c
             stack_top--;
         }
 
-        const BVHNode current_node = BVH[current_node_idx];
+        const BVHNode current_node = continuousBvhs[bvhIndex + current_node_idx];
 
         // The function checks if the ray intersects the bounding box of the current node.
         if (RayAABBIntersection(ray, current_node.minVec, current_node.maxVec, AABB_tMin))
@@ -455,7 +480,7 @@ void BVH_traverse(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_c
                     }
 
                     // The function retrieves the triangle associated with the current primitive.
-                    const Triangle tri = MESH[triangle_idx];
+                    const Triangle tri = continuousMeshes[meshIndex + triangle_idx];
                                   
                     const HitInfo triHitInfo = RayTriangleIntersection(ray, tri);
                     
@@ -513,17 +538,22 @@ HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_int
     //        closestHit.material = sphere.material;
     //    }
     //}   
-    
-    HitInfo BVHhitInfo;
-    BVHhitInfo.didCollide = false;
-    BVHhitInfo.dst = INF;
-    
-    BVH_traverse(ray, BVHhitInfo, AABB_intersect_count, TRI_intersect_count); // traversing all the triangles
-    if (BVHhitInfo.didCollide && BVHhitInfo.dst < closestHit.dst)
-    {
-        closestHit = BVHhitInfo;
-    }
 
+    for (int i = 0; i < u_objectCount; i++)
+    {
+        int meshIndex = meshMappings[i];
+		int bvhIndex = bvhMappings[i];
+		
+        HitInfo hitInfo;
+        hitInfo.didCollide = false;
+        hitInfo.dst = INF;
+
+        BVH_traverse(ray, meshIndex, bvhIndex, hitInfo, AABB_intersect_count, TRI_intersect_count);
+        if (hitInfo.didCollide && hitInfo.dst < closestHit.dst)
+        {
+            closestHit = hitInfo;
+        }
+    }
     return closestHit;
 }
 

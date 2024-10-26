@@ -21,7 +21,8 @@ namespace Laura
 
 	void OpenGLShaderStorageBuffer::Unbind()
 	{
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+		GLCall(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+		GLCall(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
 	}
 
 	void OpenGLShaderStorageBuffer::AddData(uint32_t offset, uint32_t dataSize, const void* data)
