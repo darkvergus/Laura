@@ -56,6 +56,12 @@ namespace Laura
 			}
 		}
 
+		if (ImGui::IsItemHovered()) {
+			ImGui::BeginTooltip();
+			ImGui::Text("Reload the theme if you made changes to the .lrtheme file");
+			ImGui::EndTooltip();
+		}
+
 		if (loadThemeStatusMessage != "")
 		{
 			ImGui::PushTextWrapPos(ImGui::GetContentRegionAvail().x);

@@ -148,7 +148,7 @@ layout (std140, binding = 3) uniform EnvironmentUBO
 /** Transforms SSBO stores the transformation matrices of the objects in the scene.
  * The transformation matrices are used to transform the vertices of the objects from object space to world space.
  */
-layout (std140, binding = 4) buffer SSBO_Transforms
+layout (std430, binding = 4) buffer SSBO_Transforms
 {
 	mat4 Transforms[];
 };
@@ -539,8 +539,16 @@ HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_int
     //    }
     //}   
 
+    mat4 closestHitTransform;
     for (int i = 0; i < u_objectCount; i++)
     {
+        mat4 transform = Transforms[i];
+        mat4 invTransform = inverse(transform);
+
+        Ray rayLocal;
+        rayLocal.origin = (invTransform * vec4(ray.origin, 1.0)).xyz;
+        rayLocal.dir = (invTransform * vec4(ray.dir, 0.0)).xyz;
+
         int meshIndex = meshMappings[i];
 		int bvhIndex = bvhMappings[i];
 		
@@ -548,12 +556,16 @@ HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_int
         hitInfo.didCollide = false;
         hitInfo.dst = INF;
 
-        BVH_traverse(ray, meshIndex, bvhIndex, hitInfo, AABB_intersect_count, TRI_intersect_count);
+        BVH_traverse(rayLocal, meshIndex, bvhIndex, hitInfo, AABB_intersect_count, TRI_intersect_count);
         if (hitInfo.didCollide && hitInfo.dst < closestHit.dst)
         {
             closestHit = hitInfo;
+            closestHitTransform = transform;
         }
     }
+
+    closestHit.hitPoint = (closestHitTransform * vec4(closestHit.hitPoint, 1.0)).xyz;
+    closestHit.normal = normalize((closestHitTransform * vec4(closestHit.normal, 0.0)).xyz);
     return closestHit;
 }
 

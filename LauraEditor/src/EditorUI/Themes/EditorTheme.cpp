@@ -16,7 +16,7 @@ namespace Laura
         // Check for the correct file extension
         if (!filepath.ends_with(LR_THEME_FILE_EXTENSION))
         {
-            statusMessage = "Invalid file extension for theme file: " + filepath;
+            statusMessage = "Invalid file extension for theme file ( or none selected ): " + filepath;
             return false;
         }
 
@@ -57,7 +57,7 @@ namespace Laura
         // Check for the correct file extension
         if (!filepath.ends_with(LR_THEME_FILE_EXTENSION))
         {
-            statusMessage = "Invalid file extension for theme file: " + filepath;
+            statusMessage = "Invalid file extension for theme file (or none selected): " + filepath;
 			return false;
 		}
         

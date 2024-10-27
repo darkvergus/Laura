@@ -49,16 +49,16 @@ namespace Laura
 			m_SkyboxTexture = ITexture2D::Create(rScene->skybox->data, rScene->skybox->width, rScene->skybox->height, 1);
 		}
 
+		m_TransformsSSBO = IShaderStorageBuffer::Create(sizeof(glm::mat4) * rScene->transforms.size(), 4, BufferUsageType::DYNAMIC_DRAW);
+		m_TransformsSSBO->Bind();
+		m_TransformsSSBO->AddData(0, sizeof(glm::mat4) * rScene->transforms.size(), rScene->transforms.data());
+		m_TransformsSSBO->Unbind();
+
 		if (rScene->meshesDirty)
 		{
 			m_ObjectsMetadataUBO->Bind();
 			m_ObjectsMetadataUBO->AddData(0, sizeof(uint32_t), &rScene->objectCount);
 			m_ObjectsMetadataUBO->Unbind();
-			
-			m_TransformsSSBO = IShaderStorageBuffer::Create(sizeof(glm::mat4) * rScene->transforms.size(), 4, BufferUsageType::DYNAMIC_DRAW);
-			m_TransformsSSBO->Bind();
-			m_TransformsSSBO->AddData(0, sizeof(glm::mat4) * rScene->transforms.size(), rScene->transforms.data());
-			m_TransformsSSBO->Unbind();
 
 			m_ContinuousMeshesSSBO = IShaderStorageBuffer::Create(sizeof(Triangle) * rScene->continuousMeshes.size(), 5, BufferUsageType::STATIC_DRAW);
 			m_ContinuousMeshesSSBO->Bind();

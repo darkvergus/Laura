@@ -86,6 +86,8 @@ namespace Laura
 			uint32_t materialIndex = std::distance(materialGuidList.begin(), materialIterator);
 			rScene->materialMappings.push_back(materialIndex);
 
+			// we need to inverse of the transforms to get the ray from the world space to the object's local space
+			// this way we just need to apply the inversed transformation to the ray once, instead of every vertex which saves a lot of computation
 			rScene->transforms.push_back(e.GetComponent<TransformComponent>().GetMatrix());
 		}
 
