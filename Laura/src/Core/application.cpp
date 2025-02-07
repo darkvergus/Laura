@@ -30,6 +30,8 @@ namespace Laura {
 
 		_RendererAPI = IRendererAPI::Create();
 		_Renderer = std::make_shared<Renderer>();
+
+		_Profiler = std::make_shared<Profiler>();
 	}
 
 	void Application::run()
@@ -37,6 +39,8 @@ namespace Laura {
 		init();
 		while (!_Window->shouldClose())
 		{
+			_Profiler->startTimestamp("global");
+
 			_Window->onUpdate();
 			_RendererAPI->Clear({0.98f, 0.24f, 0.97f, 1.0f}); // fill the screen with a color (pink)
 			_LayerStack->onUpdate();
@@ -44,6 +48,11 @@ namespace Laura {
 			_ImGuiContextManager->BeginFrame();
 			_LayerStack->onImGuiRender(); // all of the rendering onto the screen happens here
 			_ImGuiContextManager->EndFrame();
+
+			_Profiler->endTimestamp("global");
+
+			std::shared_ptr<const Timestamp> ts = _Profiler->getTimestamp("global");
+			std::cout << ts->id << " | " << ts->elapsed_ms << "\n";
 		}
 		shutdown();
 	}

@@ -5,7 +5,6 @@
 #include "Core/IWindow.h"
 #include "Core/LayerStack.h"
 #include "Core/ImGuiContext.h"
-#include "Core/DeltaTime.h"
 
 #include "Renderer/Renderer.h"
 #include "Renderer/IRendererAPI.h"
@@ -14,6 +13,7 @@
 
 #include "Events/Events.h"
 
+#include "Core/Profiler.h"
 
 
 namespace Laura {
@@ -26,14 +26,14 @@ namespace Laura {
         virtual ~Application();
         void run();
     protected:
-        std::shared_ptr<IWindow> _Window;
-        std::shared_ptr<LayerStack> _LayerStack;
-        std::shared_ptr <ImGuiContext> _ImGuiContextManager;
-        std::shared_ptr<IRendererAPI> _RendererAPI;
-        std::shared_ptr<Renderer> _Renderer;
-        std::shared_ptr<AssetManager> _AssetManager;
-        std::shared_ptr<SceneManager> _SceneManager;
-        std::shared_ptr<DeltaTime> dt;
+        std::shared_ptr<IWindow>        _Window;
+        std::shared_ptr<LayerStack>     _LayerStack;
+        std::shared_ptr<ImGuiContext>   _ImGuiContextManager;
+        std::shared_ptr<IRendererAPI>   _RendererAPI;
+        std::shared_ptr<Renderer>       _Renderer;
+        std::shared_ptr<AssetManager>   _AssetManager;
+        std::shared_ptr<SceneManager>   _SceneManager;
+        std::shared_ptr<Profiler>       _Profiler;
 
     protected:
         virtual void init();
