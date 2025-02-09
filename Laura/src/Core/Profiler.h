@@ -10,7 +10,6 @@ namespace Laura
 		std::chrono::high_resolution_clock::time_point end;
 		std::chrono::nanoseconds elapsed_ns;
 		double elapsed_ms;
-		std::string id;
 	};
 
 	class Profiler
@@ -22,9 +21,10 @@ namespace Laura
 		void startTimestamp(const std::string& id);
 		void endTimestamp(const std::string& id);
 
-		const std::shared_ptr<const Timestamp> getTimestamp(const std::string& id);
-
+		const std::shared_ptr<const Timestamp> getTimestamp(const std::string& id) const;
+		const std::unordered_map<std::string, Timestamp>& getAllTimestamps() const;
+		
 	private:
-		std::unordered_map<std::string, Timestamp> data;
+		std::unordered_map<std::string, Timestamp> m_Timestamps;
 	};
 }

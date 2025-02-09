@@ -155,7 +155,8 @@ namespace Laura
 	void EditorLayer::onImGuiRender()
 	{
 		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-		
+		bool showDemo = true;
+		ImGui::ShowDemoWindow(&showDemo);
 		if (ImGui::BeginMainMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))

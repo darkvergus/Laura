@@ -1,4 +1,5 @@
 #include "Profiler.h"
+#include "Profiler.h"
 
 namespace Laura {
 
@@ -6,15 +7,13 @@ namespace Laura {
 	{
 		Timestamp ts;
 		ts.start = std::chrono::high_resolution_clock::now();
-		ts.id = id;
-
-		data.insert_or_assign(id, ts);
+		m_Timestamps.insert_or_assign(id, ts);
 	}
 
 	void Profiler::endTimestamp(const std::string& id)
 	{
-		auto it = data.find(id);
-		if (it == data.end())
+		auto it = m_Timestamps.find(id);
+		if (it == m_Timestamps.end())
 		{
 			std::cout << "Invalid End Timestamp ID" << std::endl;
 			return;
@@ -26,14 +25,19 @@ namespace Laura {
 		ts.elapsed_ms = std::chrono::duration<double, std::milli>(ts.elapsed_ns).count();
 	}
 
-	const std::shared_ptr<const Timestamp> Profiler::getTimestamp(const std::string& id)
+	const std::shared_ptr<const Timestamp> Profiler::getTimestamp(const std::string& id) const
 	{
-		auto it = data.find(id);
-		if (it == data.end())
+		auto it = m_Timestamps.find(id);
+		if (it == m_Timestamps.end())
 		{
 			std::cout << "Invalid Get Timestamp ID" << std::endl;
 			return nullptr;
 		}
 		return std::make_shared<const Timestamp>(it->second);
+	}
+
+	const std::unordered_map<std::string, Timestamp>& Laura::Profiler::getAllTimestamps() const
+	{
+		return m_Timestamps;
 	}
 }

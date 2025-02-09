@@ -9,6 +9,8 @@
 #include "Core/Events/KeyCodes.h"
 #include "Core/Events/MouseCodes.h"
 
+#include "Core/Profiler.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/IRendererAPI.h"
 

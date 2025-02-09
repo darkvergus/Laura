@@ -52,7 +52,7 @@ namespace Laura {
 			_Profiler->endTimestamp("global");
 
 			std::shared_ptr<const Timestamp> ts = _Profiler->getTimestamp("global");
-			std::cout << ts->id << " | " << ts->elapsed_ms << "\n";
+			std::cout << "[" << ts->elapsed_ms << "] " << "Global" << "\n";
 		}
 		shutdown();
 	}
