@@ -10,3 +10,6 @@
 [submodule "Laura/Thirdparty/yaml-cpp"]
 	path = Laura/Thirdparty/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Laura/Thirdparty/implot"]
+	path = Laura/Thirdparty/implot
+	url = https://github.com/jakubg05/implot.git

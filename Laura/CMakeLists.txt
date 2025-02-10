@@ -26,8 +26,9 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/imgui-docking")		# UI
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/assimp")				# Model loading
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/spdlog")				# Logging/Debugging
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/entt")				    # ECS
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/font-awesome-headers") #Icons
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/yaml-cpp")             #YAML Serialization
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/font-awesome-headers") # Icons
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/yaml-cpp")             # YAML Serialization
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/implot")                # Graphs and plotting
 
 add_library(LauraEngine STATIC)
 set_property(TARGET LauraEngine PROPERTY CXX_STANDARD 20)
@@ -41,7 +42,7 @@ target_precompile_headers(lrpchLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch
 target_link_libraries(lrpchLib PUBLIC glm spdlog::spdlog)
 
 # only these should be public
-target_link_libraries(LauraEngine PUBLIC glm imgui spdlog::spdlog entt fontAwesome yaml-cpp) 
+target_link_libraries(LauraEngine PUBLIC glm imgui spdlog::spdlog entt fontAwesome yaml-cpp implot) 
 # these should be private but it does not work with private for some reason
 target_link_libraries(LauraEngine PUBLIC assimp glfw libglew_static stb_image stb_truetype) 
 

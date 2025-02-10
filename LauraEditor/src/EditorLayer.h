@@ -7,6 +7,7 @@
 #include "EditorUI/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel.h"
 #include "EditorUI/Inspector/InspectorPanel.h"
+#include "EditorUI/ProfilerPanel.h"
 
 /// --- Theme Manager --- ///
 #include "EditorUI/Themes/EditorTheme.h"
@@ -17,7 +18,7 @@ namespace Laura
 	class EditorLayer : public ILayer
 	{
 	public:
-		EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<SceneManager> sceneManager, std::shared_ptr<AssetManager> assetManager);
+		EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<SceneManager> sceneManager, std::shared_ptr<AssetManager> assetManager, std::shared_ptr<Profiler> profiler);
 		virtual void onAttach() override;
 		virtual void onDetach() override;
 		virtual void onUpdate() override;
@@ -29,6 +30,7 @@ namespace Laura
 		std::shared_ptr<Renderer> m_Renderer;
 		std::shared_ptr<AssetManager> m_AssetManager;
 		std::shared_ptr<SceneManager> m_SceneManager;
+		std::shared_ptr<Profiler> m_Profiler;
 	private:
 		glm::ivec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;
 		ImVec2 topLeftTextureCoords, bottomRightTextureCoords;
@@ -45,6 +47,7 @@ namespace Laura
 		InspectorPanel m_InspectorPanel;
 		ViewportPanel m_ViewportPanel;
 		ThemesPanel m_ThemesPanel;
+		ProfilerPanel m_ProfilerPanel;
 
 
 		// > ENGINE RELATED < //

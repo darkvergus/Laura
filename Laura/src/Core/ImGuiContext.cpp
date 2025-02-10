@@ -6,6 +6,8 @@
 #include <IconsFontAwesome6.h>
 #include <iconsFontAwesome6Brands.h>
 
+#include <implot.h>
+
 #include "lrpch.h"
 
 #include "core/Events/Events.h"
@@ -19,6 +21,7 @@ namespace Laura {
 
     ImGuiContext::~ImGuiContext()
     {
+        ImPlot::DestroyContext();
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -28,6 +31,7 @@ namespace Laura {
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
  
         // FONTS - merging Font Awesome with the default font (Icons)
         ImGuiIO& io = ImGui::GetIO();

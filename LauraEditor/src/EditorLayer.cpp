@@ -3,16 +3,18 @@
 namespace Laura
 {
 
-	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<SceneManager> sceneManager, std::shared_ptr<AssetManager> assetManager)
+	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<SceneManager> sceneManager, std::shared_ptr<AssetManager> assetManager, std::shared_ptr<Profiler> profiler)
 		: m_Renderer(renderer),
 		m_SceneManager(sceneManager),
 		m_AssetManager(assetManager),
+		m_Profiler(profiler),
 
 		m_EditorState(std::make_shared<EditorState>()),
 		m_ThemeManager(std::make_shared<ThemeManager>()),
 		m_InspectorPanel(m_EditorState, m_ThemeManager),
 		m_SceneHierarchyPanel(m_EditorState, m_ThemeManager),
-		m_ThemesPanel(m_EditorState, m_ThemeManager)
+		m_ThemesPanel(m_EditorState, m_ThemeManager),
+		m_ProfilerPanel()
 	{
 		setLayerName("EditorLayer");
 	}
@@ -195,7 +197,8 @@ namespace Laura
 		// Render The Scene
 		m_Renderer->SubmitScene(rScene);
 		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
-		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);		
+		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);
+		m_ProfilerPanel.OnImGuiRender(m_Profiler);
 	}
 
 	void EditorLayer::onDetach()

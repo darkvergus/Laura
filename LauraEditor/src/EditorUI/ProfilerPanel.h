@@ -7,12 +7,9 @@ namespace Laura
 	class ProfilerPanel
 	{
 	public:
-		ProfilerPanel(std::shared_ptr<const Profiler> profiler);
+		ProfilerPanel() = default;
 		~ProfilerPanel() = default;
 
-		void OnImGuiRender();
-	private:
-		std::shared_ptr<const Profiler> m_Profiler;
-
+		void OnImGuiRender(std::shared_ptr<const Profiler> profiler);
 	};
 }
