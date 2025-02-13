@@ -21,9 +21,9 @@ namespace Laura {
     class Application
     {
     public:
-        Application();
-        Application(WindowProps windowProps);
-        virtual ~Application();
+        Application() = default;
+        //Application(WindowProps windowProps);
+        virtual ~Application() = default;
         void run();
     protected:
         std::shared_ptr<IWindow>        _Window;

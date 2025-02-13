@@ -19,7 +19,7 @@ namespace Laura {
 		WindowProps(const std::string& title = std::string("LauraEngine"),
 			int width = 1280,
 			int height = 720,
-			bool VSync = false)
+			bool VSync = true)
 			: width(width), height(height), title(title), VSync(VSync)
 		{
 		}

@@ -11,10 +11,11 @@ namespace Laura
 
 		m_EditorState(std::make_shared<EditorState>()),
 		m_ThemeManager(std::make_shared<ThemeManager>()),
+
 		m_InspectorPanel(m_EditorState, m_ThemeManager),
 		m_SceneHierarchyPanel(m_EditorState, m_ThemeManager),
 		m_ThemesPanel(m_EditorState, m_ThemeManager),
-		m_ProfilerPanel()
+		m_ProfilerPanel(m_EditorState, m_ThemeManager)
 	{
 		setLayerName("EditorLayer");
 	}
@@ -178,9 +179,10 @@ namespace Laura
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Settings"))
+			if (ImGui::BeginMenu("View"))
 			{
 				if (ImGui::MenuItem("Themes")) { m_EditorState->temp.ThemeSettingsPanelOpen = true; }
+				if (ImGui::MenuItem("Profiler")) { m_EditorState->temp.ProfilerPanelOpen = true; }
 				ImGui::EndMenu();
 			}
 

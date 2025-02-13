@@ -2,40 +2,42 @@
 
 namespace Laura 
 {	
-	Profiler::ScopeTimer::ScopeTimer(Profiler* profiler, const char* label)
+	Profiler::ScopeTimer::ScopeTimer(Profiler* profiler, const std::string& label)
 		: m_Profiler(profiler), m_Label(label)
 	{
 		m_Start = std::chrono::high_resolution_clock::now();
+		m_Profiler->createTimerEntry(label);
 	}
 
 	Profiler::ScopeTimer::~ScopeTimer()
 	{
 		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 		double elapsed_ms = std::chrono::duration<double, std::milli>(end - m_Start).count();
-		m_Profiler->add(m_Label, elapsed_ms);
+		m_Profiler->addTimerValue(m_Label, elapsed_ms);
 	}
 
-	Profiler::Profiler()
-		: m_Labels(), m_Durations(), m_LabelsLastFrame(), m_DurationsLastFrame() {}
+	Profiler::Profiler(const size_t capacityPerTimer) 
+		: m_Capacity(capacityPerTimer){}
 
-	void Profiler::beginFrame()
+	const std::shared_ptr<Profiler::ScopeTimer> Profiler::globalTimer(const std::string& globalLabel)
 	{
-		m_Labels.clear();
-		m_Durations.clear();
+		m_GlobalLabel = globalLabel;
+		globalTimerSet = true;
+		return std::make_shared<Profiler::ScopeTimer>(this, m_GlobalLabel);
 	}
 
-	void Profiler::endFrame()
-	{
-		m_LabelsLastFrame = m_Labels;
-		m_DurationsLastFrame = m_Durations;
-	}
-
-	const std::shared_ptr<Profiler::ScopeTimer> Profiler::getTimer(const char* label) {
+	const std::shared_ptr<Profiler::ScopeTimer> Profiler::timer(const std::string& label) {
+		assert(label != m_GlobalLabel); // use globalTimer() for timing the entire frame
 		return std::make_shared<Profiler::ScopeTimer>(this, label);
 	}
 
-	void Profiler::add(const char* label, double elapsed_ms) {
-		m_Labels.push_back(label);
-		m_Durations.push_back(elapsed_ms);
+	void Profiler::createTimerEntry(const std::string& label){
+		m_Data.emplace(label, ScrollingBuffer(m_Capacity));
+	}
+
+	void Profiler::addTimerValue(const std::string& label, const double elapsed_ms) {
+		auto it = m_Data.find(label);
+		assert(it != m_Data.end()); // shouldn't ever happen
+		it->second.push_back(elapsed_ms);
 	};
 }
