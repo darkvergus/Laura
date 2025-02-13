@@ -1,0 +1,230 @@
+DefaultWindowBg:
+  - 0.908999997
+  - 0.108999997
+  - 0.108999997
+  - 1
+DefaultPopupBg:
+  - 0.0799999982
+  - 0.0799999982
+  - 0.0799999982
+  - 0.939999998
+DefaultBorder:
+  - 0.173999995
+  - 0.173999995
+  - 0.173999995
+  - 0.5
+DefaultHeader:
+  - 0.0780000016
+  - 0.0780000016
+  - 0.0780000016
+  - 1
+DefaultHeaderHovered:
+  - 0.300000012
+  - 0.305000007
+  - 0.310000002
+  - 1
+DefaultHeaderActive:
+  - 0.150000006
+  - 0.1505
+  - 0.150999993
+  - 1
+DefaultButton:
+  - 0
+  - 0
+  - 0
+  - 0
+DefaultButtonHovered:
+  - 0.300000012
+  - 0.305000007
+  - 0.310000002
+  - 1
+DefaultButtonActive:
+  - 0.150000006
+  - 0.1505
+  - 0.150999993
+  - 1
+DefaultCheckMark:
+  - 0.391000003
+  - 0.391000003
+  - 0.391000003
+  - 1
+DefaultSliderGrab:
+  - 0.391000003
+  - 0.391000003
+  - 0.391000003
+  - 1
+DefaultSliderGrabActive:
+  - 0.490999997
+  - 0.81099999
+  - 0.419
+  - 1
+DefaultFrameBg:
+  - 0.138999999
+  - 0.138999999
+  - 0.138999999
+  - 1
+DefaultFrameBgHovered:
+  - 0.199000001
+  - 0.199000001
+  - 0.199000001
+  - 1
+DefaultFrameBgActive:
+  - 0.150000006
+  - 0.1505
+  - 0.150999993
+  - 1
+DefaultTab:
+  - 0.129999995
+  - 0.129999995
+  - 0.129999995
+  - 1
+DefaultTabHovered:
+  - 0.0780000016
+  - 0.0780000016
+  - 0.0780000016
+  - 1
+DefaultTabSelected:
+  - 0.0780000016
+  - 0.0780000016
+  - 0.0780000016
+  - 1
+DefaultTabSelectedOverline:
+  - 0.238999993
+  - 0.238999993
+  - 0.238999993
+  - 1
+DefaultTabDimmed:
+  - 0.0780000016
+  - 0.0780000016
+  - 0.0780000016
+  - 1
+DefaultTabDimmedSelected:
+  - 0.0780000016
+  - 0.0780000016
+  - 0.0780000016
+  - 1
+DefaultTabDimmedSelectedOverline:
+  - 0.238999993
+  - 0.238999993
+  - 0.238999993
+  - 1
+DefaultTitleBg:
+  - 0.0680000037
+  - 0.0680000037
+  - 0.0680000037
+  - 1
+DefaultTitleBgActive:
+  - 0.0680000037
+  - 0.0680000037
+  - 0.0680000037
+  - 1
+DefaultTitleBgCollapsed:
+  - 0.0680000037
+  - 0.0680000037
+  - 0.0680000037
+  - 1
+DefaultScrollbarGrab:
+  - 0.224000007
+  - 0.224000007
+  - 0.224000007
+  - 1
+DefaultResizeGrip:
+  - 1
+  - 1
+  - 1
+  - 0.200000003
+DefaultResizeGripHovered:
+  - 1
+  - 1
+  - 1
+  - 0.289999992
+DefaultResizeGripActive:
+  - 1
+  - 1
+  - 1
+  - 0.360000014
+DefaultSeparator:
+  - 1
+  - 1
+  - 1
+  - 0.200000003
+DefaultSeparatorHovered:
+  - 1
+  - 1
+  - 1
+  - 0.289999992
+DefaultSeparatorActive:
+  - 1
+  - 1
+  - 1
+  - 0.360000014
+DefaultText:
+  - 1
+  - 1
+  - 1
+  - 1
+DefaultTextDisabled:
+  - 0.5
+  - 0.5
+  - 0.5
+  - 1
+TransformButtonXbg:
+  - 0.108999997
+  - 0.108999997
+  - 0.108999997
+  - 1
+TransformButtonYbg:
+  - 0.108999997
+  - 0.108999997
+  - 0.108999997
+  - 1
+TransformButtonZbg:
+  - 0.108999997
+  - 0.108999997
+  - 0.108999997
+  - 1
+TransformButtonXHovered:
+  - 0.409000009
+  - 0.108999997
+  - 0.108999997
+  - 1
+TransformButtonYHovered:
+  - 0.108999997
+  - 0.409000009
+  - 0.108999997
+  - 1
+TransformButtonZHovered:
+  - 0.108999997
+  - 0.108999997
+  - 0.409000009
+  - 1
+TransformButtonXActive:
+  - 0.609000027
+  - 0.108999997
+  - 0.108999997
+  - 1
+TransformButtonYActive:
+  - 0.108999997
+  - 0.609000027
+  - 0.108999997
+  - 1
+TransformButtonZActive:
+  - 0.108999997
+  - 0.108999997
+  - 0.609000027
+  - 1
+ButtonGray:
+  - 0.229000002
+  - 0.229000002
+  - 0.229000002
+  - 1
+SelectedHeader:
+  - 0.137999997
+  - 0.137999997
+  - 0.137999997
+  - 1
+AddComponentButton:
+  - 0.0780000016
+  - 0.0780000016
+  - 0.0780000016
+  - 1

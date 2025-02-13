@@ -8,12 +8,17 @@ namespace Laura
 	{
 	public:
 		ScrollingBuffer(size_t capacity) : m_Capacity(capacity) {
-			m_Data.resize(2*m_Capacity);
+			m_Data.resize(2 * m_Capacity);
 		}
 		~ScrollingBuffer() = default;
 
+		inline static const int mod(int a, int m) {
+			return ((a % m) + m) % m; // True Mathematical modulo  -1 % 10 = 9
+		}
+
 		inline void push_back(double val){
 			assert(m_Capacity != 0);
+
 			m_Data[m_WriteIdx] = val;
 			m_Data[m_WriteIdx + m_Capacity] = val;
 			m_WriteIdx = (m_WriteIdx + 1) % m_Capacity;
@@ -28,23 +33,34 @@ namespace Laura
 			return &m_Data[m_WriteIdx + (m_Size - spanSize(span))];
 		}
 
-		inline const size_t size(int span = 100) const {
-			return spanSize(span);
+		inline void clear() {
+			m_Size = 0;
+			m_WriteIdx = 0;
 		}
 
+		inline const size_t size(int span = 100) const { return spanSize(span); }
+		inline const bool empty() const { return m_Size == 0; }
+		
+		inline const double average(int span = 100) const{
+			int rSize = spanSize(span);
+			if (rSize == 0) 
+				return 0;
+
+			double sum = 0;
+			int startingIdx = mod(m_WriteIdx - rSize, m_Capacity);
+			for (size_t i = 0; i < rSize; i++) {
+				sum += m_Data[(startingIdx + i) % m_Capacity];
+			}
+			return sum / rSize;
+		}
+
+	private:
 		inline const size_t spanSize(int span) const {
 			if (span > 100) span = 100;
 			if (span < 1) span = 1;
 			return std::ceil((double)m_Size * ((double)span / 100));
 		}
 
-		inline void clear() {
-			m_Size = 0;
-			m_WriteIdx = 0;
-		}
-
-
-	private:
 		std::vector<double> m_Data;
 		const size_t m_Capacity = 0;
 		int m_WriteIdx = 0;
