@@ -18,8 +18,8 @@ namespace Laura
 
 		/// GENERATE ENTITY LIST AND UNIQUE MESH/MATERIAL GUID SETS ////////////////////////
 		std::vector<Entity> entityList;
-		std::unordered_set<GUID> meshGuidSet;
-		std::unordered_set<GUID> materialGuidSet;
+		std::unordered_set<LR_GUID> meshGuidSet;
+		std::unordered_set<LR_GUID> materialGuidSet;
 		for (auto enttEntity : scene->GetRegistry()->view<TransformComponent>())
 		{
 			Entity e(enttEntity, scene->GetRegistry());
@@ -40,14 +40,14 @@ namespace Laura
 				if (e.GetComponent<GUIDComponent>().guid == 0)
 					continue;
 
-				GUID meshGuid = e.GetComponent<MeshComponent>().guid;
+				LR_GUID meshGuid = e.GetComponent<MeshComponent>().guid;
 				if (meshGuid == 0)
 					continue;
 				meshGuidSet.insert(meshGuid);
 
 				if (e.HasComponent<MaterialComponent>())
 				{
-					GUID materialGuid = e.GetComponent<MaterialComponent>().guid;
+					LR_GUID materialGuid = e.GetComponent<MaterialComponent>().guid;
 					materialGuidSet.insert(materialGuid); // 0 = default material else custom material
 				}
 				else
@@ -63,8 +63,8 @@ namespace Laura
 		/// SORTING ///////////////////////////////////////////////////////////////////////
 		// After collecting the entities and mesh GUIDs, we sort them to ensure a stable, predictable order.
 		// Mesh GUIDs are sorted, and entities are sorted by their GUID to ensure consistency in rendering order and lookups.
-		std::vector<GUID> meshGuidList(meshGuidSet.begin(), meshGuidSet.end());
-		std::vector<GUID> materialGuidList(materialGuidSet.begin(), materialGuidSet.end());
+		std::vector<LR_GUID> meshGuidList(meshGuidSet.begin(), meshGuidSet.end());
+		std::vector<LR_GUID> materialGuidList(materialGuidSet.begin(), materialGuidSet.end());
 		std::sort(meshGuidList.begin(), meshGuidList.end());
 		std::sort(materialGuidList.begin(), materialGuidList.end());
 		std::sort(entityList.begin(), entityList.end(), 
@@ -94,7 +94,7 @@ namespace Laura
 		std::vector<uint32_t> meshIndicesSized;
 		std::vector<uint32_t> bvhIndicesSized;
 		uint32_t prevMeshIndexSized = 0, prevBvhIndexSized = 0;
-		for (GUID guid : meshGuidList)
+		for (LR_GUID guid : meshGuidList)
 		{
 			std::shared_ptr<std::vector<Triangle>> mesh = m_AssetManager->GetMesh(guid);
 			rScene->continuousMeshes.insert(rScene->continuousMeshes.end(), mesh->begin(), mesh->end());
@@ -112,7 +112,7 @@ namespace Laura
 			rScene->meshMappings.push_back(meshIndicesSized[meshMappingsIndexed[i]]);
 		}
 
-		for (GUID guid : materialGuidList)
+		for (LR_GUID guid : materialGuidList)
 		{
 			std::shared_ptr<Material> material = m_AssetManager->GetMaterial(guid);
 			rScene->continuousMaterials.push_back(*material);

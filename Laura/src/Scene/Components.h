@@ -12,7 +12,7 @@ namespace Laura
 {
 	struct GUIDComponent
 	{
-		GUID guid;
+		LR_GUID guid;
 	};
 
 	struct TagComponent
@@ -56,12 +56,12 @@ namespace Laura
 
 	struct MeshComponent
 	{
-		GUID guid = GUID(0);
+		LR_GUID guid = LR_GUID(0);
 	};
 
 	struct MaterialComponent
 	{
-		GUID guid = GUID(0);
+		LR_GUID guid = LR_GUID(0);
 	};
 
 	struct CameraComponent

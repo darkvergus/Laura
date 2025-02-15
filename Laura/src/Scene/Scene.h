@@ -10,7 +10,7 @@ namespace Laura
 	class Scene
 	{
 	public:
-		GUID skyboxGuid;
+		LR_GUID skyboxGuid;
 	public:
 		Scene();
 		~Scene();

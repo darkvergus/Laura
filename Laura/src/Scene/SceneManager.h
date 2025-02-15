@@ -49,7 +49,7 @@ namespace Laura
 	private:
 		std::shared_ptr<AssetManager> m_AssetManager;
 
-		GUID m_Cached_SkyboxGUID;
+		LR_GUID m_Cached_SkyboxGUID;
 		std::vector<uint32_t> m_Cached_MeshMappings;
 		std::vector<uint32_t> m_Cached_MaterialMappings;
 	};

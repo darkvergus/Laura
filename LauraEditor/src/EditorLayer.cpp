@@ -38,7 +38,7 @@ namespace Laura
 		// TODO make the api for the texture channels more user friendly and less error prone
 		// currently there is no way to catch these errors and they lead to hard to debug crashes
 		{
-			GUID guid = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
+			LR_GUID guid = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
 			m_Scene->skyboxGuid = guid;
 		}
 		
@@ -61,7 +61,7 @@ namespace Laura
 			TransformComponent& dragonTransform = dragon.AddComponent<TransformComponent>();
 			MaterialComponent& dragonMaterial = dragon.AddComponent<MaterialComponent>();
 			// TODO: this should be loaded upon opening the editor - asset manager should keep track of the assets to be loaded (serialize/deserialize them)
-			GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb"));
+			LR_GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb"));
 			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
 			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
 			dragonMesh.guid = guid;
@@ -75,7 +75,7 @@ namespace Laura
 			TransformComponent& sponzaTransform = sponza_e.AddComponent<TransformComponent>();
 			MaterialComponent& sponzaMaterial = sponza_e.AddComponent<MaterialComponent>();
 			// TODO: this should be loaded upon opening the editor - asset manager should keep track of the assets to be loaded (serialize/deserialize them)
-			GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
+			LR_GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
 			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
 			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
 			sponzaMesh.guid = guid;
