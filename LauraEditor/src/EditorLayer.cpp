@@ -3,9 +3,9 @@
 namespace Laura
 {
 
-	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<SceneManager> sceneManager, std::shared_ptr<AssetManager> assetManager, std::shared_ptr<Profiler> profiler)
+	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<Asset::ResourcePool> resourcePool, std::shared_ptr<Asset::Manager> assetManager, std::shared_ptr<Profiler> profiler)
 		: m_Renderer(renderer),
-		m_SceneManager(sceneManager),
+		m_ResourcePool(resourcePool),
 		m_AssetManager(assetManager),
 		m_Profiler(profiler),
 
@@ -32,7 +32,8 @@ namespace Laura
 			LR_EDITOR_WARN("Failed to load theme: {0}", statusMessage);
 		}
 		
-		// TODO: Scene serialization/deserialization
+		m_AssetManager->SetResourcePool(m_ResourcePool.get()); // pass in raw ptr
+
 		m_Scene = std::make_shared<Scene>();
 
 		// TODO make the api for the texture channels more user friendly and less error prone
@@ -192,15 +193,12 @@ namespace Laura
 		m_SceneHierarchyPanel.OnImGuiRender(m_Scene);
 		m_InspectorPanel.OnImGuiRender(m_Scene);
 		if (m_EditorState->temp.ThemeSettingsPanelOpen) { m_ThemesPanel.OnImGuiRender(); }
-
-		// Parse the scene for rendering
-		std::shared_ptr<RenderableScene> rScene = m_SceneManager->ParseSceneForRendering(m_Scene);
 		
 		// Render The Scene
-		m_Renderer->SubmitScene(rScene);
-		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
+		//m_Renderer->SubmitScene(rScene);
+		//std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
 
-		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);
+		m_ViewportPanel.OnImGuiRender(/*RenderedFrame*/ nullptr, m_EditorState);
 		m_ProfilerPanel.OnImGuiRender(m_Profiler);
 	}
 

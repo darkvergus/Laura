@@ -18,6 +18,55 @@ namespace Laura
 		//m_EnvironmentUBO = IUniformBuffer::Create(64, 3, BufferUsageType::DYNAMIC_DRAW);
 	}
 
+	std::shared_ptr<IImage2D> Renderer::Render(Scene* scene, Asset::ResourcePool* resourcePool, Settings& renderSettings)
+	{
+		return std::shared_ptr<IImage2D>();
+	}
+
+
+
+	std::shared_ptr<Renderer::ParsedScene> Renderer::Parse(Scene* scene, Asset::ResourcePool* resourcePool)
+	{
+		auto pScene = std::make_shared<Renderer::ParsedScene>();
+
+		for (entt::entity enttEntity : scene->GetRegistry()->view<TransformComponent>()){
+			Entity e(enttEntity, scene->GetRegistry());
+
+			if (e.HasComponent<CameraComponent>()){
+				if (e.GetComponent<CameraComponent>().isMain){
+					pScene->hasValidCamera = true;
+					pScene->CameraTransform = e.GetComponent<TransformComponent>().GetMatrix();
+					pScene->CameraFocalLength = e.GetComponent<CameraComponent>().GetFocalLength();
+				}
+			}
+
+			if (e.HasComponent<MeshComponent>()){
+				LR_GUID& guid = e.GetComponent<MeshComponent>().guid;
+				if (guid == 0) // invalid MeshComponent - shouldn't happen
+					continue;
+
+				std::shared_ptr<Asset::MeshMetadata> metadata = resourcePool->Get<Asset::MeshMetadata>(guid);
+				if (!metadata)
+					continue;
+				
+				MeshEntityHandle handle;
+				handle.FirstTriIdx = metadata->firstTriIdx;
+				handle.TriCount = metadata->TriCount;
+				handle.FirstNodeIdx = metadata->firstNodeIdx;
+				handle.NodeCount = metadata->nodeCount;
+				handle.transform = e.GetComponent<TransformComponent>().GetMatrix();
+
+				pScene->MeshEntityLookupTable.push_back(handle);
+			}
+		}
+
+		if (!pScene->hasValidCamera) // don't render anything
+			return nullptr;
+
+
+	}
+
+
 	void Renderer::SetFrameResolution(const glm::vec2& resolution)
 	{
 		m_FrameResolution = resolution;

@@ -2,9 +2,9 @@
 
 #include "lrpch.h"
 
-#include "Scene/Entity.h"
-#include "Scene/Skybox.h"
-#include "Scene/Components.h"
+#include "Scene/Scene.h"
+
+#include "Assets/Assets.h"
 
 #include "Renderer/IRendererAPI.h"
 #include "Renderer/IComputeShader.h"
@@ -13,45 +13,54 @@
 #include "Renderer/IUniformBuffer.h"
 #include "Renderer/IShaderStorageBuffer.h"
 
-#include "Assets/TextureLoader.h" // LoadedTexture struct
-#include "Scene/SceneManager.h"
-#include "Assets/AssetManager.h"
-
 namespace Laura 
 {
 
 	class Renderer
 	{
 	private:
-		struct RenderSettings
+		struct Settings
 		{
 			uint32_t raysPerPixel;
 			uint32_t bouncesPerRay;
 			bool accumulateFrames;
 			bool displayBVH;
 			uint32_t maxAABBIntersections;
+			glm::vec2 resolution;
 		};
-	public:
-		inline Renderer()
-			: m_AccumulateFrameCount(0), m_FrameResolution(300, 100)
+
+		struct EntityHandle 
 		{
-		}
+			uint32_t FirstTriIdx	= 0;
+			uint32_t TriCount		= 0;
+			uint32_t FirstNodeIdx	= 0;
+			uint32_t NodeCount		= 0;
+			glm::mat4 transform;
+		};
+
+		struct ParsedScene {
+			std::vector<EntityHandle> entityLookupTable;
+			uint32_t FirstTexByteSkyboxIdx = 0;
+			uint32_t SkyboxTexByteCount	   = 0;
+			glm::mat4 CameraTransform;
+			float CameraFocalLength;
+			bool hasValidCamera			   = false;
+		};
+
+
+	public:
+		Renderer() = default;
 		~Renderer() = default;
 
-		RenderSettings renderSettings;
+		inline static IRendererAPI::API GetAPI() { return IRendererAPI::GetAPI(); } // getter
+		inline static void SetAPI(IRendererAPI::API api) { IRendererAPI::SetAPI(api); } // setter
 
-		inline static IRendererAPI::API GetAPI() { return IRendererAPI::GetAPI(); }
-		inline static void SetAPI(IRendererAPI::API api) { IRendererAPI::SetAPI(api); }
-
-		// Initializes buffers (camera, render settings - things which we know will be used every frame)
 		void Init();
-		void SubmitScene(std::shared_ptr<RenderableScene> rScene);
-		std::shared_ptr<IImage2D> RenderScene();
-
-		void SetFrameResolution(const glm::vec2& resolution);
+		std::shared_ptr<IImage2D> Render(Scene* scene, Asset::ResourcePool* resourcePool, Settings& renderSettings);
 
 	private:
-		glm::vec2 m_FrameResolution;
+		std::shared_ptr<ParsedScene> Parse(Scene* scene, Asset::ResourcePool* resourcePool);
+		std::shared_ptr<IImage2D> Draw();
 
 		std::shared_ptr<IComputeShader> m_Shader;
 		std::shared_ptr<ITexture2D> m_SkyboxTexture;
@@ -60,7 +69,5 @@ namespace Laura
 		std::shared_ptr<IShaderStorageBuffer> m_TransformsSSBO, m_ContinuousMeshesSSBO, m_ContinuousBvhsSSBO, m_MeshMappingsSSBO, m_MeshSizesSSBO, m_BvhMappingsSSBO, m_BVHSizesSSBO;
 
 		uint32_t m_AccumulateFrameCount;
-		bool m_SceneValid;
 	};
-
 }
