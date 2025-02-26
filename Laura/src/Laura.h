@@ -16,12 +16,10 @@
 #include "Renderer/IShaderStorageBuffer.h"
 #include "Renderer/IUniformBuffer.h"
 #include "Renderer/ITexture2D.h"
-#include "Renderer/Material.h"
 
 #include "Scene/Scene.h" 
 #include "Scene/Entity.h"
 #include "Scene/Components.h"
-#include "Scene/Skybox.h"
 
 #include "Assets/Assets.h"
 

@@ -10,11 +10,19 @@ namespace Laura::Asset
 	class BVHAccel
 	{
 	public:
+
+		// according to std430 - 32 bytes
 		struct Node {
-			glm::vec3 min, max;
+			glm::vec4 min; // w component leftChild_Or_FirstTri
+			glm::vec4 max; // w component triCount
 			/*	if primCount == 0: leftChild_Or_FirstTri == leftChild
 				else leftChild_Or_FirstTri == firstTri */
-			int leftChild_Or_FirstTri, triCount;
+
+			inline float& triCount() { return max.w; }
+			inline float& leftChild_Or_FirstTri() { return min.w; }
+
+			inline const uint32_t triCount_int() const { return static_cast<uint32_t>(max.w); }
+			inline const uint32_t leftChild_Or_FirstTri_int() const { return static_cast<uint32_t>(min.w); }
 		};
 
 		BVHAccel(const std::vector<Triangle>& meshBuffer, const uint32_t firstTriIdx, const uint32_t triCount);

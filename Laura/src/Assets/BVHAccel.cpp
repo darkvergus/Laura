@@ -28,8 +28,8 @@ namespace Laura::Asset
 
 		m_NodesUsed = 0;
 		Node& root = m_NodeBuff[m_NodesUsed++];
-		root.leftChild_Or_FirstTri = 0;
-		root.triCount = N;
+		root.leftChild_Or_FirstTri() = 0;
+		root.triCount() = N;
 
 		UpdateAABB(root);
 		SubDivide(root);
@@ -40,27 +40,30 @@ namespace Laura::Asset
 
 	void BVHAccel::UpdateAABB(Node& node)
 	{
-		node.min = glm::vec3(FLT_MAX);
-		node.max = glm::vec3(-FLT_MAX);
+		glm::vec3 minTmp = glm::vec3( FLT_MAX );
+		glm::vec3 maxTmp = glm::vec3( -FLT_MAX );
 
 		// iterate over primitives contained by the Node
-		for (int i = 0; i < node.triCount; i++) // every 3rd vertex is new triangle
+		for (size_t i = 0; i < node.triCount_int(); i++) // every 3rd vertex is new triangle
 		{
-			const Triangle& t = m_MeshBuff[m_FirstTriIdx + m_IdxBuff[node.leftChild_Or_FirstTri + i]];
+			const Triangle& t = m_MeshBuff[m_FirstTriIdx + m_IdxBuff[node.leftChild_Or_FirstTri_int() + i]];
 			// find minimum & maximum coordinates
-			node.min = glm::min(node.min, t.v0);
-			node.min = glm::min(node.min, t.v1);
-			node.min = glm::min(node.min, t.v2);
-			node.max = glm::max(node.max, t.v0);
-			node.max = glm::max(node.max, t.v1);
-			node.max = glm::max(node.max, t.v2);
+			minTmp = glm::min(minTmp, glm::vec3(t.v0));
+			minTmp = glm::min(minTmp, glm::vec3(t.v1));
+			minTmp = glm::min(minTmp, glm::vec3(t.v2));
+			maxTmp = glm::max(maxTmp, glm::vec3(t.v0));
+			maxTmp = glm::max(maxTmp, glm::vec3(t.v1));
+			maxTmp = glm::max(maxTmp, glm::vec3(t.v2));
 		}
+
+		node.min = glm::vec4(minTmp, node.min.w); // copying leftChild_Or_FirstTri as w
+		node.max = glm::vec4(maxTmp, node.max.w); // copying triCount as w
 	}
 
 	void BVHAccel::SubDivide(Node& node)
 	{
 		// Found Leaf Node
-		if (node.triCount <= 2) 
+		if (node.triCount_int() <= 2)
 			return;
 		
 		// SPLIT METHOD
@@ -71,8 +74,8 @@ namespace Laura::Asset
 		double splitPoint = node.min[splitAxis] + AABB[splitAxis] * 0.5;
 		// SPLIT METHOD
 
-		uint32_t leftPtr = node.leftChild_Or_FirstTri; // points to the firstTri in node's triangles
-		uint32_t rightPtr = node.leftChild_Or_FirstTri + node.triCount - 1; // points to the lastTri
+		uint32_t leftPtr = node.leftChild_Or_FirstTri_int(); // points to the firstTri in node's triangles
+		uint32_t rightPtr = node.leftChild_Or_FirstTri_int() + node.triCount_int() - 1; // points to the lastTri
 
 		// partition/sort the triangles (quicksort partition)
 		while (leftPtr <= rightPtr)
@@ -83,10 +86,10 @@ namespace Laura::Asset
 				Swap(leftPtr, rightPtr--); // swap and decrement right
 		}
 
-		int leftTriCount = leftPtr - node.leftChild_Or_FirstTri; // distance between firstTri and partition point
+		int leftTriCount = leftPtr - node.leftChild_Or_FirstTri_int(); // distance between firstTri and partition point
 		
 		// couldn't partition
-		if (leftTriCount == 0 || leftTriCount == node.triCount) 
+		if (leftTriCount == 0 || leftTriCount == node.triCount_int()) 
 			return;
 
 		// find indices for the new child nodes
@@ -94,14 +97,14 @@ namespace Laura::Asset
 		int rightChildIdx = m_NodesUsed++;
 
 		// populate children
-		m_NodeBuff[leftChildIdx].leftChild_Or_FirstTri = node.leftChild_Or_FirstTri;
-		m_NodeBuff[leftChildIdx].triCount = leftTriCount;
-		m_NodeBuff[rightChildIdx].leftChild_Or_FirstTri = node.leftChild_Or_FirstTri + leftTriCount;
-		m_NodeBuff[rightChildIdx].triCount = node.triCount - leftTriCount;
+		m_NodeBuff[leftChildIdx].leftChild_Or_FirstTri() = node.leftChild_Or_FirstTri_int();
+		m_NodeBuff[leftChildIdx].triCount() = leftTriCount;
+		m_NodeBuff[rightChildIdx].leftChild_Or_FirstTri() = node.leftChild_Or_FirstTri_int() + leftTriCount;
+		m_NodeBuff[rightChildIdx].triCount() = node.triCount_int() - leftTriCount;
 		
 		// update current node
-		node.triCount = 0; // Important! mark the node as non-leaf node
-		node.leftChild_Or_FirstTri = leftChildIdx; // now points to the leftChild node
+		node.triCount() = 0; // Important! mark the node as non-leaf node
+		node.leftChild_Or_FirstTri() = leftChildIdx; // now points to the leftChild node
 
 		UpdateAABB(m_NodeBuff[leftChildIdx]);
 		UpdateAABB(m_NodeBuff[rightChildIdx]);

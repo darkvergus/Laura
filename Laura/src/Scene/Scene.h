@@ -2,7 +2,6 @@
 #include "entt/entt.hpp"
 
 #include "Scene/Entity.h"
-#include "Scene/Skybox.h"
 #include "Scene/Components.h"
 
 namespace Laura

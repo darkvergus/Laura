@@ -4,7 +4,7 @@
 
 namespace Laura {
 
-	OpenGLTexture2D::OpenGLTexture2D(unsigned char* data, int width, int height, int textureUnit)
+	OpenGLTexture2D::OpenGLTexture2D(const unsigned char* data, const int width, const int height, int textureUnit)
 		: m_TextureUnit(textureUnit), m_ID(0) {
 
 		if (width <= 0 || height <= 0) 

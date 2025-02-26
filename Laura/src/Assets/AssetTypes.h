@@ -8,8 +8,10 @@
 
 namespace Laura::Asset {
 
+	// According to std430 - 48 bytes
+	// For simplicity - storing one extra padding float per vertex ( not ideal but might use the space for some other data in the future)
 	struct Triangle {
-		glm::vec3 v0 = {}, v1 = {}, v2 = {};
+		glm::vec4 v0 = {}, v1 = {}, v2 = {};
 	};
 
 	struct Metadata {

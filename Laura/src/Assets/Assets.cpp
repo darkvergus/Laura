@@ -45,9 +45,9 @@ namespace Laura::Asset
 
                 auto idxs = face.mIndices;
                 meshBuffer.emplace_back( Triangle({ 
-                    glm::vec3(verts[idxs[0]].x, verts[idxs[0]].y, verts[idxs[0]].z),
-                    glm::vec3(verts[idxs[1]].x, verts[idxs[1]].y, verts[idxs[1]].z),
-                    glm::vec3(verts[idxs[2]].x, verts[idxs[2]].y, verts[idxs[2]].z)
+                    glm::vec4(verts[idxs[0]].x, verts[idxs[0]].y, verts[idxs[0]].z, 0.0f),
+                    glm::vec4(verts[idxs[1]].x, verts[idxs[1]].y, verts[idxs[1]].z, 0.0f),
+                    glm::vec4(verts[idxs[2]].x, verts[idxs[2]].y, verts[idxs[2]].z, 0.0f)
                     })
                 );
             }

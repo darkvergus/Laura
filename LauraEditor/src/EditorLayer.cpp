@@ -78,32 +78,33 @@ namespace Laura
 			sponzaMesh.guid = guid;
 		}
 
-		//{
-		//	Entity sponza_e = m_Scene->CreateEntity();
-		//	std::string& tag = sponza_e.GetComponent<TagComponent>().Tag;
-		//	tag = std::string("Sponza");
-		//	MeshComponent& sponzaMesh = sponza_e.AddComponent<MeshComponent>();
-		//	TransformComponent& sponzaTransform = sponza_e.AddComponent<TransformComponent>();
-		//	MaterialComponent& sponzaMaterial = sponza_e.AddComponent<MaterialComponent>();
-		//	// TODO: this should be loaded upon opening the editor - asset manager should keep track of the assets to be loaded (serialize/deserialize them)
-		//	GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
-		//	//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
-		//	//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
-		//	sponzaMesh.guid = guid;
-		//}
+		{
+			Entity sponza_e = m_Scene->CreateEntity();
+			std::string& tag = sponza_e.GetComponent<TagComponent>().Tag;
+			tag = std::string("Sponza");
+			MeshComponent& sponzaMesh = sponza_e.AddComponent<MeshComponent>();
+			TransformComponent& sponzaTransform = sponza_e.AddComponent<TransformComponent>();
+			MaterialComponent& sponzaMaterial = sponza_e.AddComponent<MaterialComponent>();
+			// TODO: this should be loaded upon opening the editor - asset manager should keep track of the assets to be loaded (serialize/deserialize them)
+			LR_GUID guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
+			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb"));
+			//uint32_t guid = m_AssetManager->LoadMesh(std::string(EDITOR_RESOURCES_PATH "Models/sponza_scene.glb"));
+			sponzaMesh.guid = guid;
+		}
 
-		m_Renderer->renderSettings.raysPerPixel = 1;
-		m_Renderer->renderSettings.bouncesPerRay = 5;
-		m_Renderer->renderSettings.maxAABBIntersections = 500;
-		m_Renderer->renderSettings.displayBVH = false;
-
+		// Most of these are default arguments (not necessary to specify but showing them for clarity)
+		m_Renderer->settings.raysPerPixel = 1;
+		m_Renderer->settings.bouncesPerRay = 5;
+		m_Renderer->settings.maxAABBIntersections = 500;
+		m_Renderer->settings.displayBVH = false;
+		m_Renderer->settings.ShouldAccumulate = false;
 		// The FRAME_WIDTH and FRAME_HEIGHT define the dimensions of the render frame.
 		// These values represent the actual number of pixels that the renderer will process to produce the final image.
 		// Note: These dimensions are different from the size or aspect ratio of the ImGui viewport window in the editor.
 		// The camera's aspect ratio only stretches the image to fit the viewport window correctly
-		#define FRAME_WIDTH 1200.0f
-		#define FRAME_HEIGHT 800.0f
-		m_Renderer->SetFrameResolution(glm::vec2(FRAME_WIDTH, FRAME_HEIGHT));
+		m_Renderer->settings.Resolution = glm::uvec2(1200, 800);
+		m_Renderer->settings.ComputeShaderPath = LR_RESOURCES_PATH "Shaders/RayTracingDefault.comp";
+
 
 		/// ------------- SCRIPTING -------------- /// (just to see how to use the system) will change in the future
 		/* 
@@ -138,8 +139,6 @@ namespace Laura
 		/// ---------------------------------------- ///
 
 		m_Scene->OnStart(); // calls the onStart() of the scripts
-		
-		m_Renderer->Init();
 	}
 
 	void EditorLayer::onEvent(Event* event)
@@ -190,11 +189,10 @@ namespace Laura
 		m_InspectorPanel.OnImGuiRender(m_Scene);
 		if (m_EditorState->temp.ThemeSettingsPanelOpen) { m_ThemesPanel.OnImGuiRender(); }
 		
-		// Render The Scene
-		//m_Renderer->SubmitScene(rScene);
-		//std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->RenderScene();
+		
+		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.get(), m_ResourcePool.get());
 
-		m_ViewportPanel.OnImGuiRender(/*RenderedFrame*/ nullptr, m_EditorState);
+		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);
 		m_ProfilerPanel.OnImGuiRender(m_Profiler);
 	}
 
