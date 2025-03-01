@@ -1,0 +1,421 @@
+// Thanks to Sebastian Lague: https://www.youtube.com/watch?v=Qz0KTGYJtUk
+
+#version 460 core
+
+#define AABB_primitives_limit 2
+#define MAX_STACK_SIZE 30 // (BVH tree depth)
+
+#define heatmap_cold vec3(0.0, 0.0, 0.0)
+#define heatmap_warm vec3(0.9, 1.0, 0.9)
+
+#define NUM_SPHERES 4
+
+#define PI 3.1415926
+#define EPSILON 1.0e-10 // Small value to avoid division by zero
+#define GAMMA 0.8
+#define INF 1.0 / 0.0;
+#define wantPixelInfo true
+
+#define LOCAL_GROUP_X 8
+#define LOCAL_GROUP_Y 4
+#define LOCAL_GROUP_Z 1
+
+layout (local_size_x = LOCAL_GROUP_X, local_size_y = LOCAL_GROUP_Y, local_size_z = LOCAL_GROUP_Z) in;
+
+/* The following structs MUST be defined exactly as they are on the CPU. */
+// std430 - 32 bytes (CPU side defined in Assets/BVHAccel.h)
+struct Node {
+	vec3 min;
+    uint leftChild_Or_FirstTri;
+	vec3 max;
+    uint triCount;
+	/*	if primCount == 0: leftChild_Or_FirstTri == leftChild
+		else leftChild_Or_FirstTri == firstTri */
+};
+
+// std430 - 48 bytes (CPU side defined in Assets/AssetTypes.h
+struct Triangle {
+	vec4 v0, v1, v2;
+};
+
+// std430 - 80 bytes (CPU side defined in Renderer/Renderer.h
+struct MeshEntityHandle {
+	mat4 Transform;
+	uint FirstTriIdx;
+	uint TriCount;
+	uint FirstNodeIdx;
+	uint NodeCount;
+};
+
+struct Material {
+    vec4 emission; // .xyz=color, .w=strength
+    vec3 color;
+};
+
+/* Shader specific structs (don't have CPU counterpart) */
+struct Ray {
+    vec3 origin;
+    vec3 dir;
+};
+
+struct HitInfo {
+    bool didCollide;
+    float dst;
+    vec3 hitPoint;
+    vec3 normal;
+    Material material;
+};
+
+
+layout (rgba32f, binding = 0) uniform image2D rayTracingTexture;
+
+layout (binding = 1) uniform sampler2D skyboxTexture;
+
+layout (std140, binding = 0) uniform CameraUBO {
+    mat4 u_CameraTransform;
+    float u_FocalLength;
+};
+
+layout (std140, binding = 1) uniform SettingsUBO {
+    uint u_RaysPerPixel;
+    uint u_BouncesPerRay;
+    uint u_heatmap_color_limit;
+    uint u_numAccumulatedFrames;
+    uint u_MeshEntityCount;
+    uint u_displayBVH;
+};
+
+layout (std430, binding = 4) buffer MeshEntityLookupSSBO {
+    MeshEntityHandle MeshEntityLookupTable[];
+};
+
+layout (std430, binding = 5) buffer MeshBufferSSBO {
+    Triangle MeshBuffer[];
+};
+
+layout (std430, binding = 6) buffer NodeBufferSSBO {
+    Node NodeBuffer[];
+};
+
+layout (std430, binding = 7) buffer IndexBufferSSBO {
+    uint IndexBuffer[];
+};
+
+
+/** The function getCurrentState calculates a unique state value based on the texel coordinates and the number of accumulated frames.
+ * The state value is used to generate random numbers for sampling in the shader.
+ */
+uint getCurrentState(ivec2 texelCoords, int screenWidth){
+    uint pixelIndex = (uint(texelCoords.y) * uint(screenWidth)) + uint(texelCoords.x);
+    return pixelIndex + u_numAccumulatedFrames * 745621; // new state every frame
+}
+
+/** The RandomValue function generates a random value between 0 and 1 using a simple linear congruential generator (LCG).
+ * The function uses the LCG algorithm to generate a sequence of pseudo-random numbers based on a seed value.
+ * Thanks to https://www.pcg-random.org, https://www.shadertoy.com/view/XlGcRh
+ */
+float RandomValue(inout uint state){
+    state = state * 747796405u + 2891336453u;
+    uint result = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    result = (result >> 22u) ^ result;
+    return float(result) / 4294967295.0;
+}
+
+/** The RandomValueNormalDistribution function generates a random value from a normal distribution using the Box-Muller transform.
+ * The function generates two random values from a uniform distribution and transforms them into a random value from a normal distribution.
+ * Thanks to https://stackoverflow.com/a/6178290
+ */
+float RandomValueNormalDistribution(inout uint state){
+    float theta = 2 * PI * RandomValue(state);
+    float rho = sqrt(-2 * log(RandomValue(state)));
+    return rho * cos(theta);
+}
+
+/** The RandomDirection function generates a random direction vector by sampling from a normal distribution in three dimensions.
+ * The function generates three random values from a normal distribution and normalizes them to create a random direction vector.
+ * Thanks to https://math.stackexchange.com/questions/1585975
+ */
+vec3 RandomDirection(inout uint state){
+    float x = RandomValueNormalDistribution(state);
+    float y = RandomValueNormalDistribution(state);
+    float z = RandomValueNormalDistribution(state);
+    return normalize(vec3(x, y, z));
+}
+
+/** The RandomDirectionInHemisphere function generates a random direction vector in the hemisphere defined by the normal vector.
+ * The distribution is cosine-weighted. (meaning more rays are sent in the direction of the normal)
+ */
+vec3 RandomDirectionInHemisphere(vec3 normalVector, inout uint state){
+    vec3 randomDirectionVector = RandomDirection(state);
+    if (dot(normalVector, randomDirectionVector) < 0){
+        randomDirectionVector = -randomDirectionVector;
+    }
+    return randomDirectionVector;
+}
+
+/** The GainSkyboxLight function calculates the color of the skybox based on the direction of the ray.
+ * The function uses a gradient from the horizon color to the zenith color to simulate the sky.
+ */
+vec3 GainSkyboxLight(const Ray ray){
+    float u = 0.5f + atan(ray.dir.z, ray.dir.x) / (2.0f * PI);
+    float v = 0.5f + asin(ray.dir.y) / PI;
+    vec3 texelColor = texture(skyboxTexture, vec2(u, v)).rgb;
+    return texelColor;
+}
+
+/** The complexityToRGB function converts a complexity value to an RGB color using a rainbow color map.
+ * The function maps the complexity value to a wavelength in the visible spectrum and then converts the wavelength to an RGB color.
+ * The RGB color is gamma-corrected to ensure that the colors are displayed correctly on the screen.
+ */
+vec3 complexityToRGB(uint complexity) 
+{
+	float wavelength = 380.0 + 370.0 * complexity/(u_heatmap_color_limit);
+    vec3 color;
+    if (wavelength <= 380.0) {
+		color.r = 0.0;
+		color.g = 0.0;
+		color.b = 0.0;
+	}
+    else if (wavelength > 380.0 && wavelength <= 440.0) {
+        color.r = -(wavelength - 440.0) / (440.0 - 380.0)/3;
+        color.g = 0.0;
+        color.b = 0.8;
+    } else if (wavelength >= 440.0 && wavelength <= 490.0) {
+        color.r = 0.0;
+        color.g = (wavelength - 440.0) / (490.0 - 440.0);
+        color.b = 1.0;
+    } else if (wavelength >= 490.0 && wavelength <= 510.0) {
+        color.r = 0.0;
+        color.g = 1.0;
+        color.b = -(wavelength - 510.0) / (510.0 - 490.0);
+    } else if (wavelength >= 510.0 && wavelength <= 580.0) {
+        color.r = (wavelength - 510.0) / (580.0 - 510.0);
+        color.g = 1.0;
+        color.b = 0.0;
+    } else if (wavelength >= 580.0 && wavelength <= 645.0) {
+        color.r = 1.0;
+        color.g = -(wavelength - 645.0) / (645.0 - 580.0);
+        color.b = 0.0;
+    } else if (wavelength >= 645.0 && wavelength <= 780.0) {
+        color.r = 1.0;
+        color.g = 0.0;
+        color.b = 0.0;
+    } else {
+        color.r = 1.0;
+        color.g = 1.0;
+        color.b = 1.0;
+    }
+
+    float factor;
+    vec3 white = vec3(1.0);
+    
+    if (wavelength >= 380 && wavelength < 420){
+        factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+    }
+    else if (wavelength >= 420 && wavelength < 701){
+		factor = 1.0;
+	}
+	else if (wavelength >= 701 && wavelength < 781){
+        factor = 0.3 + 0.7*(780 - wavelength) / (780 - 700);
+        return pow((color + factor*white), vec3(GAMMA));
+    }
+    else {
+        factor = 1.0;
+    }
+
+    return pow(factor * color, vec3(GAMMA)); //gamma correction component-wise
+}
+
+// Slab method Ray-AABB intersection algorithm
+// Thanks to: https://tavianator.com/fast-branchless-raybounding-box-intersections/ and https://tavianator.com/2022/ray_box_boundary.html
+bool RayAABBIntersection(Ray ray, const vec3 minVec, const vec3 maxVec, inout float largest_tMin){
+    const vec3 t1 = (minVec - ray.origin) / ray.dir;
+    const vec3 t2 = (maxVec - ray.origin) / ray.dir;
+    const vec3 tMin = min(t1, t2);
+    const vec3 tMax = max(t1, t2);
+    largest_tMin = max(max(tMin.x, tMin.y), tMin.z);
+    const float smallest_tMax = min(min(tMax.x, tMax.y), tMax.z);
+    return smallest_tMax >= largest_tMin && smallest_tMax >= 0.0;
+}
+
+// Möller–Trumbore Ray-Triangle intersection algorithm
+// Thanks to: https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d/42752998#42752998
+HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri){
+    // E1, E2 are triangle edge direction vectors
+    const vec3 E1 = tri.v1.xyz - tri.v0.xyz;
+    const vec3 E2 = tri.v2.xyz - tri.v0.xyz;
+    vec3 triNormal = cross(E1, E2);
+    const float determinant = -dot(ray.dir, triNormal);
+    // Early exit if the ray and triangle are nearly parallel
+    if (determinant < 1E-6) {
+        HitInfo hitInfo;
+        hitInfo.didCollide = false;
+        return hitInfo;
+    }
+    const float invdet = 1.0 / determinant;
+    const vec3 AO = ray.origin - tri.v0.xyz;
+    const vec3 DAO = cross(AO, ray.dir);
+    const float t = dot(AO, triNormal) * invdet;
+    const float u = dot(E2, DAO) * invdet;
+    const float v = -dot(E1, DAO) * invdet;
+    const float w = 1 - u - v;
+    // Back-face culling (assuming triangles are consistently oriented)
+    if (t < 0 || u < 0 || v < 0 || w < 0) {
+        HitInfo hitInfo;
+        hitInfo.didCollide = false;
+        return hitInfo;
+    }
+    HitInfo hitInfo;
+    hitInfo.didCollide = true;
+    hitInfo.hitPoint = ray.origin + ray.dir * t;
+    hitInfo.normal = triNormal;
+    hitInfo.dst = t;
+    return hitInfo;
+}
+
+void BVH_traverse(Ray ray, inout MeshEntityHandle meshEntity, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
+{
+    const Material defaultMaterial = Material(vec4(0.0, 0.0, 0.0, 0.0), vec3(0.8, 0.75, 0.9));
+    int stack[MAX_STACK_SIZE];
+    int stackTop = 0; // -1 when empty
+    stack[stackTop] = 0; // stack_init(0 = root)
+
+    int nodeIdx;
+    float AABB_tMin; // intersection dst with AABB
+    while (stackTop >= 0) { // Inlined !stack_empty(stack)
+        // Inlined stack_pop
+        nodeIdx = stack[stackTop];
+        stackTop--;
+
+        const Node node = NodeBuffer[meshEntity.FirstNodeIdx + nodeIdx];
+
+        if (!RayAABBIntersection(ray, node.min, node.max, AABB_tMin))
+            continue;
+
+        if (AABB_tMin > closestHit.dst) 
+            continue;
+
+        // If the current node is a leaf node (has triangle indices),
+        // check triangle intersections
+        if (node.triCount > 0) {
+            for (uint i = 0; i < node.triCount; i++) {
+                // since triCount != 0, leftChild_Or_FirstTri = FirstTri
+                const HitInfo triHitInfo = RayTriangleIntersection(ray, MeshBuffer[meshEntity.FirstTriIdx + IndexBuffer[meshEntity.FirstTriIdx + node.leftChild_Or_FirstTri + i]]);
+                    
+                if (triHitInfo.didCollide) {
+                    TRI_intersect_count += 1;
+                    if (triHitInfo.dst < closestHit.dst) {
+                        closestHit = triHitInfo;
+                        closestHit.material = defaultMaterial;
+                        break;
+                    }
+                }
+            }
+        }
+        else {
+            AABB_intersect_count += 1;
+            // Inlined stack_push children
+            if (stackTop < MAX_STACK_SIZE - 1) {
+                stackTop++;
+                stack[stackTop] = int(node.leftChild_Or_FirstTri+1);
+            }
+            if (stackTop < MAX_STACK_SIZE - 1) {
+                stackTop++;
+                stack[stackTop] = int(node.leftChild_Or_FirstTri);
+            }
+        }
+    }
+}
+
+
+HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count) {
+    closestHit.didCollide = false;
+    closestHit.dst = INF;
+
+    mat4 closestHitTransform;
+    for (int i = 0; i < u_MeshEntityCount; i++) {
+        // Transform ray to the local space of the tested MeshEntity
+        MeshEntityHandle meshEntity = MeshEntityLookupTable[i];
+        mat4 invTransform = inverse(meshEntity.Transform);
+
+        Ray rayLocal;
+        rayLocal.origin = (invTransform * vec4(ray.origin, 1.0)).xyz;
+        rayLocal.dir = (invTransform * vec4(ray.dir, 0.0)).xyz;
+		
+        HitInfo hitInfo;
+        hitInfo.didCollide = false;
+        hitInfo.dst = INF;
+
+        BVH_traverse(rayLocal, meshEntity, hitInfo, AABB_intersect_count, TRI_intersect_count);
+       
+        if (hitInfo.didCollide && hitInfo.dst < closestHit.dst){
+            closestHit = hitInfo;
+            closestHitTransform = meshEntity.Transform;
+        }
+    }
+    closestHit.hitPoint = (closestHitTransform * vec4(closestHit.hitPoint, 1.0)).xyz;
+    closestHit.normal = normalize((closestHitTransform * vec4(closestHit.normal, 0.0)).xyz);
+    return closestHit;
+}
+
+vec3 TraceRay(Ray ray, inout uint state, inout uint AABB_intersect_count, inout uint TRI_intersect_count) {
+    vec3 rayColor = vec3(1.0);
+    vec3 brightness_score = vec3(0.0);
+    HitInfo current_collision;
+    
+    for (int i = 0; i <= u_BouncesPerRay; i++) {
+        CheckRayCollision(ray, current_collision, AABB_intersect_count, TRI_intersect_count);
+
+        if (current_collision.didCollide) {
+            ray.origin = current_collision.hitPoint;
+            ray.dir = normalize(current_collision.normal + RandomDirection(state));
+            vec3 emittedLight = current_collision.material.emission.xyz * current_collision.material.emission.w; // Color * Strength
+            brightness_score += emittedLight * rayColor;
+            rayColor *= current_collision.material.color;
+        }
+        else {
+            brightness_score += GainSkyboxLight(ray) * rayColor;
+            break;
+        }
+    }
+    return brightness_score;
+}
+
+
+void main() {
+    // Find texel (texture pixel coordinates)
+    ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 dims = imageSize(rayTracingTexture);
+    float x = (float(texelCoords.x * 2 - dims.x) / dims.x); // map to <-1.0; 1.0>
+    float y = (float(texelCoords.y * 2 - dims.y) / dims.x); // divide by x to keep ratio
+    
+    Ray ray;
+
+    // Transform Ray origin from local to WORLD space using Camera's Transform
+    vec4 rayOriginHomogeneous = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    rayOriginHomogeneous = u_CameraTransform * rayOriginHomogeneous;
+    ray.origin = rayOriginHomogeneous.xyz / rayOriginHomogeneous.w;
+
+    // Same with Ray direction (no translation needed <=> no homogeneous coordinates)
+    vec3 rayDirectionLocal = vec3(x, y, u_FocalLength); // focalLengh = distance between origin & screen plane
+    ray.dir = normalize(mat3(u_CameraTransform) * rayDirectionLocal);
+
+    uint AABB_intersect_count = 0; 
+    uint TRI_intersect_count = 0;
+    vec3 pixelColor = vec3(0.0);
+    uint state = getCurrentState(texelCoords, dims.x);
+    for (int i = 0; i < u_RaysPerPixel; i++) {
+        pixelColor += TraceRay(ray, state, AABB_intersect_count, TRI_intersect_count);
+    }
+
+    if (u_displayBVH == 1)
+        pixelColor = complexityToRGB(AABB_intersect_count + 3*TRI_intersect_count);
+    else
+        pixelColor = pixelColor / u_RaysPerPixel;
+    
+    // combine accumulated & current pixelColor
+    float weight = 1.0f / (u_numAccumulatedFrames + 1);
+    vec3 outputColor = imageLoad(rayTracingTexture, texelCoords).rgb * (1 - weight) + pixelColor * weight;
+    imageStore(rayTracingTexture, texelCoords, vec4(outputColor, 1.0f));
+    //barrier(); // wait for all threads to finish
+};

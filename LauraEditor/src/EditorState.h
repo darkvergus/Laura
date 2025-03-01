@@ -22,7 +22,7 @@ namespace Laura
 			// panels
 			bool ViewportSettingsPanelOpen = false;
 			bool ThemeSettingsPanelOpen = false;
-			bool ProfilerPanelOpen = false;
+			bool ProfilerPanelOpen = true;
 		} temp;
 
 		// TO ADD new persistent entries, add them here and update the SERIALIZE and DESERIALIZE functions 

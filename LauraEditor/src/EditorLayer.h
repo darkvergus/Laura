@@ -18,7 +18,7 @@ namespace Laura
 	class EditorLayer : public ILayer
 	{
 	public:
-		EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<SceneManager> sceneManager, std::shared_ptr<AssetManager> assetManager, std::shared_ptr<Profiler> profiler);
+		EditorLayer(std::shared_ptr<Renderer> renderer, std::shared_ptr<Asset::ResourcePool> resourcePool, std::shared_ptr<Asset::Manager> assetManager, std::shared_ptr<Profiler> profiler);
 		virtual void onAttach() override;
 		virtual void onDetach() override;
 		virtual void onUpdate() override;
@@ -28,8 +28,8 @@ namespace Laura
 	private:
 		// EDITOR INDEPENDENT SYSTEMS
 		std::shared_ptr<Renderer> m_Renderer;
-		std::shared_ptr<AssetManager> m_AssetManager;
-		std::shared_ptr<SceneManager> m_SceneManager;
+		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
+		std::shared_ptr<Asset::Manager> m_AssetManager;
 		std::shared_ptr<Profiler> m_Profiler;
 	private:
 		glm::ivec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;

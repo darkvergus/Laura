@@ -4,7 +4,7 @@
 
 namespace Laura {
 
-	std::shared_ptr<ITexture2D> ITexture2D::Create(unsigned char* data, int width, int height, int textureUnit)
+	std::shared_ptr<ITexture2D> ITexture2D::Create(const unsigned char* data, const int width, const int height, int textureUnit)
 	{
 		switch (IRendererAPI::GetAPI())
 		{

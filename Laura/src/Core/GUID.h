@@ -5,14 +5,14 @@ namespace Laura
 {
 	// Globally Unique IDentifier
 	// A wrapper for a uint64_t
-	class GUID
+	class LR_GUID
 	{
 	public:
-		GUID(); // constructs a random uint64_t GUID
-		GUID(uint64_t guid);
-		GUID(const GUID& other); // copy constructor
+		LR_GUID(); // constructs a random uint64_t GUID
+		LR_GUID(uint64_t guid);
+		LR_GUID(const LR_GUID& other); // copy constructor
 		operator uint64_t() const { return m_GUID; } // uint64_t conversion operator 
-		~GUID() = default;
+		~LR_GUID() = default;
 	private:
 		uint64_t m_GUID;
 	};
@@ -23,9 +23,9 @@ namespace Laura
 namespace std
 {
 	template<>
-	struct hash<Laura::GUID>
+	struct hash<Laura::LR_GUID>
 	{
-		std::size_t operator()(const Laura::GUID& guid) const
+		std::size_t operator()(const Laura::LR_GUID& guid) const
 		{
 			return std::hash<uint64_t>()((uint64_t)guid);
 		}

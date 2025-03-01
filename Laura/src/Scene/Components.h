@@ -12,7 +12,7 @@ namespace Laura
 {
 	struct GUIDComponent
 	{
-		GUID guid;
+		LR_GUID guid;
 	};
 
 	struct TagComponent
@@ -56,12 +56,12 @@ namespace Laura
 
 	struct MeshComponent
 	{
-		GUID guid = GUID(0);
+		LR_GUID guid = LR_GUID(0);
 	};
 
 	struct MaterialComponent
 	{
-		GUID guid = GUID(0);
+		LR_GUID guid = LR_GUID(0);
 	};
 
 	struct CameraComponent
@@ -75,6 +75,14 @@ namespace Laura
 		// since we transform the size of the screen in the compute shader to "normalized device coordinates" or NDC for short (-1, 1) 
 		// half of the screen width is 1. Therefore (screen width / 2) / tan(FOV in radians / 2) can be simplified to 1 / tan(FOV_rad / 2)
 		inline const float& GetFocalLength() const { return 1.0f/tan(glm::radians(fov)/2.0f); };
+	};
+
+	struct SkyboxComponent
+	{
+		SkyboxComponent() = default;
+
+		bool isMain = false;
+		LR_GUID guid = LR_GUID(0); // GUID of the texture
 	};
 
 	/// EXPERIMENTAL SCRIPTING SYSTEM /// (will change in the future)
