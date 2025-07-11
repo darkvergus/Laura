@@ -79,7 +79,8 @@ namespace Laura
 
 		/// MATERIAL COMPONENT UI /////////////////////////////////////////////////////////////
 		// TODO
-
+		
+		/// ADD COMPONENT BUTTON /////////////////////////
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 		ImGui::Dummy(ImVec2(0.0f, 10.0f));
@@ -106,11 +107,10 @@ namespace Laura
 		}
 		if (ImGui::BeginPopup("AddComponent"))
 		{
-			AddComponentSelectable<TransformComponent>	(entity, "Transform", ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT);
-			AddComponentSelectable<CameraComponent>		(entity, "Camera", ICON_FA_VIDEO);
-			AddComponentSelectable<MeshComponent>		(entity, "Mesh", ICON_FA_CUBE);
-			AddComponentSelectable<MaterialComponent>	(entity, "Material", ICON_FA_LAYER_GROUP);
-			AddComponentSelectable<ScriptComponent>		(entity, "Script", ICON_FA_FILE_CODE);
+			GiveEntityComponentButton<TransformComponent>	(entity, "Transform", ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT);
+			GiveEntityComponentButton<CameraComponent>		(entity, "Camera", ICON_FA_VIDEO);
+			GiveEntityComponentButton<MeshComponent>		(entity, "Mesh", ICON_FA_CUBE);
+			GiveEntityComponentButton<MaterialComponent>	(entity, "Material", ICON_FA_LAYER_GROUP);
 			ImGui::EndPopup();
 		}
 		// ensure that there is always some space under the Add Component button when scrolling to display the popup

@@ -42,10 +42,7 @@ namespace Laura {
 
         static ImPlotAxisFlags shouldAutoFit = ImPlotAxisFlags_AutoFit;
         ImGui::CheckboxFlags("Autofit", &shouldAutoFit, ImPlotAxisFlags_AutoFit);
-        ImGui::SameLine();
 
-        ImGui::Button(ICON_FA_FILE_ARROW_UP " Import...");
-        
         static int colorIndex = 0;
         static std::unordered_map<std::string, plotLineStyle> plotLineStyleMap;
         const ImPlotSubplotFlags SubPlot_Flags = ImPlotSubplotFlags_ShareItems | ImPlotSubplotFlags_NoTitle;

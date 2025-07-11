@@ -82,7 +82,7 @@ namespace Laura
 		}
 
         template<typename T>
-        void AddComponentSelectable(Entity entity, const char* label, const char* icon) {
+        void GiveEntityComponentButton(Entity entity, const char* label, const char* icon) {
 			if (entity.HasComponent<T>()) { ImGui::BeginDisabled(); }
 			if (ImGui::Selectable((icon + std::string(" ") + label).c_str(), false)) 
 			{ 

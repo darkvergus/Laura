@@ -160,30 +160,12 @@ namespace Laura
 		ImGui::ShowDemoWindow(&showDemo);
 		if (ImGui::BeginMainMenuBar())
 		{
-			if (ImGui::BeginMenu("File"))
-			{
-				ImGui::MenuItem("New", "Ctrl+N");
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::BeginMenu("Edit"))
-			{
-				if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-				if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
-				ImGui::Separator();
-				if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-				if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-				if (ImGui::MenuItem("Paste", "CTRL+V")) {}
-				ImGui::EndMenu();
-			}
-
 			if (ImGui::BeginMenu("View"))
 			{
 				if (ImGui::MenuItem("Themes")) { m_EditorState->temp.ThemeSettingsPanelOpen = true; }
 				if (ImGui::MenuItem("Profiler")) { m_EditorState->temp.ProfilerPanelOpen = true; }
 				ImGui::EndMenu();
 			}
-
 			ImGui::EndMainMenuBar();
 		}
 

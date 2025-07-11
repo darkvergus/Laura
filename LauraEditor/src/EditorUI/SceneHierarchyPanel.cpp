@@ -13,22 +13,10 @@ namespace Laura
     {
         ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
 
-        if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add"))
-        {
-            if (ImGui::MenuItem("Empty")) { scene->CreateEntity(); }
-            
-            ImGui::BeginDisabled(true); // Not implemented yet
-            if (ImGui::BeginMenu("3D Object"))
-            {
-                if (ImGui::MenuItem("Sphere")) {}
-                if (ImGui::MenuItem("Cuboid")) {}
-                ImGui::EndMenu();
+        if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
+            if (ImGui::MenuItem("Empty")) {
+                scene->CreateEntity();
             }
-            if (ImGui::MenuItem("2D Plane")) {}
-            if (ImGui::MenuItem("Camera")) {}
-            if (ImGui::MenuItem("3D Mesh")) {}
-            ImGui::EndDisabled();
-
             ImGui::EndMenu();
         }
 
