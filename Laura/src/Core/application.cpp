@@ -5,6 +5,8 @@ namespace Laura
 	void Application::init()
 	{
 		Log::Init();
+		LR_CORE_INFO("C++ version: {0}", __cplusplus);
+		
 		_Profiler = std::make_shared<Profiler>(500);
 
 		_Window = IWindow::createWindow();
