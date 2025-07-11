@@ -76,12 +76,4 @@ namespace Laura
 		// half of the screen width is 1. Therefore (screen width / 2) / tan(FOV in radians / 2) can be simplified to 1 / tan(FOV_rad / 2)
 		inline const float& GetFocalLength() const { return 1.0f/tan(glm::radians(fov)/2.0f); };
 	};
-
-	struct SkyboxComponent
-	{
-		SkyboxComponent() = default;
-
-		bool isMain = false;
-		LR_GUID guid = LR_GUID(0); // GUID of the texture
-	};
 }

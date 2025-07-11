@@ -25,6 +25,7 @@ namespace Laura
 	private:
 		struct Settings /* here are the default ones */
 		{
+			LR_GUID skyboxGuid = 0;
 			glm::uvec2 Resolution{ 640, 360 }; // nHD 16:9
 			std::filesystem::path ComputeShaderPath = LR_RESOURCES_PATH "Shaders/PathTracing.comp";
 			uint32_t raysPerPixel = 1;

@@ -36,13 +36,6 @@ namespace Laura
 		m_Scene = std::make_shared<Scene>();
 
 		{
-			Entity skyboxEntity = m_Scene->CreateEntity();
-			skyboxEntity.GetComponent<TagComponent>().Tag = std::string("Skybox");
-			auto& skyboxComponent = skyboxEntity.AddComponent<SkyboxComponent>();
-			skyboxComponent.guid = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
-			skyboxComponent.isMain = true;
-		}
-		{
 			Entity camera = m_Scene->CreateEntity();
 			std::string& tag = camera.GetComponent<TagComponent>().Tag;
 			tag = std::string("Camera");
@@ -94,6 +87,7 @@ namespace Laura
 		//}
 
 		// Most of these are default arguments (not necessary to specify but showing them for clarity)
+		m_Renderer->settings.skyboxGuid = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
 		m_Renderer->settings.raysPerPixel = 1;
 		m_Renderer->settings.bouncesPerRay = 5;
 		m_Renderer->settings.maxAABBIntersections = 500;

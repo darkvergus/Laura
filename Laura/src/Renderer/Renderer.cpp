@@ -27,7 +27,8 @@ namespace Laura
 		auto t = m_Profiler->timer("Renderer::Parse()");
 
 		auto pScene = std::make_shared<Renderer::ParsedScene>();
-
+	
+		// find a main camera
 		auto cameraView = scene->GetRegistry()->view<TransformComponent, CameraComponent>();
 		for (auto entity : cameraView) {
 			Entity e(entity, scene->GetRegistry());
@@ -43,24 +44,6 @@ namespace Laura
 
 		if (!pScene->hasValidCamera)
 			return nullptr;
-		
-		auto skyboxView = scene->GetRegistry()->view<SkyboxComponent>();
-		for (auto entity : skyboxView) {
-			Entity e(entity, scene->GetRegistry());
-			const auto& skyboxComponent = e.GetComponent<SkyboxComponent>();
-			if (!skyboxComponent.isMain)
-				continue;
-
-			std::shared_ptr<Asset::TextureMetadata> metadata = resourcePool->Get<Asset::TextureMetadata>(skyboxComponent.guid);
-			if (!metadata)
-				continue;
-
-			pScene->SkyboxFirstTexIdx = metadata->texStartIdx;
-			pScene->SkyboxWidth = metadata->width;
-			pScene->SkyboxHeight = metadata->height;
-			pScene->SkyboxChannels = metadata->channels;
-			break;
-		}
 
 		auto renderableView = scene->GetRegistry()->view<TransformComponent, MeshComponent>();
 		pScene->MeshEntityLookupTable.reserve(renderableView.size_hint());
@@ -126,7 +109,6 @@ namespace Laura
 			m_CameraUBO->AddData(64, sizeof(float), &pScene->CameraFocalLength);
 			m_CameraUBO->Unbind();
 		}
-
 		{
 			// ENTITY LOOKUP TABLE
 			uint32_t sizeBytes = sizeof(MeshEntityHandle) * pScene->MeshEntityLookupTable.size();
@@ -137,13 +119,17 @@ namespace Laura
 		}
 
 		static bool shouldLoadBuffers = true;
-		if (shouldLoadBuffers)
-		{
+		if (shouldLoadBuffers) {
 			shouldLoadBuffers = false;
+
 			{
 				// SKYBOX
-				const unsigned char* data = &resourcePool->TextureBuffer[pScene->SkyboxFirstTexIdx];
-				m_SkyboxTexture = ITexture2D::Create(data, pScene->SkyboxWidth, pScene->SkyboxHeight, 1); // TODO: for some reason Channels are not passed
+				std::shared_ptr<Asset::TextureMetadata> metadata = resourcePool->Get<Asset::TextureMetadata>(settings.skyboxGuid);
+				if (metadata) {
+					const uint32_t SKYBOX_TEXTURE_UNIT = 1;
+					const unsigned char* data = &resourcePool->TextureBuffer[metadata->texStartIdx];
+					m_SkyboxTexture = ITexture2D::Create(data, metadata->width, metadata->height, SKYBOX_TEXTURE_UNIT);
+				}
 			}
 			{
 				// RESOURCE POOL 
