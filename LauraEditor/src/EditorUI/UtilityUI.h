@@ -1,54 +1,62 @@
 #pragma once
 #include "Laura.h"
-#include "EditorUI/Themes/EditorTheme.h"
+#include "EditorUI/EditorTheme/ThemePanel.h"
 #include "EditorState.h"
 
 namespace Laura
 {
-	// Executes the OnConfirm function. If "doubleConfirmation" is enabled in the editor state, 
-	// a popup will prompt the user for confirmation first. To use this with a button click, 
-	// set a bool to true and pass it as the "execute" parameter. This bool ensures the popup 
-	// shows, as calling this function directly in the button's if clause won't trigger it.
+	/*
+		Executes the OnConfirm function. If "doubleConfirmEnabled" is enabled in the editor state, 
+		a popup will prompt the user for confirmation first. To use this with a button click, 
+		set a bool to true and pass it as the "execute" parameter. This bool ensures the popup 
+		shows, as calling this function directly in the button's if clause won't trigger it.
+	*/
 	template <typename OnConfirm>
-	void ConfirmAndExecute(bool& execute, const char* popupTitle, const char* popupMessage, OnConfirm onConfirm, std::shared_ptr<ThemeManager> themeManager, std::shared_ptr<EditorState> editorState)
-	{
-		if (!execute)
-		{
+	void ConfirmAndExecute(	bool& shouldExecute, 
+							const char* popupTitle,		
+							const char* popupMessage, 
+							OnConfirm onConfirm, 
+							std::shared_ptr<EditorState> editorState) {
+		if (!shouldExecute) {
 			return;
 		}
-
-		if (!editorState->persistent.doubleConfirmation)
-		{
+		
+		// early return if double confirmation not needed
+		if (!editorState->persistent.doubleConfirmEnabled) {
 			onConfirm();
-			execute = false;
+			shouldExecute = false;
 			return;
 		}
+		
+		EditorTheme& theme = editorState->temp.editorTheme;
 
 		ImGui::OpenPopup(popupTitle);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
-		if (ImGui::BeginPopupModal(popupTitle, NULL, ImGuiWindowFlags_AlwaysAutoResize))
-		{
+
+		if (ImGui::BeginPopupModal(popupTitle, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
 			ImGui::Text(popupMessage);
 			float panelWidth = ImGui::GetContentRegionAvail().x;
 			float buttonWidth = panelWidth * 0.5f - 5.0f;
 			ImGui::Dummy({ 5.0f, 0.0f });
 
-			themeManager->ImGuiSet(ImGuiCol_Button, themeManager->GetActiveTheme()->ButtonGray);
-			if (ImGui::Button("Yes", ImVec2(buttonWidth, 0)))
+			theme.PushColor(ImGuiCol_Button, theme.SECONDARY_2);
 			{
-				onConfirm();
-				execute = false;
-				ImGui::CloseCurrentPopup();
+				if (ImGui::Button("Yes", ImVec2(buttonWidth, 0))) {
+					onConfirm();
+					shouldExecute = false;
+					ImGui::CloseCurrentPopup();
+				}
+
+				ImGui::SameLine();
+				if (ImGui::Button("No", ImVec2(buttonWidth, 0))) {
+					shouldExecute = false;
+					ImGui::CloseCurrentPopup();
+				}
 			}
-			ImGui::SameLine();
-			if (ImGui::Button("No", ImVec2(buttonWidth, 0)))
-			{
-				execute = false;
-				ImGui::CloseCurrentPopup();
-			}
-			themeManager->ImGuiSet(ImGuiCol_Button, themeManager->GetActiveTheme()->DefaultButton);
+			theme.PopColor();
 			ImGui::EndPopup();
 		}
+
 		ImGui::PopStyleVar();
 	}
 }

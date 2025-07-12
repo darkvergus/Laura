@@ -8,10 +8,7 @@
 #include "EditorUI/SceneHierarchyPanel.h"
 #include "EditorUI/Inspector/InspectorPanel.h"
 #include "EditorUI/ProfilerPanel.h"
-
-/// --- Theme Manager --- ///
-#include "EditorUI/Themes/EditorTheme.h"
-#include "EditorUI/Themes/ThemesPanel.h"
+#include "EditorUI/EditorTheme/ThemePanel.h"
 
 namespace Laura
 {
@@ -40,13 +37,12 @@ namespace Laura
 		// > EDITOR RELATED < //
 		// The Editor Layer owns the Editor State (and deletes it)
 		std::shared_ptr<EditorState> m_EditorState;
-		// contains and manages the ThemeData
-		std::shared_ptr<ThemeManager> m_ThemeManager;
+
 		// UI panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		InspectorPanel m_InspectorPanel;
 		ViewportPanel m_ViewportPanel;
-		ThemesPanel m_ThemesPanel;
+		ThemePanel m_ThemePanel;
 		ProfilerPanel m_ProfilerPanel;
 
 
@@ -55,7 +51,5 @@ namespace Laura
 		// It has to manage the LOADING and UNLOADING of scenes
 		// UI panels only work with the active scene
 		std::shared_ptr<Scene> m_Scene;
-
 	};
-
 }

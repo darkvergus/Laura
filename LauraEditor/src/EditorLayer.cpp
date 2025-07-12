@@ -8,14 +8,12 @@ namespace Laura
 		m_ResourcePool(resourcePool),
 		m_AssetManager(assetManager),
 		m_Profiler(profiler),
-
 		m_EditorState(std::make_shared<EditorState>()),
-		m_ThemeManager(std::make_shared<ThemeManager>()),
 
-		m_InspectorPanel(m_EditorState, m_ThemeManager),
-		m_SceneHierarchyPanel(m_EditorState, m_ThemeManager),
-		m_ThemesPanel(m_EditorState, m_ThemeManager),
-		m_ProfilerPanel(m_EditorState, m_ThemeManager)
+		m_InspectorPanel(m_EditorState),
+		m_SceneHierarchyPanel(m_EditorState),
+		m_ThemePanel(m_EditorState),
+		m_ProfilerPanel(m_EditorState)
 	{
 		setLayerName("EditorLayer");
 	}
@@ -23,15 +21,8 @@ namespace Laura
 
 	void EditorLayer::onAttach() {
 		deserializeState(m_EditorState);
-
-		std::string statusMessage;
-		if (!m_ThemeManager->LoadTheme(m_EditorState->persistent.ThemeFilePath, statusMessage)) {
-			m_EditorState->persistent.ThemeFilePath = "";
-			m_ThemeManager->LoadBuiltInDefualtTheme();
-			LR_EDITOR_WARN("Failed to load theme: {0}", statusMessage);
-		}
-		
 		m_AssetManager->SetResourcePool(m_ResourcePool.get());
+
 		m_Scene = std::make_shared<Scene>();
 
 		/// STARTING SCENE FOR THE MOMENT DEFINED IN HERE //////////////////////////////////////
@@ -40,6 +31,7 @@ namespace Laura
 			camera.GetComponent<TagComponent>().Tag = std::string("Camera");
 			camera.AddComponent<TransformComponent>().SetTranslation({ 0.0f, 40.0f, -200.0f });
 			camera.AddComponent<CameraComponent>().fov = 30.0f;
+
 		}
 		{
 			Entity dragon = m_Scene->CreateEntity();
@@ -108,7 +100,7 @@ namespace Laura
 		// INSPECTOR PANEL
 		m_InspectorPanel.OnImGuiRender(m_Scene);
 		// THEMES PANEL
-		if (m_EditorState->temp.ThemeSettingsPanelOpen) { m_ThemesPanel.OnImGuiRender(); }
+		if (m_EditorState->temp.ThemeSettingsPanelOpen) { m_ThemePanel.OnImGuiRender(); }
 		
 		// RENDERER RENDERING // -> WILL BE MOVED TO THE RUNTIME LAYER
 		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.get(), m_ResourcePool.get());

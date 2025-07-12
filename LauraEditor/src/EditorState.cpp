@@ -22,9 +22,9 @@ namespace Laura
         try 
         {
             YAML::Node node;
-            node["doubleConfirmation"] = state->persistent.doubleConfirmation;
+            node["doubleConfirmation"] = state->persistent.doubleConfirmEnabled;
             node["viewportMode"] = state->persistent.viewportMode;
-            node["ThemeFilePath"] = state->persistent.ThemeFilePath;
+            node["ThemeFilePath"] = state->persistent.editorThemeFilepath;
 
             std::ofstream fout(EDITOR_STATE_FILE_PATH);
             fout << node;
@@ -64,9 +64,9 @@ namespace Laura
         try
 		{
 			YAML::Node node = YAML::LoadFile(filepath);
-			state->persistent.doubleConfirmation = node["doubleConfirmation"].as<bool>();
+			state->persistent.doubleConfirmEnabled = node["doubleConfirmation"].as<bool>();
 			state->persistent.viewportMode = node["viewportMode"].as<ViewportMode>();
-			state->persistent.ThemeFilePath = node["ThemeFilePath"].as<std::string>();
+			state->persistent.editorThemeFilepath = node["ThemeFilePath"].as<std::string>();
 			return true;
 		}
 		catch (const YAML::RepresentationException& e)
@@ -79,5 +79,10 @@ namespace Laura
 			LR_EDITOR_CRITICAL("Unknown error occurred while saving file: {0}, error: {1}", filepath, e.what());
 			return false;
 		}
+
+        auto [status, errMsg] = state->temp.editorTheme.LoadFromFile(state->persistent.editorThemeFilepath); // deserialize derived state
+        if (!status) {
+            LR_EDITOR_WARN("Unable to deserialize theme: {0}", state->persistent.editorThemeFilepath);
+        }
 	}
 }

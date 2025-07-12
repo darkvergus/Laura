@@ -4,7 +4,7 @@
 
 #include "Laura.h"
 #include "EditorState.h"
-#include "EditorUI/Themes/EditorTheme.h"
+#include "EditorUI/EditorTheme/Theme.h"
 #include "EditorUI/UtilityUI.h"
 
 namespace Laura
@@ -12,7 +12,7 @@ namespace Laura
 	class InspectorPanel
 	{
 	public:
-		InspectorPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ThemeManager> themeManager);
+		InspectorPanel(std::shared_ptr<EditorState> editorState);
 		~InspectorPanel() = default;
 
 		void OnImGuiRender(std::shared_ptr<Scene> scene);
@@ -48,7 +48,7 @@ namespace Laura
 
 					ConfirmAndExecute(deleteComponent, ICON_FA_TRASH_CAN " Delete Component", "Are you sure you want to delete this component?", [&]() {
 						entity.RemoveComponent<T>();
-					}, m_ThemeManager, m_EditorState);
+					}, m_EditorState);
 				}
 
 				ImGui::SameLine(panelDims.x - lineHeight * 0.5);
@@ -84,17 +84,16 @@ namespace Laura
         template<typename T>
         void GiveEntityComponentButton(Entity entity, const char* label, const char* icon) {
 			if (entity.HasComponent<T>()) { ImGui::BeginDisabled(); }
-			if (ImGui::Selectable((icon + std::string(" ") + label).c_str(), false)) 
-			{ 
+
+			if (ImGui::Selectable((icon + std::string(" ") + label).c_str(), false)) { 
 				entity.AddComponent<T>(); 
 				return; // avoid calling EndDisabled()
 			}
+
             if (entity.HasComponent<T>()) { ImGui::EndDisabled(); }
         }
 
 	private:
 		std::shared_ptr<EditorState> m_EditorState;
-		std::shared_ptr<ThemeManager> m_ThemeManager;
 	};
-
 }

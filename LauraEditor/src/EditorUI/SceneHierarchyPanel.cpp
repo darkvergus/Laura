@@ -4,13 +4,14 @@
 
 namespace Laura
 {
-    SceneHierarchyPanel::SceneHierarchyPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ThemeManager> themeManager)
-		: m_EditorState(editorState), m_ThemeManager(themeManager)
+    SceneHierarchyPanel::SceneHierarchyPanel(std::shared_ptr<EditorState> editorState)
+		: m_EditorState(editorState)
     {
     }
 
-    void SceneHierarchyPanel::OnImGuiRender(std::shared_ptr<Scene> scene)
-    {
+    void SceneHierarchyPanel::OnImGuiRender(std::shared_ptr<Scene> scene) {
+        EditorTheme& theme = m_EditorState->temp.editorTheme;
+
         ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
 
         if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
@@ -21,8 +22,7 @@ namespace Laura
         }
 
         entt::registry* activeRegistry = scene->GetRegistry();
-        if(!activeRegistry)
-		{
+        if(!activeRegistry) {
 			ImGui::End();
             LR_CORE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
 			return;
@@ -40,40 +40,34 @@ namespace Laura
         static bool destroyEntity = false; // since you can only delete one entity at a time the fact that this is used in the loop is fine
         /// ITERATE OVER ENTITIES /////////////////////////////////////////////////////////////
         auto view = activeRegistry->view<entt::entity>();
-        for (auto entityID : view)
-        {
+        for (auto entityID : view) {
             bool entityChildrenOpen = false;
             Entity entity(entityID, activeRegistry);
             std::string& tag = entity.GetComponent<TagComponent>().Tag;
 
             // display selected entity
-            if (entityID == m_EditorState->temp.selectedEntity)
-            {
-                m_ThemeManager->ImGuiSet(ImGuiCol_Header, m_ThemeManager->GetActiveTheme()->SelectedHeader);
+            if (entityID == m_EditorState->temp.selectedEntity) {
+                theme.PushColor(ImGuiCol_Header, theme.SECONDARY_2);
+
                 entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
                 ImGui::SameLine(panelDims.x - lineHeight * 0.5);
-
                 if (ImGui::Button(ICON_FA_TRASH_CAN)) { destroyEntity = true; }
-
                 ConfirmAndExecute(destroyEntity, ICON_FA_TRASH_CAN " Delete Entity", "Are you sure you want to delete this entity?", [&]() {
                         scene->DestroyEntity(entity);
                         m_EditorState->temp.selectedEntity = entt::null;
-                    }, m_ThemeManager, m_EditorState);
+                    }, m_EditorState);
 
-                m_ThemeManager->ImGuiSet(ImGuiCol_Header, m_ThemeManager->GetActiveTheme()->DefaultHeader);
+                theme.PopColor();
 			}
-			else // display non-selected entity
-			{
+			else { // display non-selected entity
 				entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
 			}
 
-            if (ImGui::IsItemClicked())
-            {
+            if (ImGui::IsItemClicked()) {
                 m_EditorState->temp.selectedEntity = entityID;
             }
 
-            if (entityChildrenOpen)
-            {
+            if (entityChildrenOpen) {
                 // TODO: Child entity system
                 ImGui::BulletText("This is a testing text.");
                 ImGui::TreePop();
@@ -81,8 +75,7 @@ namespace Laura
         }
 
         // Deselect the selected entity if the user clicks in the window but outside of any tree node
-        if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-		{
+        if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
 			m_EditorState->temp.selectedEntity = entt::null;
 		}
 

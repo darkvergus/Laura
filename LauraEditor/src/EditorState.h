@@ -1,6 +1,7 @@
 #pragma once
 #include <yaml-cpp/yaml.h>
 #include "Laura.h"
+#include "EditorUI\EditorTheme\Theme.h"
 
 #define EDITOR_STATE_FILE_PATH EDITOR_RESOURCES_PATH "EditorStatePersistent.yaml"
 
@@ -23,22 +24,22 @@ namespace Laura
 			bool ViewportSettingsPanelOpen = false;
 			bool ThemeSettingsPanelOpen = false;
 			bool ProfilerPanelOpen = true;
+			EditorTheme editorTheme;
 		} temp;
 
 		// TO ADD new persistent entries, add them here and update the SERIALIZE and DESERIALIZE functions 
 		// (if the type is custom, also create a YAML::convert template specialization)
 		struct
 		{
-			bool doubleConfirmation = false;
-			/// VIEWPORT ///
+			bool doubleConfirmEnabled = false;
 			ViewportMode viewportMode = ViewportMode::FIT_TO_VIEWPORT;
-			/// THEMES ///
-			std::string ThemeFilePath = "";
+			std::string editorThemeFilepath = "";
 		} persistent;
 	};
 
 	bool serializeState(const std::shared_ptr<const EditorState>& state);
-	bool deserializeState(const std::shared_ptr<EditorState>& state);
+	//deserializes derived state (EditorTheme from editorThemeFilepath)
+	bool deserializeState(const std::shared_ptr<EditorState>& state); 
 }
 
 // tell yaml-cpp how to convert the ViewportMode enum to and from a string when serializing and deserializing

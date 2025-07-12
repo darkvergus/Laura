@@ -4,8 +4,9 @@
 
 namespace Laura {
 
-    void ProfilerPanel::OnImGuiRender(std::shared_ptr<Profiler> profiler)
-    {
+    void ProfilerPanel::OnImGuiRender(std::shared_ptr<Profiler> profiler) {
+        EditorTheme& theme = m_EditorState->temp.editorTheme;
+
         if (!m_EditorState->temp.ProfilerPanelOpen)
             return;
 
@@ -17,14 +18,17 @@ namespace Laura {
         auto t = profiler->timer("ProfilerPanel");
 
         ImPlot::PushColormap(ImPlotColormap_Deep);
-        m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->ButtonGray);
+        theme.PushColor(ImGuiCol_Button, theme.SECONDARY_2);
         ImGui::Begin(ICON_FA_STOPWATCH " Profiler", &m_EditorState->temp.ProfilerPanelOpen);
 
         const char* playLabel = (profiler->isPaused) ? ICON_FA_PLAY : ICON_FA_PAUSE;
-        m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->DefaultButton);
-        if (ImGui::Button(playLabel))
+        theme.PopColor();
+
+        if (ImGui::Button(playLabel)) {
             profiler->isPaused = !profiler->isPaused;
-        m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->ButtonGray);
+        }
+
+        theme.PushColor(ImGuiCol_Button, theme.SECONDARY_2);
 
         const ScrollingBuffer& buff = profiler->getGlobalBuffer();
         if (!buff.empty()) {
@@ -69,8 +73,9 @@ namespace Laura {
                 if (ImPlot::IsLegendEntryHovered(label.c_str())) {
                     ImGui::SetTooltip("Open %s Options", label.c_str());
 
-                    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
                         ImGui::OpenPopup(label.c_str());
+                    }
                 }
 
                 if (ImGui::BeginPopup(label.c_str())) {
@@ -96,6 +101,6 @@ namespace Laura {
         }
         ImGui::End();
         ImPlot::PopColormap();
-        m_ThemeManager->ImGuiSet(ImGuiCol_Button, m_ThemeManager->GetActiveTheme()->DefaultButton);
+        theme.PopColor();
     }
 }

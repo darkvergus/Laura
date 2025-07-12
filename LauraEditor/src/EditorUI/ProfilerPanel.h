@@ -2,7 +2,6 @@
 
 #include "Laura.h"
 #include "EditorState.h"
-#include "EditorUI/Themes/EditorTheme.h"
 
 namespace Laura
 {
@@ -10,8 +9,8 @@ namespace Laura
 	class ProfilerPanel
 	{
 	public:
-		ProfilerPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ThemeManager> themeManager)
-			: m_EditorState(editorState), m_ThemeManager(themeManager) {}
+		ProfilerPanel(std::shared_ptr<EditorState> editorState)
+			: m_EditorState(editorState) {}
 
 		~ProfilerPanel() = default;
 
@@ -25,6 +24,5 @@ namespace Laura
 		};
 
 		std::shared_ptr<EditorState> m_EditorState;
-		std::shared_ptr<ThemeManager> m_ThemeManager;
 	};
 }

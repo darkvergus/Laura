@@ -1,14 +1,19 @@
 #pragma once
 #include "Laura.h"
-#include "EditorUI/Themes/EditorTheme.h"
+#include "EditorState.h"
 #include <imgui_internal.h>
 
 namespace Laura
 {
 	// Since the transform component can only get and set values through its own functions, we need to pass the set function as a lambda
 	template <typename T>
-	void TransformVec3Slider(std::shared_ptr<ThemeManager> themeManager, const std::string& label, glm::vec3 vector, const T& setVector)
-	{
+	void TransformVec3Slider(	std::shared_ptr<EditorState> editorState, 
+								const std::string& label, 
+								glm::vec3 vector, 
+								const T& setVector) {
+
+		EditorTheme& theme = editorState->temp.editorTheme;
+
 		ImGui::AlignTextToFramePadding();
 		ImGui::Columns(2);
 		// width of the 1st column (labels)
@@ -24,47 +29,68 @@ namespace Laura
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		{ // adding a scope for clarity
 			ImGui::SetNextItemWidth(lineheight);
-			themeManager->ImGuiSet(ImGuiCol_Button, themeManager->GetActiveTheme()->TransformButtonXbg);
-			themeManager->ImGuiSet(ImGuiCol_ButtonHovered, themeManager->GetActiveTheme()->TransformButtonXHovered);
-			themeManager->ImGuiSet(ImGuiCol_ButtonActive, themeManager->GetActiveTheme()->TransformButtonXActive);
-			if (ImGui::Button("X", btnSize)) { setVector(glm::vec3(0.0f, vector.y, vector.z)); }
-			ImGui::SameLine();
-			if (ImGui::DragFloat("##X", &vector.x, 0.1f)) { setVector(vector); }
-			ImGui::SameLine(); ImGui::PopItemWidth();
+			theme.PushColor(ImGuiCol_Button, theme.SECONDARY_2);
+			theme.PushColor(ImGuiCol_ButtonHovered, theme.SECONDARY_2);
+			{
+				theme.PushColor(ImGuiCol_ButtonActive, theme.X_COLOR);
+				if (ImGui::Button("X", btnSize)) {
+					setVector(glm::vec3(0.0f, vector.y, vector.z));
+				}
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##X", &vector.x, 0.1f)) {
+					setVector(vector);
+				}
+				ImGui::SameLine();
+				theme.PopColor(); // ButtonActive
+				ImGui::PopItemWidth();
 
-			ImGui::SetNextItemWidth(lineheight);
-			themeManager->ImGuiSet(ImGuiCol_Button, themeManager->GetActiveTheme()->TransformButtonYbg);
-			themeManager->ImGuiSet(ImGuiCol_ButtonHovered, themeManager->GetActiveTheme()->TransformButtonYHovered);
-			themeManager->ImGuiSet(ImGuiCol_ButtonActive, themeManager->GetActiveTheme()->TransformButtonYActive);
-			if (ImGui::Button("Y", btnSize)) { setVector(glm::vec3(vector.x, 0.0f, vector.z)); }
-			ImGui::SameLine();
-			if (ImGui::DragFloat("##Y", &vector.y, 0.1f)) { setVector(vector); }
-			ImGui::SameLine(); ImGui::PopItemWidth();
+				ImGui::SetNextItemWidth(lineheight);
+				theme.PushColor(ImGuiCol_ButtonActive, theme.Y_COLOR);
+				if (ImGui::Button("Y", btnSize)) {
+					setVector(glm::vec3(vector.x, 0.0f, vector.z));
+				}
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##Y", &vector.y, 0.1f)) {
+					setVector(vector);
+				}
+				ImGui::SameLine();
+				theme.PopColor(); // ButtonActive
+				ImGui::PopItemWidth();
 
-			ImGui::SetNextItemWidth(lineheight);
-			themeManager->ImGuiSet(ImGuiCol_Button, themeManager->GetActiveTheme()->TransformButtonZbg);
-			themeManager->ImGuiSet(ImGuiCol_ButtonHovered, themeManager->GetActiveTheme()->TransformButtonZHovered);
-			themeManager->ImGuiSet(ImGuiCol_ButtonActive, themeManager->GetActiveTheme()->TransformButtonZActive);
-			if (ImGui::Button("Z", btnSize)) { setVector(glm::vec3(vector.x, vector.y, 0.0f)); }
-			ImGui::SameLine();
-			if (ImGui::DragFloat("##Z", &vector.z, 0.1f)) { setVector(vector); }
-			ImGui::PopItemWidth();
+				ImGui::SetNextItemWidth(lineheight);
+				theme.PushColor(ImGuiCol_ButtonActive, theme.Z_COLOR);
+				if (ImGui::Button("Z", btnSize)) {
+					setVector(glm::vec3(vector.x, vector.y, 0.0f));
+				}
+				ImGui::SameLine();
+				if (ImGui::DragFloat("##Z", &vector.z, 0.1f)) {
+					setVector(vector);
+				}
+				ImGui::PopItemWidth();
+			}
+			theme.PopColor(2);
 		}
+
 		ImGui::PopStyleVar();
 		ImGui::PopID();
-		themeManager->ImGuiSet(ImGuiCol_Button, themeManager->GetActiveTheme()->DefaultButton);
-		themeManager->ImGuiSet(ImGuiCol_ButtonActive, themeManager->GetActiveTheme()->DefaultButtonHovered);
-		themeManager->ImGuiSet(ImGuiCol_ButtonHovered, themeManager->GetActiveTheme()->DefaultButtonActive);
 		ImGui::Columns(1);
 	}
 
-	inline void DrawTransformSliders(std::shared_ptr<ThemeManager> themeManager, Entity entity)
-	{
+	inline void DrawTransformSliders(std::shared_ptr<EditorState> editorState, Entity entity) {
 		auto& transform = entity.GetComponent<TransformComponent>();
-		TransformVec3Slider(themeManager, "Position", transform.GetTranslation(), [&transform](glm::vec3 vector) {transform.SetTranslation(vector); });
-		TransformVec3Slider(themeManager, "Rotation", transform.GetRotation(), [&transform](glm::vec3 vector) {transform.SetRotation(vector); });
-		if (entity.HasComponent<CameraComponent>()) { ImGui::BeginDisabled(); }
-		TransformVec3Slider(themeManager, "Scale", transform.GetScale(), [&transform](glm::vec3 vector) {transform.SetScale(vector); });
-		if (entity.HasComponent<CameraComponent>()) { ImGui::EndDisabled(); }
+		TransformVec3Slider(editorState, "Position", transform.GetTranslation(), [&transform](glm::vec3 vector) {
+				transform.SetTranslation(vector); 
+			}
+		);
+
+		TransformVec3Slider(editorState, "Rotation", transform.GetRotation(), [&transform](glm::vec3 vector) {
+				transform.SetRotation(vector); 
+			}
+		);
+
+		TransformVec3Slider(editorState, "Scale", transform.GetScale(), [&transform](glm::vec3 vector) {
+				transform.SetScale(vector);
+			}
+		);
 	}
 }
