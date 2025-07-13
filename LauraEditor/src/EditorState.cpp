@@ -7,7 +7,7 @@ namespace Laura
         std::string filepath = EDITOR_STATE_FILE_PATH;
         if (!filepath.ends_with(".yaml"))
         {
-            LR_EDITOR_CRITICAL("Invalid file extension for theme file: {0}", filepath);
+            LOG_EDITOR_CRITICAL("Invalid file extension for theme file: {0}", filepath);
             return false;
         }
 
@@ -15,7 +15,7 @@ namespace Laura
         std::ofstream fout(filepath);
         if (!fout.is_open())
         {
-            LR_EDITOR_CRITICAL("Could not open file for writing: {0}", filepath);
+            LOG_EDITOR_CRITICAL("Could not open file for writing: {0}", filepath);
             return false;
         }
 
@@ -32,12 +32,12 @@ namespace Laura
         }
         catch (const YAML::RepresentationException& e)
         {
-            LR_EDITOR_CRITICAL("YAML representation error (invalid syntax?): {0}, error: {1}", EDITOR_STATE_FILE_PATH, e.what());
+            LOG_EDITOR_CRITICAL("YAML representation error (invalid syntax?): {0}, error: {1}", EDITOR_STATE_FILE_PATH, e.what());
             return false;
         }
         catch (const std::exception& e)
         {
-            LR_EDITOR_CRITICAL("Unknown error occurred while saving file: {0}, error: {1}", EDITOR_STATE_FILE_PATH, e.what());
+            LOG_EDITOR_CRITICAL("Unknown error occurred while saving file: {0}, error: {1}", EDITOR_STATE_FILE_PATH, e.what());
             return false;
         }
     }
@@ -48,7 +48,7 @@ namespace Laura
         // Check for the correct file extension
         if (!filepath.ends_with(".yaml"))
         {
-            LR_EDITOR_CRITICAL("Invalid file extension for theme file: {0}", filepath);
+            LOG_EDITOR_CRITICAL("Invalid file extension for theme file: {0}", filepath);
             return false;
         }
 
@@ -56,7 +56,7 @@ namespace Laura
         std::ifstream file(filepath);
         if (!file.is_open())
         {
-            LR_EDITOR_WARN("Could not open file (Does it exit?): {0}", filepath);
+            LOG_EDITOR_WARN("Could not open file (Does it exit?): {0}", filepath);
             return false;
         }
         file.close();
@@ -70,24 +70,24 @@ namespace Laura
 		}
 		catch (const YAML::RepresentationException& e)
 		{
-			LR_EDITOR_CRITICAL("YAML representation error (make sure the file is valid): {0}, error: {1}", filepath, e.what());
+			LOG_EDITOR_CRITICAL("YAML representation error (make sure the file is valid): {0}, error: {1}", filepath, e.what());
 			return false;
 		}
 		catch (const std::exception& e)
 		{
-			LR_EDITOR_CRITICAL("Unknown error occurred while saving file: {0}, error: {1}", filepath, e.what());
+			LOG_EDITOR_CRITICAL("Unknown error occurred while saving file: {0}, error: {1}", filepath, e.what());
 			return false;
 		}
         
         auto [status, errMsg] = state->temp.editorTheme.LoadFromFile(state->persistent.editorThemeFilepath); // deserialize derived state
         if (state->persistent.editorThemeFilepath == "") {
-            LR_EDITOR_INFO("Using default theme");
+            LOG_EDITOR_INFO("Using default theme");
         }
         else if (!status) {
-            LR_EDITOR_WARN("Unable to deserialize theme: {0} [Using Default Theme instead]", state->persistent.editorThemeFilepath);
+            LOG_EDITOR_WARN("Unable to deserialize theme: {0} [Using Default Theme instead]", state->persistent.editorThemeFilepath);
         }
         else {
-            LR_EDITOR_INFO("Successfully loaded theme {0}", state->persistent.editorThemeFilepath);
+            LOG_EDITOR_INFO("Successfully loaded theme {0}", state->persistent.editorThemeFilepath);
         }
 		return true;
 	}

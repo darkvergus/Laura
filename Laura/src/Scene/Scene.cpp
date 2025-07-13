@@ -21,7 +21,7 @@ namespace Laura
 
 	void Scene::DestroyEntity(const Entity& entity) {
 		m_Registry->destroy(entity.GetID());
-		LR_CORE_INFO("Destroyed entity");
+		LOG_ENGINE_INFO("Destroyed entity");
 	}
 
 	void Scene::OnStart() {

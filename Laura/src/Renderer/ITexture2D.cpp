@@ -8,7 +8,7 @@ namespace Laura {
 	{
 		switch (IRendererAPI::GetAPI())
 		{
-		case IRendererAPI::API::None: LR_CORE_CRITICAL("in ITexture2D::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
+		case IRendererAPI::API::None: LOG_ENGINE_CRITICAL("in ITexture2D::Create() - RendererAPI::None UNSUPPORTED"); return nullptr;
 		case IRendererAPI::API::OpenGL: return std::make_shared<OpenGLTexture2D>(data, width, height, textureUnit);
 		}
 	}

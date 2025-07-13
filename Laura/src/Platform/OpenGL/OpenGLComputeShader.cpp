@@ -82,8 +82,8 @@ namespace Laura {
 			GLCall(glGetShaderiv(computeShaderID, GL_INFO_LOG_LENGTH, &length));
 			char* message = (char*)alloca(length * sizeof(char));
 			GLCall(glGetShaderInfoLog(computeShaderID, length, &length, message));
-			LR_CORE_CRITICAL("[ERROR] Compute Shader compilaion error:");
-			LR_CORE_CRITICAL(message);
+			LOG_ENGINE_CRITICAL("[ERROR] Compute Shader compilaion error:");
+			LOG_ENGINE_CRITICAL(message);
 			GLCall(glDeleteShader(computeShaderID));
 			m_ID = 0;
 			return;

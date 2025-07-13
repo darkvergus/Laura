@@ -35,13 +35,13 @@ namespace Laura
 		{
 			if (!m_Registry)
 			{
-				LR_CORE_CRITICAL("Registry is null");
+				LOG_ENGINE_CRITICAL("Registry is null");
 				return;
 			}
 
 			if (!m_Registry->valid(m_EntityID)) 
 			{
-				LR_CORE_CRITICAL("Entity is not valid");
+				LOG_ENGINE_CRITICAL("Entity is not valid");
 				return;
 			}
 

@@ -12,7 +12,7 @@ namespace Laura {
 	{
 		if (!glfwInit())
 		{
-			LR_CORE_CRITICAL("Failed to initialize GLFW!");
+			LOG_ENGINE_CRITICAL("Failed to initialize GLFW!");
 		}
 
 		OpenGLContext::setWindowHints();
@@ -20,7 +20,7 @@ namespace Laura {
 		m_NativeWindow = glfwCreateWindow(m_WindowProps.width, m_WindowProps.height, (m_WindowProps.title).c_str(), NULL, NULL);
 		if (!m_NativeWindow)
 		{
-			LR_CORE_CRITICAL("Failed to generate GLFW window!");
+			LOG_ENGINE_CRITICAL("Failed to generate GLFW window!");
 		}
 
 		m_Context = new OpenGLContext(m_NativeWindow);

@@ -9,7 +9,7 @@ namespace Laura
 	{
 		switch (IRendererAPI::GetAPI())
 		{
-		case IRendererAPI::API::None: LR_CORE_CRITICAL("RendererAPI::None - UNSUPPORTED"); return nullptr;
+		case IRendererAPI::API::None: LOG_ENGINE_CRITICAL("RendererAPI::None - UNSUPPORTED"); return nullptr;
 		case IRendererAPI::API::OpenGL: return std::make_shared<OpenGLShaderStorageBuffer>(size, bindingPoint, type);
 		}
 	}

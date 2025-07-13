@@ -11,7 +11,7 @@ namespace Laura {
             return;
 
         if (!profiler->globalTimerSet) {
-            LR_CORE_WARN("Unable to render Profiler Panel - No Global Timer Set");
+            LOG_ENGINE_WARN("Unable to render Profiler Panel - No Global Timer Set");
             return;
         }
 

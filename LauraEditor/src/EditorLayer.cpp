@@ -84,8 +84,17 @@ namespace Laura
 		// MAIN MENU
 		if (ImGui::BeginMainMenuBar()) {
 			if (ImGui::BeginMenu("View")) {
-				if (ImGui::MenuItem("Themes"  ))	{ m_EditorState->temp.ThemeSettingsPanelOpen = true; }
-				if (ImGui::MenuItem("Profiler"))	{ m_EditorState->temp.ProfilerPanelOpen		 = true; }
+
+				bool themePanelDisabled = m_EditorState->temp.ThemeSettingsPanelOpen;
+				if (themePanelDisabled)			 { ImGui::BeginDisabled(); }
+				if (ImGui::MenuItem("Themes"  )) { m_EditorState->temp.ThemeSettingsPanelOpen = true; }
+				if (themePanelDisabled)			 { ImGui::EndDisabled(); }
+
+				bool profilerPanelDisabled = m_EditorState->temp.ProfilerPanelOpen;
+				if (profilerPanelDisabled)		 { ImGui::BeginDisabled(); }
+				if (ImGui::MenuItem("Profiler")) { m_EditorState->temp.ProfilerPanelOpen = true; }
+				if (profilerPanelDisabled)		 { ImGui::EndDisabled(); }
+
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();

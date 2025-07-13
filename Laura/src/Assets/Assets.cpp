@@ -12,14 +12,14 @@ namespace Laura::Asset
 	LR_GUID Manager::LoadMesh(const std::filesystem::path& path)
     {
         if (!m_ResourcePool) {
-            LR_CORE_CRITICAL("Asset::Manager::LoadMesh({0}) called before a valid ResourcePool has been assigned!", path.string());
+            LOG_ENGINE_CRITICAL("Asset::Manager::LoadMesh({0}) called before a valid ResourcePool has been assigned!", path.string());
             return LR_GUID(0);
         }
 
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path.string(), aiProcessPreset_TargetRealtime_MaxQuality);
         if (!scene) {
-            LR_CORE_CRITICAL("Asset::Manager::LoadMesh({0}) failed to load!", path.string());
+            LOG_ENGINE_CRITICAL("Asset::Manager::LoadMesh({0}) failed to load!", path.string());
             return LR_GUID(0);
         }
 
@@ -57,7 +57,7 @@ namespace Laura::Asset
             }
         }
 
-        LR_CORE_INFO("Asset::Manager::LoadMesh({0}) loaded {1} triangles.", path.string(), numTris);
+        LOG_ENGINE_INFO("Asset::Manager::LoadMesh({0}) loaded {1} triangles.", path.string(), numTris);
 
         BVHAccel BVH(meshBuffer, metadata->firstTriIdx, metadata->TriCount); // pass in the mesh
         BVH.Build(m_ResourcePool->NodeBuffer, m_ResourcePool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount); // populate in place
@@ -70,7 +70,7 @@ namespace Laura::Asset
 	LR_GUID Manager::LoadTexture(const std::filesystem::path& path, const int desiredChannels)
 	{
         if (!m_ResourcePool){
-            LR_CORE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) called before a valid ResourcePool has been assigned!", path.string(), desiredChannels);
+            LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) called before a valid ResourcePool has been assigned!", path.string(), desiredChannels);
             return LR_GUID(0);
         }
 
@@ -78,7 +78,7 @@ namespace Laura::Asset
         stbi_set_flip_vertically_on_load(1); // ensure (0,0) is bottom-left
 		unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &channels, desiredChannels);
         if (!data) {
-			LR_CORE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) failed to load!", path.string(), desiredChannels);
+			LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) failed to load!", path.string(), desiredChannels);
 			return LR_GUID(0);
 		}
         

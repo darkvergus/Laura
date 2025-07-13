@@ -10,13 +10,13 @@ namespace Laura
 
 		if (width <= 0 || height <= 0)
 		{
-			LR_CORE_CRITICAL("Error: Invalid image dimensions {0}x{1}", width, height);
+			LOG_ENGINE_CRITICAL("Error: Invalid image dimensions {0}x{1}", width, height);
 			return;
 		}
 
 		if (imageUnit < 0 || imageUnit >= GL_MAX_IMAGE_UNITS)
 		{
-			LR_CORE_CRITICAL("Error: Invalid image unit slot {0}", imageUnit);
+			LOG_ENGINE_CRITICAL("Error: Invalid image unit slot {0}", imageUnit);
 			return;
 		}
 
@@ -34,7 +34,7 @@ namespace Laura
 		}
 		else
 		{
-			LR_CORE_WARN("Generating empty image");
+			LOG_ENGINE_WARN("Generating empty image");
 		}
 
 		// Converting the Image2DType to OpenGL's equivalent
@@ -48,7 +48,7 @@ namespace Laura
 			case Image2DType::LR_READ_WRITE:
 				m_Image2DType = GL_READ_WRITE; break;
 			default:
-				LR_CORE_CRITICAL("Invalid Image2DType"); break;
+				LOG_ENGINE_CRITICAL("Invalid Image2DType"); break;
 		}
 		// Binding the texture to the image unit
 		GLCall(glBindImageTexture(m_ImageUnit, m_ID, 0, GL_FALSE, 0, m_Image2DType, GL_RGBA32F));
@@ -67,7 +67,7 @@ namespace Laura
 	{
 		if (imageUnit < 0 || imageUnit >= GL_MAX_IMAGE_UNITS)
 		{
-			LR_CORE_CRITICAL("Error: Invalid image unit slot {0}", imageUnit);
+			LOG_ENGINE_CRITICAL("Error: Invalid image unit slot {0}", imageUnit);
 			return;
 		}
 

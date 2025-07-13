@@ -45,7 +45,7 @@ namespace Laura
 
 		if (dataPtr == nullptr) 
 		{
-			LR_CORE_CRITICAL("[ERROR] reading SSBO Buffer");
+			LOG_ENGINE_CRITICAL("[ERROR] reading SSBO Buffer");
 			ASSERT(false);
 			return nullptr;
 		}

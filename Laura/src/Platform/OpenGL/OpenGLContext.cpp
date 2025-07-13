@@ -24,11 +24,11 @@ namespace Laura {
 
 		if (glewInit() != GLEW_OK)
 		{
-			LR_CORE_CRITICAL("[ERROR] Failed to initialize GLEW!");
+			LOG_ENGINE_CRITICAL("[ERROR] Failed to initialize GLEW!");
 		}
 
-		LR_CORE_INFO("Using OpenGL - Version: {0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-		LR_CORE_INFO("(OpenGLContext.cpp) Successfully initialized OpenGL context and GLEW!");
+		LOG_ENGINE_INFO("Using OpenGL - Version: {0}", reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+		LOG_ENGINE_INFO("(OpenGLContext.cpp) Successfully initialized OpenGL context and GLEW!");
 	}
 
 	void OpenGLContext::swapBuffers()

@@ -24,7 +24,7 @@ namespace Laura
         entt::registry* activeRegistry = scene->GetRegistry();
         if(!activeRegistry) {
 			ImGui::End();
-            LR_CORE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
+            LOG_ENGINE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
 			return;
 		}
         

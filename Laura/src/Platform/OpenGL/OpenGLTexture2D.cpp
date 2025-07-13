@@ -9,13 +9,13 @@ namespace Laura {
 
 		if (width <= 0 || height <= 0) 
 		{
-			LR_CORE_CRITICAL("Error: Invalid texture dimensions {0}x{1}", width, height);
+			LOG_ENGINE_CRITICAL("Error: Invalid texture dimensions {0}x{1}", width, height);
 			return;
 		}
 
 		if (textureUnit < 0 || textureUnit >= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)
 		{
-			LR_CORE_CRITICAL("Error: Invalid texture unit slot {0}", textureUnit);
+			LOG_ENGINE_CRITICAL("Error: Invalid texture unit slot {0}", textureUnit);
 			return;
 		}
 
@@ -29,7 +29,7 @@ namespace Laura {
 
 		if (!data)
 		{
-			LR_CORE_WARN("Generating empty texture");
+			LOG_ENGINE_WARN("Generating empty texture");
 		}
 
 		GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
@@ -48,7 +48,7 @@ namespace Laura {
 	{
 		if (textureUnit < 0 || textureUnit >= GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS)
 		{
-			LR_CORE_CRITICAL("Error: Invalid texture unit slot {0}", textureUnit);
+			LOG_ENGINE_CRITICAL("Error: Invalid texture unit slot {0}", textureUnit);
 			return;
 		}
 
