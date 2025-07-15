@@ -9,6 +9,9 @@
 
 #include <filesystem>
 
+constexpr const char* SUPPORTED_MESH_FILE_FORMATS[]		= { ".fbx", ".obj" ,".gltf", ".glb" };
+constexpr const char* SUPPORTED_TEXTURE_FILE_FORMATS[]	= { ".png", ".jpg", ".jpeg", ".tga", ".bpm", ".hdr" };
+
 namespace Laura::Asset
 {
 	struct ResourcePool {
@@ -21,28 +24,30 @@ namespace Laura::Asset
 		template <typename T>
 		std::shared_ptr<T> Get(const LR_GUID& guid) const {
 			auto it = Metadata.find(guid);
-			if (it == Metadata.end())
+			if (it == Metadata.end()) {
 				return nullptr;
+			}
 			return std::dynamic_pointer_cast<T>(it->second);
 		}
 	};
 
-	class Manager
-	{
+	class Manager {
 	public:
 		Manager(ResourcePool* pool = nullptr)
-			: m_ResourcePool(pool) {}
+			: m_ResourcePool(pool) {
+		}
 		~Manager() = default;
 		
 		inline void SetResourcePool(ResourcePool* pool) {
 			m_ResourcePool = pool;
 		}
 
-		LR_GUID LoadMesh(const std::filesystem::path& path);
-		// 0: original (default), 1: grayscale, 2: grayscale+alpha, 3: RGB, 4: RGBA
-		LR_GUID LoadTexture(const std::filesystem::path& path, const int channels = 0);
+		LR_GUID LoadAsset(const std::filesystem::path& path);
 
 	private:
 		ResourcePool* m_ResourcePool = nullptr;
+		LR_GUID LoadMesh(const std::filesystem::path& path);
+		// 0: original (default), 1: grayscale, 2: grayscale+alpha, 3: RGB, 4: RGBA
+		LR_GUID LoadTexture(const std::filesystem::path& path, const int channels = 0);
 	};
-}
+} 

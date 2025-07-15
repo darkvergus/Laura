@@ -34,6 +34,7 @@ namespace Laura {
 		glDispatchCompute(m_WorkGroupSizes.x, m_WorkGroupSizes.y, m_WorkGroupSizes.z);
 		GLCall(glMemoryBarrier(GL_ALL_BARRIER_BITS));
 
+		/* LOG THE EXACT SHADER EXECUTION TIME
 		glEndQuery(GL_TIME_ELAPSED);
 		
 		GLint available = 0;
@@ -48,6 +49,7 @@ namespace Laura {
 		printf("Compute Shader Execution Time: %.3f ms\n", elapsedTimeMs);
 		
 		glDeleteQueries(1, &query);
+		*/
 	}
 
 	std::string OpenGLComputeShader::ParseShaderFile()

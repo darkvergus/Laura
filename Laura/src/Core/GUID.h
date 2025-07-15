@@ -8,11 +8,23 @@ namespace Laura
 	class LR_GUID
 	{
 	public:
+		static const LR_GUID INVALID;
+
 		LR_GUID(); // constructs a random uint64_t GUID
 		LR_GUID(uint64_t guid);
 		LR_GUID(const LR_GUID& other); // copy constructor
-		operator uint64_t() const { return m_GUID; } // uint64_t conversion operator 
 		~LR_GUID() = default;
+		
+		bool operator==(const LR_GUID& other) const { return m_GUID == other.m_GUID; }
+		bool operator!=(const LR_GUID& other) const { return m_GUID != other.m_GUID; }
+		operator uint64_t() const { return m_GUID; } // uint64_t conversion operator 
+
+		inline std::string toString() const {
+			std::stringstream ss;
+			ss << std::hex << m_GUID;
+			return ss.str();
+		}
+		
 	private:
 		uint64_t m_GUID;
 	};

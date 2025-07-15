@@ -56,12 +56,12 @@ namespace Laura
 
 	struct MeshComponent
 	{
-		LR_GUID guid = LR_GUID(0);
+		LR_GUID guid = LR_GUID::INVALID;
 	};
 
 	struct MaterialComponent
 	{
-		LR_GUID guid = LR_GUID(0);
+		LR_GUID guid = LR_GUID::INVALID;
 	};
 
 	struct CameraComponent

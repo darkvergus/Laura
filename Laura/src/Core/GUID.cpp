@@ -10,6 +10,8 @@ namespace Laura
 	static std::mt19937_64 s_RandomEngine(s_RandomDevice());
 	static std::uniform_int_distribution<uint64_t> s_UniformDistribution;
 
+	const LR_GUID LR_GUID::INVALID = LR_GUID(0);
+
 	LR_GUID::LR_GUID()
 		: m_GUID(s_UniformDistribution(s_RandomEngine))
 	{

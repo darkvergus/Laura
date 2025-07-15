@@ -9,18 +9,17 @@
 namespace Laura::Asset
 {
 
-	LR_GUID Manager::LoadMesh(const std::filesystem::path& path)
-    {
+	LR_GUID Manager::LoadMesh(const std::filesystem::path& path) {
         if (!m_ResourcePool) {
             LOG_ENGINE_CRITICAL("Asset::Manager::LoadMesh({0}) called before a valid ResourcePool has been assigned!", path.string());
-            return LR_GUID(0);
+            return LR_GUID::INVALID;
         }
 
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(path.string(), aiProcessPreset_TargetRealtime_MaxQuality);
         if (!scene) {
             LOG_ENGINE_CRITICAL("Asset::Manager::LoadMesh({0}) failed to load!", path.string());
-            return LR_GUID(0);
+            return LR_GUID::INVALID;
         }
 
         size_t numTris = 0;
@@ -67,11 +66,10 @@ namespace Laura::Asset
         return guid;
     }
 
-	LR_GUID Manager::LoadTexture(const std::filesystem::path& path, const int desiredChannels)
-	{
+	LR_GUID Manager::LoadTexture(const std::filesystem::path& path, const int desiredChannels) {
         if (!m_ResourcePool){
             LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) called before a valid ResourcePool has been assigned!", path.string(), desiredChannels);
-            return LR_GUID(0);
+            return LR_GUID::INVALID;
         }
 
         int width, height, channels;
@@ -79,7 +77,7 @@ namespace Laura::Asset
 		unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &channels, desiredChannels);
         if (!data) {
 			LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) failed to load!", path.string(), desiredChannels);
-			return LR_GUID(0);
+			return LR_GUID::INVALID;
 		}
         
         std::vector<unsigned char>& textureBuffer = m_ResourcePool->TextureBuffer;
@@ -100,4 +98,26 @@ namespace Laura::Asset
         m_ResourcePool->Metadata[guid] = metadata;
 		return guid;
 	}
+
+    LR_GUID Manager::LoadAsset(const std::filesystem::path& path) {
+        if (!path.has_extension()) {
+            LOG_ENGINE_ERROR("LoadAsset: File has no extension: {}", path.string());
+            return LR_GUID::INVALID;
+        }
+
+        std::string ext = path.extension().string();
+        for ( const auto& SUPPORTED_EXT : SUPPORTED_MESH_FILE_FORMATS) {
+            if (ext == SUPPORTED_EXT) {
+                return LoadMesh(path);
+            }
+        }
+        for (auto SUPPORTED_EXT : SUPPORTED_TEXTURE_FILE_FORMATS) {
+            if (ext == SUPPORTED_EXT) {
+                return LoadTexture(path, 4);
+            }
+        }
+
+        LOG_ENGINE_WARN("LoadAsset: Unknown file extension: {}", ext);
+        return LR_GUID::INVALID;
+    }
 }

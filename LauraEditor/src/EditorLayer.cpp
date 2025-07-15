@@ -3,20 +3,21 @@
 namespace Laura
 {
 
-	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer, 
+	EditorLayer::EditorLayer(std::shared_ptr<Renderer> renderer,
 							 std::shared_ptr<Asset::ResourcePool> resourcePool,
-							 std::shared_ptr<Asset::Manager> assetManager, 
+							 std::shared_ptr<Asset::Manager> assetManager,
 							 std::shared_ptr<Profiler> profiler)
-		: m_Renderer(renderer),
-		m_ResourcePool(resourcePool),
-		m_AssetManager(assetManager),
-		m_Profiler(profiler),
+		:	m_Renderer(renderer),
+			m_ResourcePool(resourcePool),
+			m_AssetManager(assetManager),
+			m_Profiler(profiler),
 
-		m_EditorState(std::make_shared<EditorState>()),
-		m_InspectorPanel(m_EditorState),
-		m_SceneHierarchyPanel(m_EditorState),
-		m_ThemePanel(m_EditorState),
-		m_ProfilerPanel(m_EditorState)
+			m_EditorState(std::make_shared<EditorState>()),
+			m_InspectorPanel(m_EditorState),
+			m_SceneHierarchyPanel(m_EditorState),
+			m_ThemePanel(m_EditorState),
+			m_ProfilerPanel(m_EditorState),
+			m_AssetsPanel(m_EditorState, m_AssetManager, m_ResourcePool)
 	{
 		setLayerName("EditorLayer");
 	}
@@ -41,7 +42,7 @@ namespace Laura
 			dragon.AddComponent<TransformComponent>(); // Add if you want to set translation/scale
 			dragon.AddComponent<MaterialComponent>();
 			dragon.AddComponent<MeshComponent>().guid =
-			m_AssetManager->LoadMesh(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb");
+			m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb");
 		}
 		{
 			Entity bunny = m_Scene->CreateEntity();
@@ -49,11 +50,11 @@ namespace Laura
 			bunny.AddComponent<TransformComponent>();
 			bunny.AddComponent<MaterialComponent>();
 			bunny.AddComponent<MeshComponent>().guid =
-			m_AssetManager->LoadMesh(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb");
+			m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb");
 		}
 
 		// Most of these are default arguments (not necessary to specify but showing them for clarity)
-		m_Renderer->settings.skyboxGuid = m_AssetManager->LoadTexture(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr", 4);
+		m_Renderer->settings.skyboxGuid = m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr");
 		m_Renderer->settings.raysPerPixel = 1;
 		m_Renderer->settings.bouncesPerRay = 5;
 		m_Renderer->settings.maxAABBIntersections = 500;
@@ -100,6 +101,7 @@ namespace Laura
 		m_SceneHierarchyPanel.OnImGuiRender(m_Scene);
 		m_InspectorPanel.OnImGuiRender(m_Scene);
 		m_ThemePanel.OnImGuiRender();
+		m_AssetsPanel.OnImGuiRender();
 		// RENDERER RENDERING // -> WILL BE MOVED TO THE RUNTIME LAYER
 		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.get(), m_ResourcePool.get());
 		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);

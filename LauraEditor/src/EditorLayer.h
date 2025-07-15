@@ -7,6 +7,7 @@
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
 #include "EditorUI/ProfilerPanel/ProfilerPanel.h"
 #include "EditorUI/ThemePanel/ThemePanel.h"
+#include "EditorUI/AssetsPanel/AssetsPanel.h"
 
 namespace Laura
 {
@@ -30,6 +31,13 @@ namespace Laura
 		float aspectRatio;
 
 	private:
+		// > ENGINE RELATED < //
+		std::shared_ptr<Renderer> m_Renderer;
+		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
+		std::shared_ptr<Asset::Manager> m_AssetManager;
+		std::shared_ptr<Profiler> m_Profiler;
+		std::shared_ptr<Scene> m_Scene;
+
 		// > EDITOR RELATED < //
 		std::shared_ptr<EditorState> m_EditorState;
 		SceneHierarchyPanel m_SceneHierarchyPanel;
@@ -37,12 +45,6 @@ namespace Laura
 		ViewportPanel m_ViewportPanel;
 		ThemePanel m_ThemePanel;
 		ProfilerPanel m_ProfilerPanel;
-
-		// > ENGINE RELATED < //
-		std::shared_ptr<Renderer> m_Renderer;
-		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
-		std::shared_ptr<Asset::Manager> m_AssetManager;
-		std::shared_ptr<Profiler> m_Profiler;
-		std::shared_ptr<Scene> m_Scene;
+		AssetsPanel m_AssetsPanel;
 	};
 }
