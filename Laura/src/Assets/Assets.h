@@ -14,8 +14,13 @@ constexpr const char* SUPPORTED_TEXTURE_FILE_FORMATS[]	= { ".png", ".jpg", ".jpe
 
 namespace Laura::Asset
 {
-	struct ResourcePool {
-		std::unordered_map<LR_GUID, std::shared_ptr<Metadata>> Metadata; // polymorphic type
+	using MetadataPair = std::pair<
+		std::shared_ptr<Metadata>, 
+		std::shared_ptr<MetadataExtension>
+	>;
+
+	struct ResourcePool { 
+		std::unordered_map<LR_GUID, MetadataPair> Metadata; // polymorphic type
 		std::vector<Triangle> MeshBuffer;
 		std::vector<uint32_t> IndexBuffer; // indirection between BVHAccel::Node and triangles in ResourcePool::meshBuffer
 		std::vector<BVHAccel::Node> NodeBuffer;
@@ -27,7 +32,18 @@ namespace Laura::Asset
 			if (it == Metadata.end()) {
 				return nullptr;
 			}
-			return std::dynamic_pointer_cast<T>(it->second);
+			const auto& [metadata, metadataExtension] = it->second;
+			return std::dynamic_pointer_cast<T>(metadata);
+		}
+
+		template <typename T>
+		std::shared_ptr<T> GetExtension(const LR_GUID& guid) const {
+			auto it = Metadata.find(guid);
+			if (it == Metadata.end()) {
+				return nullptr;
+			}
+			const auto& [metadata, metadataExtension] = it->second;
+			return std::dynamic_pointer_cast<T>(metadataExtension);
 		}
 	};
 

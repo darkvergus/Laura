@@ -34,8 +34,9 @@ namespace Laura {
                 float column_x1 = ImGui::GetCursorScreenPos().x; // left border x
                 float column_x2 = column_x1 + ImGui::GetColumnWidth(); // right border x
                 ImGui::Indent(manualSpacing);
-                for (const auto& [guid, metadata] : m_ResourcePool->Metadata) {
-                    const std::filesystem::path& assetPath = metadata->path;
+                for (const auto& [guid, metadataPair] : m_ResourcePool->Metadata) {
+                    const auto& [metadata, metadataExtension] = metadataPair;
+                    const std::filesystem::path& assetPath = metadataExtension->sourcePath;
                     DrawAssetTile(guid, ICON_FA_CUBE, assetPath.filename().string().c_str());
                     float last_assetTile_x2 = ImGui::GetItemRectMax().x;
                 

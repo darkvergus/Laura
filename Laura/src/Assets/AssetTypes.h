@@ -13,9 +13,10 @@ namespace Laura::Asset {
 	struct Triangle {
 		glm::vec4 v0 = {}, v1 = {}, v2 = {};
 	};
+
+
 	struct Metadata {
         virtual ~Metadata() = default;
-        std::filesystem::path path;
     };
 
     struct MeshMetadata : public Metadata {
@@ -35,4 +36,24 @@ namespace Laura::Asset {
     };
 
 
+    /*
+        ///////////////////////
+        extensions to provide more detailed information about assets
+        generally not needed for rendering
+    */
+    struct MetadataExtension {
+        float loadTimeMs = -1;
+        std::filesystem::path sourcePath = "";
+        virtual ~MetadataExtension() = default;
+    };
+
+    struct MeshMetadataExtension : MetadataExtension {
+        /* additional mesh specific fields ... */
+        ~MeshMetadataExtension() override = default;
+    };
+
+    struct TextureMetadataExtension : MetadataExtension {
+        /* additional texture specific fields ... */
+        ~TextureMetadataExtension() override = default;
+    };
 }

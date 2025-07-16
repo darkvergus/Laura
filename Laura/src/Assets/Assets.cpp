@@ -10,6 +10,8 @@ namespace Laura::Asset
 {
 
 	LR_GUID Manager::LoadMesh(const std::filesystem::path& path) {
+		auto timerStart = std::chrono::high_resolution_clock::now();
+
         if (!m_ResourcePool) {
             LOG_ENGINE_CRITICAL("Asset::Manager::LoadMesh({0}) called before a valid ResourcePool has been assigned!", path.string());
             return LR_GUID::INVALID;
@@ -32,7 +34,9 @@ namespace Laura::Asset
         auto metadata = std::make_shared<MeshMetadata>();
         metadata->firstTriIdx = meshBuffer.size();
         metadata->TriCount = numTris;
-        metadata->path = path;
+
+        auto metadataExtension = std::make_shared<MeshMetadataExtension>();
+        metadataExtension->sourcePath = path;
         
         meshBuffer.reserve(meshBuffer.size() + metadata->TriCount);
 
@@ -62,11 +66,16 @@ namespace Laura::Asset
         BVH.Build(m_ResourcePool->NodeBuffer, m_ResourcePool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount); // populate in place
 
         LR_GUID guid;
-        m_ResourcePool->Metadata[guid] = metadata;
+
+		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
+        
+        m_ResourcePool->Metadata[guid] = { metadata, metadataExtension };
         return guid;
     }
 
 	LR_GUID Manager::LoadTexture(const std::filesystem::path& path, const int desiredChannels) {
+		auto timerStart = std::chrono::high_resolution_clock::now();
         if (!m_ResourcePool){
             LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) called before a valid ResourcePool has been assigned!", path.string(), desiredChannels);
             return LR_GUID::INVALID;
@@ -87,7 +96,9 @@ namespace Laura::Asset
         metadata->width = width;
         metadata->height = height;
         metadata->channels = (desiredChannels == 0) ? channels : desiredChannels;
-        metadata->path = path;
+
+        auto metadataExtension = std::make_shared<TextureMetadataExtension>();
+        metadataExtension->sourcePath = path;
 
         const size_t totalBytes = metadata->width * metadata->height * metadata->channels;
         textureBuffer.reserve(textureBuffer.size() + totalBytes);
@@ -95,7 +106,11 @@ namespace Laura::Asset
         stbi_image_free(data);
 		
         LR_GUID guid;
-        m_ResourcePool->Metadata[guid] = metadata;
+
+		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
+        
+        m_ResourcePool->Metadata[guid] = { metadata, metadataExtension };
 		return guid;
 	}
 
