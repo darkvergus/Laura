@@ -24,17 +24,17 @@ namespace Laura::Asset
             return LR_GUID::INVALID;
         }
 
+        // count the number of triangles in file
         size_t numTris = 0;
         for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
             numTris += scene->mMeshes[i]->mNumFaces;
         }
-
+        
         std::vector<Triangle>& meshBuffer = m_ResourcePool->MeshBuffer;
-
+        // populate some metadata
         auto metadata = std::make_shared<MeshMetadata>();
         metadata->firstTriIdx = meshBuffer.size();
         metadata->TriCount = numTris;
-
         auto metadataExtension = std::make_shared<MeshMetadataExtension>();
         metadataExtension->sourcePath = path;
         metadataExtension->fileSizeInBytes = std::filesystem::file_size(path);
@@ -60,11 +60,14 @@ namespace Laura::Asset
                 );
             }
         }
+        m_ResourcePool->MarkUpdated(ResourceType::MeshBuffer);
 
         LOG_ENGINE_INFO("Asset::Manager::LoadMesh({0}) loaded {1} triangles.", path.string(), numTris);
 
         BVHAccel BVH(meshBuffer, metadata->firstTriIdx, metadata->TriCount); // pass in the mesh
         BVH.Build(m_ResourcePool->NodeBuffer, m_ResourcePool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount); // populate in place
+        m_ResourcePool->MarkUpdated(ResourceType::NodeBuffer);
+        m_ResourcePool->MarkUpdated(ResourceType::IndexBuffer);
 
         LR_GUID guid;
 
@@ -72,6 +75,7 @@ namespace Laura::Asset
 		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
         
         m_ResourcePool->Metadata[guid] = { metadata, metadataExtension };
+        m_ResourcePool->MarkUpdated(ResourceType::Metadata);
         return guid;
     }
 
@@ -105,14 +109,16 @@ namespace Laura::Asset
         const size_t totalBytes = metadata->width * metadata->height * metadata->channels;
         textureBuffer.reserve(textureBuffer.size() + totalBytes);
         textureBuffer.insert(textureBuffer.end(), data, data + totalBytes);
+        m_ResourcePool->MarkUpdated(ResourceType::TextureBuffer);
         stbi_image_free(data);
-		
+	    	
         LR_GUID guid;
 
 		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
         
         m_ResourcePool->Metadata[guid] = { metadata, metadataExtension };
+        m_ResourcePool->MarkUpdated(ResourceType::Metadata);
 		return guid;
 	}
 

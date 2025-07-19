@@ -63,8 +63,20 @@ namespace Laura
 
 		/// MESH COMPONENT UI /////////////////////////////////////////////////////////////////
 		DrawComponent<MeshComponent>(std::string(ICON_FA_CUBE " Mesh"), entity, [](Entity& entity) {
-				auto& meshComponent = entity.GetComponent<MeshComponent>();
-				ImGui::Text("Mesh ID: %d", meshComponent.guid);
+				static std::string meshFilename = "";
+				ImGui::Text("Mesh:");
+				ImGui::SameLine();
+				ImGui::Selectable(meshFilename.c_str(), false);
+
+                if (ImGui::BeginDragDropTarget()) {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_MESH_ASSET")) {
+						IM_ASSERT(payload->DataSize == sizeof(LR_GUID));
+						LR_GUID& guid = *static_cast<LR_GUID*>(payload->Data);
+						meshFilename = guid.toString();
+						entity.GetComponent<MeshComponent>().guid = guid;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
 			}
 		);
 

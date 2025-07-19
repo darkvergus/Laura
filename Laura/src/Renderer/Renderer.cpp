@@ -109,8 +109,9 @@ namespace Laura
 			m_CameraUBO->AddData(64, sizeof(float), &pScene->CameraFocalLength);
 			m_CameraUBO->Unbind();
 		}
+
+		// ENTITY LOOKUP TABLE - updated every frame (transforms...)
 		{
-			// ENTITY LOOKUP TABLE
 			uint32_t sizeBytes = sizeof(MeshEntityHandle) * pScene->MeshEntityLookupTable.size();
 			m_MeshEntityLookupSSBO = IShaderStorageBuffer::Create(sizeBytes, 4, BufferUsageType::DYNAMIC_DRAW);
 			m_MeshEntityLookupSSBO->Bind();
@@ -118,39 +119,67 @@ namespace Laura
 			m_MeshEntityLookupSSBO->Unbind();
 		}
 
-		static bool shouldLoadBuffers = true;
-		if (shouldLoadBuffers) {
-			shouldLoadBuffers = false;
+		static uint32_t prevTexBuffVersion = 0;
+		static uint32_t prevMeshBuffVersion = 0;
+		static uint32_t prevNodeBuffVersion = 0;
+		static uint32_t prevIndexBuffVersion = 0;
 
-			{
-				// SKYBOX
-				std::shared_ptr<Asset::TextureMetadata> metadata = resourcePool->Get<Asset::TextureMetadata>(settings.skyboxGuid);
-				if (metadata) {
-					const uint32_t SKYBOX_TEXTURE_UNIT = 1;
-					const unsigned char* data = &resourcePool->TextureBuffer[metadata->texStartIdx];
-					m_SkyboxTexture = ITexture2D::Create(data, metadata->width, metadata->height, SKYBOX_TEXTURE_UNIT);
-				}
-			}
-			{
-				// RESOURCE POOL 
-				uint32_t meshBuffer_sizeBytes = sizeof(Asset::Triangle) * resourcePool->MeshBuffer.size();
-				m_MeshBufferSSBO = IShaderStorageBuffer::Create(meshBuffer_sizeBytes, 5, BufferUsageType::STATIC_DRAW);
-				m_MeshBufferSSBO->Bind();
-				m_MeshBufferSSBO->AddData(0, meshBuffer_sizeBytes, resourcePool->MeshBuffer.data());
-				m_MeshBufferSSBO->Unbind();
+		// TEXTURE BUFFER
+		{
+    		uint32_t currTexBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::TextureBuffer);
+    		if (prevTexBuffVersion != currTexBuffVersion) {
+        		prevTexBuffVersion = currTexBuffVersion;
 
-				uint32_t nodeBuffer_sizeBytes = sizeof(Asset::BVHAccel::Node) * resourcePool->NodeBuffer.size();
-				m_NodeBufferSSBO = IShaderStorageBuffer::Create(nodeBuffer_sizeBytes, 6, BufferUsageType::STATIC_DRAW);
-				m_NodeBufferSSBO->Bind();
-				m_NodeBufferSSBO->AddData(0, nodeBuffer_sizeBytes, resourcePool->NodeBuffer.data());
-				m_NodeBufferSSBO->Unbind();
+        		// SKYBOX
+        		std::shared_ptr<Asset::TextureMetadata> metadata = resourcePool->Get<Asset::TextureMetadata>(settings.skyboxGuid);
+        		if (metadata) {
+            		const uint32_t SKYBOX_TEXTURE_UNIT = 1;
+            		const unsigned char* data = &resourcePool->TextureBuffer[metadata->texStartIdx];
+            		m_SkyboxTexture = ITexture2D::Create(data, metadata->width, metadata->height, SKYBOX_TEXTURE_UNIT);
+        		}
+    		}
+		}
 
-				uint32_t indexBuffer_sizeBytes = sizeof(uint32_t) * resourcePool->MeshBuffer.size();
-				m_IndexBufferSSBO = IShaderStorageBuffer::Create(indexBuffer_sizeBytes, 7, BufferUsageType::STATIC_DRAW);
-				m_IndexBufferSSBO->Bind();
-				m_IndexBufferSSBO->AddData(0, indexBuffer_sizeBytes, resourcePool->IndexBuffer.data());
-				m_IndexBufferSSBO->Unbind();
-			}
+		// MESH BUFFER
+		{
+    		uint32_t currMeshBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::MeshBuffer);
+    		if (prevMeshBuffVersion != currMeshBuffVersion) {
+        		prevMeshBuffVersion = currMeshBuffVersion;
+
+        		uint32_t meshBuffer_sizeBytes = sizeof(Asset::Triangle) * resourcePool->MeshBuffer.size();
+        		m_MeshBufferSSBO = IShaderStorageBuffer::Create(meshBuffer_sizeBytes, 5, BufferUsageType::STATIC_DRAW);
+        		m_MeshBufferSSBO->Bind();
+        		m_MeshBufferSSBO->AddData(0, meshBuffer_sizeBytes, resourcePool->MeshBuffer.data());
+        		m_MeshBufferSSBO->Unbind();
+    		}
+		}
+
+		// NODE BUFFER
+		{
+    		uint32_t currNodeBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::NodeBuffer);
+    		if (prevNodeBuffVersion != currNodeBuffVersion) {
+        		prevNodeBuffVersion = currNodeBuffVersion;
+
+        		uint32_t nodeBuffer_sizeBytes = sizeof(Asset::BVHAccel::Node) * resourcePool->NodeBuffer.size();
+        		m_NodeBufferSSBO = IShaderStorageBuffer::Create(nodeBuffer_sizeBytes, 6, BufferUsageType::STATIC_DRAW);
+        		m_NodeBufferSSBO->Bind();
+        		m_NodeBufferSSBO->AddData(0, nodeBuffer_sizeBytes, resourcePool->NodeBuffer.data());
+        		m_NodeBufferSSBO->Unbind();
+    		}
+		}
+
+		// INDEX BUFFER
+		{
+    		uint32_t currIndexBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::IndexBuffer);
+    		if (prevIndexBuffVersion != currIndexBuffVersion) {
+        		prevIndexBuffVersion = currIndexBuffVersion;
+
+        		uint32_t indexBuffer_sizeBytes = sizeof(uint32_t) * resourcePool->IndexBuffer.size();
+        		m_IndexBufferSSBO = IShaderStorageBuffer::Create(indexBuffer_sizeBytes, 7, BufferUsageType::STATIC_DRAW);
+        		m_IndexBufferSSBO->Bind();
+        		m_IndexBufferSSBO->AddData(0, indexBuffer_sizeBytes, resourcePool->IndexBuffer.data());
+        		m_IndexBufferSSBO->Unbind();
+    		}
 		}
 	}
 

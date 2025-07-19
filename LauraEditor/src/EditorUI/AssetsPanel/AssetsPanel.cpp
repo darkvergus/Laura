@@ -40,8 +40,9 @@ namespace Laura {
                     std::string filename = metadataExtension->sourcePath.filename().string();
                     DrawAssetTile(guid, filename.c_str());
                     float last_assetTile_x2 = ImGui::GetItemRectMax().x;
-                    if (last_assetTile_x2 + ImGui::GetItemRectSize().x < column_x2)
+                    if (last_assetTile_x2 + ImGui::GetItemRectSize().x < column_x2) {
                         ImGui::SameLine(0, manualSpacing);
+                    }
                 }
                 ImGui::Unindent();
             }
@@ -79,6 +80,15 @@ namespace Laura {
         }
         theme.PopColor();
 
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        {
+            // Set payload to carry the guid 
+            ImGui::SetDragDropPayload("DND_MESH_ASSET", &guid, sizeof(LR_GUID));
+            theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
+            ImGui::Text(title);
+            theme.PopColor();
+            ImGui::EndDragDropSource();
+        }
 
         // Render ICON
         ImVec2 tileCoordsTopLeft = ImGui::GetItemRectMin();
@@ -189,7 +199,10 @@ namespace Laura {
             ImGui::Text("Mesh Metadata");
             theme.PopColor();
             DrawLabelValue("Triangle Count", meshMetadata->TriCount);
+            DrawLabelValue("FirstTriIdx:", meshMetadata->firstTriIdx);
+            ImGui::Dummy({ 0, 3.0f });
             DrawLabelValue("BVH Node Count", meshMetadata->nodeCount);
+            DrawLabelValue("BVH FirstNodeIdx:", meshMetadata->firstNodeIdx);
         }
 
         // Try cast to TextureMetadata

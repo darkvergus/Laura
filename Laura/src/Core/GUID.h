@@ -21,7 +21,7 @@ namespace Laura
 
 		inline std::string toString() const {
 			std::stringstream ss;
-			ss << std::hex << m_GUID;
+			ss << m_GUID;
 			return ss.str();
 		}
 		
