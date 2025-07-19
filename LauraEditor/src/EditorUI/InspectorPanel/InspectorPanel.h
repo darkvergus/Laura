@@ -6,6 +6,7 @@
 #include "EditorState.h"
 #include "EditorTheme.h"
 #include "EditorUI/UtilityUI.h"
+#include "EditorUI/DNDPayloads.h"
 
 namespace Laura
 {

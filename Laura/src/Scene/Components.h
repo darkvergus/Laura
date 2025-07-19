@@ -57,6 +57,7 @@ namespace Laura
 	struct MeshComponent
 	{
 		LR_GUID guid = LR_GUID::INVALID;
+		std::string sourceName = "";
 	};
 
 	struct MaterialComponent

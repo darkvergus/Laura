@@ -78,24 +78,11 @@ namespace Laura
 		}
 			
 		inline void PushColor(ImGuiCol_ widget, EditorCol_ col) {
-			assert(m_ColorStack.size() < EditorCol_COUNT && "ColorStack.size() exceeds EditorCol_COUNT (did you forget to pop?)");
-			// cache old color on the stack
-			m_ColorStack.push_front({ widget, colorMap[widget] });
-			// set new color	
-			ImGui::GetStyle().Colors[widget] = m_ColorPallete[col]; 
-			colorMap[widget] = col;
+			ImGui::PushStyleColor(widget, m_ColorPallete[col]);
 		}
 
 		inline void PopColor(size_t count = 1) {
-			assert(0 < count && count <= m_ColorStack.size() && "Too many PopColor() calls (ColorStack already empty)");
-			for (size_t i = 0; i < count; i++) {
-				// pop the latest widget change and update color 
-				auto [widget, col] = m_ColorStack.front();
-				m_ColorStack.pop_front();
-				// reset to old color
-				ImGui::GetStyle().Colors[widget] = m_ColorPallete[col];
-				colorMap[widget] = col;
-			}
+			ImGui::PopStyleColor(count);
 		}
 
 		inline ImVec4& operator[](EditorCol_ col) {
@@ -108,11 +95,8 @@ namespace Laura
 			return m_ColorPallete[col];
 		}
 
-	public:
-		std::unordered_map<ImGuiCol_, EditorCol_> colorMap;
 		void ApplyAllToImgui();
 	private:
-		std::deque<std::pair<ImGuiCol_, EditorCol_>> m_ColorStack;
 		std::array<ImVec4, EditorCol_COUNT> m_ColorPallete; // stores the actual colors of the theme
 		
 		std::pair<bool, std::string> SerializeToYAML(const std::filesystem::path& filepath);

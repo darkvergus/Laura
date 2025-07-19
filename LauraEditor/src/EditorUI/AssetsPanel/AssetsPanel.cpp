@@ -74,18 +74,23 @@ namespace Laura {
             m_SelectedTile = LR_GUID::INVALID;
 		} 
         // Render the Selectable
-        theme.PushColor(ImGuiCol_Header, EditorCol_Secondary2);
-        if (ImGui::Selectable("##tile", m_SelectedTile == guid, ImGuiSelectableFlags_None, { m_TileScalar*BASE_TILE_WH_RATIO, m_TileScalar})) {
+        EditorCol_ tileBg = (m_SelectedTile == guid) ? EditorCol_Secondary2 : EditorCol_Primary3;
+        theme.PushColor(ImGuiCol_Header, tileBg);
+        if (ImGui::Selectable("##tile", true, ImGuiSelectableFlags_None, { m_TileScalar*BASE_TILE_WH_RATIO, m_TileScalar})) {
             m_SelectedTile = guid;
         }
         theme.PopColor();
 
-        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
-        {
-            // Set payload to carry the guid 
-            ImGui::SetDragDropPayload("DND_MESH_ASSET", &guid, sizeof(LR_GUID));
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+
+            DNDMeshPayload payload;
+            m_DNDMeshPayload.guid = guid;
+            strncpy(m_DNDMeshPayload.title, title, sizeof(m_DNDMeshPayload.title));
+            m_DNDMeshPayload.title[sizeof(m_DNDMeshPayload.title) - 1] = '\0'; // add null terminator
+
+            ImGui::SetDragDropPayload("DNDMeshPayload", &m_DNDMeshPayload, sizeof(DNDMeshPayload));
             theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
-            ImGui::Text(title);
+            ImGui::Text("Dragging: %s", title);
             theme.PopColor();
             ImGui::EndDragDropSource();
         }
@@ -140,7 +145,7 @@ namespace Laura {
     
     void AssetsPanel::DrawAssetMetadata() {
         ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x);
-        EditorTheme theme = m_EditorState->temp.editorTheme;
+        EditorTheme& theme = m_EditorState->temp.editorTheme;
 
         auto DrawLabelValue = [&theme](const char* label, auto value) {
             theme.PushColor(ImGuiCol_Text, EditorCol_Text2);

@@ -36,8 +36,9 @@ namespace Laura
 			if (ImGui::InputText("##Tag", buffer, sizeof(buffer))) {
 				tag = std::string(buffer);
 			}
+			ImGui::Dummy({ 0.0f, 5.0f });
 			ImGui::Separator();
-			ImGui::Spacing();
+			ImGui::Dummy({ 0.0f, 5.0f });
 		}
 
 		/// TRANSFORM COMPONENT UI ////////////////////////////////////////////////////////////
@@ -62,18 +63,23 @@ namespace Laura
 		);
 
 		/// MESH COMPONENT UI /////////////////////////////////////////////////////////////////
-		DrawComponent<MeshComponent>(std::string(ICON_FA_CUBE " Mesh"), entity, [](Entity& entity) {
-				static std::string meshFilename = "";
+		DrawComponent<MeshComponent>(std::string(ICON_FA_CUBE " Mesh"), entity, [&theme](Entity& entity) {
+				std::string& sourceName = entity.GetComponent<MeshComponent>().sourceName;
+				ImGui::Dummy({ 0.0f, 5.0f });
+				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				ImGui::Text("Mesh:");
-				ImGui::SameLine();
-				ImGui::Selectable(meshFilename.c_str(), false);
+				theme.PopColor();
 
+				ImGui::SameLine();
+				theme.PushColor(ImGuiCol_Header, EditorCol_Secondary2);
+				ImGui::Selectable(sourceName.c_str(), true);
+				theme.PopColor();
                 if (ImGui::BeginDragDropTarget()) {
-                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DND_MESH_ASSET")) {
-						IM_ASSERT(payload->DataSize == sizeof(LR_GUID));
-						LR_GUID& guid = *static_cast<LR_GUID*>(payload->Data);
-						meshFilename = guid.toString();
-						entity.GetComponent<MeshComponent>().guid = guid;
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DNDMeshPayload")) {
+						IM_ASSERT(payload->DataSize == sizeof(DNDMeshPayload));
+						auto& meshPayload = *static_cast<DNDMeshPayload*>(payload->Data);
+						sourceName = meshPayload.title; // copy char title[256] into std::string
+						entity.GetComponent<MeshComponent>().guid = meshPayload.guid;
                     }
                     ImGui::EndDragDropTarget();
                 }
@@ -82,9 +88,11 @@ namespace Laura
 
 
 		/// ADD COMPONENT BUTTON /////////////////////////
+		ImGui::Dummy(ImVec2(0.0f, 5.0f));
+		ImGui::Separator();
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
-		ImGui::Dummy(ImVec2(0.0f, 10.0f));
+		ImGui::Dummy(ImVec2(0.0f, 5.0f));
 		ImGui::SetCursorPosX(panelDims.x / 6);
 		bool popupOpened = false;
 		

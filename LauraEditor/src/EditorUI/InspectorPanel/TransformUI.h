@@ -8,7 +8,7 @@ namespace Laura
 	// Since the transform component can only get and set values through its own functions, we need to pass the set function as a lambda
 	template <typename T>
 	void TransformVec3Slider(	std::shared_ptr<EditorState> editorState, 
-								const std::string& label, 
+								const char* label, 
 								glm::vec3 vector, 
 								const T& setVector) {
 
@@ -21,11 +21,14 @@ namespace Laura
 		float lineheight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 		ImVec2 btnSize = ImVec2(lineheight * 0.7, lineheight);
 
-		ImGui::Text(label.c_str());
+		theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
+		ImGui::Text(label);
+		theme.PopColor();
+
 		ImGui::NextColumn();
 		ImGui::PushMultiItemsWidths(3, ImGui::GetContentRegionAvail().x - 30);
 
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
 		{ // adding a scope for clarity
 			ImGui::SetNextItemWidth(lineheight);

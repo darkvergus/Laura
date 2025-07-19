@@ -59,9 +59,7 @@ namespace Laura
             return { false, "Unknown error occurred while loading file: " + filepath.string() + ", error: " + e.what() };
         }
         
-        this->colorMap = std::move(newEditorTheme.colorMap);
-        this->m_ColorPallete = std::move(newEditorTheme.m_ColorPallete);
-        // keep the stack intact 
+        *this = std::move(newEditorTheme);
 
         return { true, "" };
     }
@@ -107,48 +105,44 @@ namespace Laura
         m_ColorPallete[EditorCol_Z]           = ImVec4{0.2f, 0.2f, 0.8f, 1.0f};          // TransformButtonZHovered
         ApplyAllToImgui();
     }
-
     void EditorTheme::ApplyAllToImgui() {
-        // populate colormap
-        colorMap[ImGuiCol_WindowBg]                  = EditorCol_Background1;
-        colorMap[ImGuiCol_PopupBg]                   = EditorCol_Background2;
-        colorMap[ImGuiCol_Border]                    = EditorCol_Secondary2;
-        colorMap[ImGuiCol_Header]                    = EditorCol_Secondary1;
-        colorMap[ImGuiCol_HeaderHovered]             = EditorCol_Primary1;
-        colorMap[ImGuiCol_HeaderActive]              = EditorCol_Primary2;
-        colorMap[ImGuiCol_Button]                    = EditorCol_Secondary1;
-        colorMap[ImGuiCol_ButtonHovered]             = EditorCol_Primary1;
-        colorMap[ImGuiCol_ButtonActive]              = EditorCol_Primary2;
-        colorMap[ImGuiCol_CheckMark]                 = EditorCol_Accent2;
-        colorMap[ImGuiCol_SliderGrab]                = EditorCol_Accent2;
-        colorMap[ImGuiCol_SliderGrabActive]          = EditorCol_Accent1;
-        colorMap[ImGuiCol_FrameBg]                   = EditorCol_Background1;
-        colorMap[ImGuiCol_FrameBgHovered]            = EditorCol_Background1;
-        colorMap[ImGuiCol_FrameBgActive]             = EditorCol_Primary2;
-        colorMap[ImGuiCol_Tab]                       = EditorCol_Background2;
-        colorMap[ImGuiCol_TabHovered]                = EditorCol_Secondary2;
-        colorMap[ImGuiCol_TabActive]                 = EditorCol_Secondary2;
-        colorMap[ImGuiCol_TabSelectedOverline]       = EditorCol_Accent1;
-        colorMap[ImGuiCol_TabDimmedSelectedOverline] = EditorCol_Primary1;
-        colorMap[ImGuiCol_TabUnfocused]              = EditorCol_Secondary2;
-        colorMap[ImGuiCol_TabUnfocusedActive]        = EditorCol_Secondary2;
-        colorMap[ImGuiCol_TitleBg]                   = EditorCol_Background2;
-        colorMap[ImGuiCol_TitleBgActive]             = EditorCol_Background2;
-        colorMap[ImGuiCol_TitleBgCollapsed]          = EditorCol_Background2;
-        colorMap[ImGuiCol_ScrollbarGrab]             = EditorCol_Secondary2;
-        colorMap[ImGuiCol_ResizeGrip]                = EditorCol_Secondary2;
-        colorMap[ImGuiCol_ResizeGripHovered]         = EditorCol_Secondary2;
-        colorMap[ImGuiCol_ResizeGripActive]          = EditorCol_Secondary2;
-        colorMap[ImGuiCol_Separator]                 = EditorCol_Secondary2;
-        colorMap[ImGuiCol_SeparatorHovered]          = EditorCol_Secondary2;
-        colorMap[ImGuiCol_SeparatorActive]           = EditorCol_Secondary2;
-        colorMap[ImGuiCol_Text]                      = EditorCol_Text1;
-        colorMap[ImGuiCol_TextDisabled]              = EditorCol_Text2;
-        colorMap[ImGuiCol_MenuBarBg]                 = EditorCol_Primary3;
+    ImGuiStyle& style = ImGui::GetStyle();
 
-        // set imgui based on colormap
-        for (const auto& [widget, col] : colorMap) {
-			ImGui::GetStyle().Colors[widget] = m_ColorPallete[col];
-        }
-    }
+    style.Colors[ImGuiCol_WindowBg]                  = m_ColorPallete[EditorCol_Background1];
+    style.Colors[ImGuiCol_PopupBg]                   = m_ColorPallete[EditorCol_Background2];
+    style.Colors[ImGuiCol_Border]                    = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_Header]                    = m_ColorPallete[EditorCol_Primary3];
+    style.Colors[ImGuiCol_HeaderHovered]             = m_ColorPallete[EditorCol_Primary2];
+    style.Colors[ImGuiCol_HeaderActive]              = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_Button]                    = m_ColorPallete[EditorCol_Secondary1];
+    style.Colors[ImGuiCol_ButtonHovered]             = m_ColorPallete[EditorCol_Primary1];
+    style.Colors[ImGuiCol_ButtonActive]              = m_ColorPallete[EditorCol_Primary2];
+    style.Colors[ImGuiCol_CheckMark]                 = m_ColorPallete[EditorCol_Accent2];
+    style.Colors[ImGuiCol_SliderGrab]                = m_ColorPallete[EditorCol_Accent2];
+    style.Colors[ImGuiCol_SliderGrabActive]          = m_ColorPallete[EditorCol_Accent1];
+    style.Colors[ImGuiCol_FrameBg]                   = m_ColorPallete[EditorCol_Background1];
+    style.Colors[ImGuiCol_FrameBgHovered]            = m_ColorPallete[EditorCol_Background1];
+    style.Colors[ImGuiCol_FrameBgActive]             = m_ColorPallete[EditorCol_Primary2];
+    style.Colors[ImGuiCol_Tab]                       = m_ColorPallete[EditorCol_Background2];
+    style.Colors[ImGuiCol_TabHovered]                = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_TabActive]                 = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_TabSelectedOverline]       = m_ColorPallete[EditorCol_Accent1];
+    style.Colors[ImGuiCol_TabDimmedSelectedOverline] = m_ColorPallete[EditorCol_Primary1];
+    style.Colors[ImGuiCol_TabUnfocused]              = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_TabUnfocusedActive]        = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_TitleBg]                   = m_ColorPallete[EditorCol_Background2];
+    style.Colors[ImGuiCol_TitleBgActive]             = m_ColorPallete[EditorCol_Background2];
+    style.Colors[ImGuiCol_TitleBgCollapsed]          = m_ColorPallete[EditorCol_Background2];
+    style.Colors[ImGuiCol_ScrollbarGrab]             = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_ResizeGrip]                = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_ResizeGripHovered]         = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_ResizeGripActive]          = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_SeparatorHovered]          = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_SeparatorActive]           = m_ColorPallete[EditorCol_Secondary2];
+    style.Colors[ImGuiCol_Text]                      = m_ColorPallete[EditorCol_Text1];
+    style.Colors[ImGuiCol_TextDisabled]              = m_ColorPallete[EditorCol_Text2];
+    style.Colors[ImGuiCol_MenuBarBg]                 = m_ColorPallete[EditorCol_Primary3];
+}
+
 }

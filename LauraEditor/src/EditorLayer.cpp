@@ -41,16 +41,18 @@ namespace Laura
 			dragon.GetComponent<TagComponent>().Tag = "Dragon";
 			dragon.AddComponent<TransformComponent>(); // Add if you want to set translation/scale
 			dragon.AddComponent<MaterialComponent>();
-			dragon.AddComponent<MeshComponent>().guid =
-			m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb");
+			auto& meshComponent = dragon.AddComponent<MeshComponent>();
+			meshComponent.guid = m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_dragon_pbr.glb");
+			meshComponent.sourceName = "stanford_dragon_pbr.glb";
 		}
 		{
 			Entity bunny = m_Scene->CreateEntity();
 			bunny.GetComponent<TagComponent>().Tag = "Bunny";
 			bunny.AddComponent<TransformComponent>();
 			bunny.AddComponent<MaterialComponent>();
-			bunny.AddComponent<MeshComponent>().guid =
-			m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb");
+			auto& meshComponent = bunny.AddComponent<MeshComponent>();
+			meshComponent.guid = m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb");
+			meshComponent.sourceName = "stanford_bunny_pbr.glb";
 		}
 
 		// Most of these are default arguments (not necessary to specify but showing them for clarity)

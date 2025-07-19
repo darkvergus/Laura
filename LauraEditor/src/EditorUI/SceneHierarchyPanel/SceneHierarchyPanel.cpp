@@ -56,7 +56,6 @@ namespace Laura
                         scene->DestroyEntity(entity);
                         m_EditorState->temp.selectedEntity = entt::null;
                     }, m_EditorState);
-
                 theme.PopColor();
 			}
 			else { // display non-selected entity
