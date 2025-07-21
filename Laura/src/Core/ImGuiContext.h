@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/ILayer.h"
-#include "core/IWindow.h"
+#include "Core/Layers/ILayer.h"
+#include "Core/IWindow.h"
 
 namespace Laura {
 

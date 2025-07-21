@@ -1,7 +1,7 @@
 #pragma once
 
-#include "events/events.h"
-#include "core/IWindow.h"
+#include "Core/Events/events.h"
+#include "Core/IWindow.h"
 
 namespace Laura {
 

@@ -3,7 +3,7 @@
 #include "lrpch.h"
 
 #include "Core/IWindow.h"
-#include "Core/LayerStack.h"
+#include "Core/Layers/LayerStack.h"
 #include "Core/ImGuiContext.h"
 
 #include "Renderer/Renderer.h"

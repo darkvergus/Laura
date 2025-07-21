@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/application.h"
-#include "Core/ILayer.h"
-#include "Core/LayerStack.h"
+#include "Core/Layers/ILayer.h"
+#include "Core/Layers/LayerStack.h"
 #include "Core/Events/Events.h"
 #include "Core/Events/KeyCodes.h"
 #include "Core/Events/MouseCodes.h"

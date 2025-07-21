@@ -1,5 +1,4 @@
-#include "LayerStack.h"
-#include "core/LayerStack.h"
+#include "Core/Layers/LayerStack.h"
 
 namespace Laura {
 
