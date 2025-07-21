@@ -36,9 +36,11 @@ namespace Laura
 			theme.PushColor(ImGuiCol_ButtonHovered, EditorCol_Secondary2);
 			theme.PushColor(ImGuiCol_ButtonActive, EditorCol_X);
 
+			theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				if (ImGui::Button("X", btnSize)) {
 					setVector(glm::vec3(0.0f, vector.y, vector.z));
 				}
+			theme.PopColor();
 				ImGui::SameLine();
 				if (ImGui::DragFloat("##X", &vector.x, 0.1f)) {
 					setVector(vector);
@@ -49,9 +51,11 @@ namespace Laura
 
 				ImGui::SetNextItemWidth(lineheight);
 			theme.PushColor(ImGuiCol_ButtonActive, EditorCol_Y);
+			theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				if (ImGui::Button("Y", btnSize)) {
 					setVector(glm::vec3(vector.x, 0.0f, vector.z));
 				}
+			theme.PopColor();
 				ImGui::SameLine();
 				if (ImGui::DragFloat("##Y", &vector.y, 0.1f)) {
 					setVector(vector);
@@ -62,9 +66,11 @@ namespace Laura
 
 				ImGui::SetNextItemWidth(lineheight);
 			theme.PushColor(ImGuiCol_ButtonActive, EditorCol_Z);
+			theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				if (ImGui::Button("Z", btnSize)) {
 					setVector(glm::vec3(vector.x, vector.y, 0.0f));
 				}
+			theme.PopColor();
 				ImGui::SameLine();
 				if (ImGui::DragFloat("##Z", &vector.z, 0.1f)) {
 					setVector(vector);
