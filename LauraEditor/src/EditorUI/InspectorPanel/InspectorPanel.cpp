@@ -48,9 +48,15 @@ namespace Laura
 		);
 
 		/// CAMERA COMPOENENT UI //////////////////////////////////////////////////////////////
-		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&](Entity& entity) {
+		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&theme, &scene](Entity& entity) {
 				auto& cameraComponent = entity.GetComponent<CameraComponent>();
-				if (ImGui::Checkbox("Main", &cameraComponent.isMain)) {
+
+				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
+				ImGui::Text("Main Camera:");
+				theme.PopColor();
+				ImGui::SameLine(150.0f);
+				theme.PushColor(ImGuiCol_CheckMark, EditorCol_Text1);
+				if (ImGui::Checkbox("##MainCameraCheckbox", &cameraComponent.isMain)) {
 					for (auto e : scene->GetRegistry()->view<CameraComponent>()) {
 						Entity otherEntity(e, scene->GetRegistry());
 						if (otherEntity.GetComponent<GUIDComponent>().guid != entity.GetComponent<GUIDComponent>().guid) {
@@ -58,7 +64,13 @@ namespace Laura
 						}
 					}
 				}
-				ImGui::DragFloat("FOV", &cameraComponent.fov, 0.1f, 10.0f, 130.0f, "%.1f");
+				theme.PopColor();
+
+				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
+				ImGui::Text("FOV");
+				theme.PopColor();
+				ImGui::SameLine(150.0f);
+				ImGui::DragFloat("##fovDragInt", &cameraComponent.fov, 0.1f, 10.0f, 130.0f, "%.1f");
 			}
 		);
 
@@ -72,7 +84,7 @@ namespace Laura
 
 				ImGui::SameLine();
 				theme.PushColor(ImGuiCol_Header, EditorCol_Secondary2);
-				ImGui::Selectable(sourceName.c_str(), true);
+				ImGui::Selectable((sourceName + "##MeshSelectable").c_str(), true);
 				theme.PopColor();
                 if (ImGui::BeginDragDropTarget()) {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DNDPayloadTypes::MESH)) {
