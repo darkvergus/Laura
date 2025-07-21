@@ -6,6 +6,7 @@
 #include "EditorUI/SceneHierarchyPanel/SceneHierarchyPanel.h"
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
 #include "EditorUI/ProfilerPanel/ProfilerPanel.h"
+#include "EditorUI/RenderSettingsPanel/RenderSettingsPanel.h"
 #include "EditorUI/ThemePanel/ThemePanel.h"
 #include "EditorUI/AssetsPanel/AssetsPanel.h"
 
@@ -45,6 +46,7 @@ namespace Laura
 		ViewportPanel m_ViewportPanel;
 		ThemePanel m_ThemePanel;
 		ProfilerPanel m_ProfilerPanel;
+		RenderSettingsPanel m_RenderSettingsPanel;
 		AssetsPanel m_AssetsPanel;
 	};
 }

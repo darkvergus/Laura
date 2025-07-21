@@ -71,10 +71,15 @@ namespace Laura
 
 				if (componentTreeNodeOpen)
 				{
-					if (entity.HasComponent<T>()) // the component could have been removed in the meantime
-					{
+					float avail_width = ImGui::GetContentRegionAvail().x;
+					float margin_right = 5.0f;  // pixels to leave empty on the right
+					ImGui::BeginChild("test", ImVec2(avail_width - margin_right, 0), ImGuiChildFlags_AutoResizeY);
+
+					if (entity.HasComponent<T>()){ // the component could have been removed in the meantime
 						uiLambda(entity);
 					}
+					ImGui::EndChild();
+
 					ImGui::TreePop();
 					ImGui::Spacing();
 				}

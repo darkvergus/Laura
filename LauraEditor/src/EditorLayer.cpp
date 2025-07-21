@@ -17,6 +17,7 @@ namespace Laura
 			m_SceneHierarchyPanel(m_EditorState),
 			m_ThemePanel(m_EditorState),
 			m_ProfilerPanel(m_EditorState),
+			m_RenderSettingsPanel(m_EditorState),
 			m_AssetsPanel(m_EditorState, m_AssetManager, m_ResourcePool)
 	{
 		setLayerName("EditorLayer");
@@ -104,6 +105,7 @@ namespace Laura
 		m_InspectorPanel.OnImGuiRender(m_Scene);
 		m_ThemePanel.OnImGuiRender();
 		m_AssetsPanel.OnImGuiRender();
+		m_RenderSettingsPanel.OnImGuiRender();
 		// RENDERER RENDERING // -> WILL BE MOVED TO THE RUNTIME LAYER
 		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.get(), m_ResourcePool.get());
 		m_ViewportPanel.OnImGuiRender(RenderedFrame, m_EditorState);
