@@ -14,6 +14,11 @@ namespace Laura
 
         ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
 
+        if (scene == nullptr) {
+            ImGui::End();
+            return;
+        }
+
         if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
             if (ImGui::MenuItem("Empty")) {
                 scene->CreateEntity();

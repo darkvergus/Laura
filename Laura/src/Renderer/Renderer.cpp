@@ -22,8 +22,11 @@ namespace Laura
 		return m_Frame;
 	}
 
-	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const
-	{
+	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const {
+		if (scene == nullptr) {
+			return nullptr;
+		}
+
 		auto t = m_Profiler->timer("Renderer::Parse()");
 
 		auto pScene = std::make_shared<Renderer::ParsedScene>();

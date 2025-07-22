@@ -28,8 +28,9 @@ namespace Laura
 		deserializeState(m_EditorState);
 		m_AssetManager->SetResourcePool(m_ResourcePool.get());
 
-		m_Scene = std::make_shared<Scene>();
-
+		//m_Scene = std::make_shared<Scene>();
+		m_Scene = nullptr;
+/*
 		/// STARTING SCENE FOR THE MOMENT DEFINED IN HERE //////////////////////////////////////
 		{
 			Entity camera = m_Scene->CreateEntity();
@@ -55,7 +56,7 @@ namespace Laura
 			meshComponent.guid = m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Models/stanford_bunny_pbr.glb");
 			meshComponent.sourceName = "stanford_bunny_pbr.glb";
 		}
-
+*/
 		// Most of these are default arguments (not necessary to specify but showing them for clarity)
 		m_Renderer->settings.skyboxGuid = m_AssetManager->LoadAsset(EDITOR_RESOURCES_PATH "Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr");
 		m_Renderer->settings.raysPerPixel = 1;

@@ -3,11 +3,9 @@
 #include "Core/Events/events.h"
 #include "Core/IWindow.h"
 
-namespace Laura {
-
-	class ILayer
-	{
-
+namespace Laura 
+{
+	class ILayer {
 	public:
 		virtual ~ILayer() = default;
 
@@ -21,8 +19,8 @@ namespace Laura {
 		inline std::string getLayerName() const { return m_LayerName; }
 
 	protected:
-		IWindow* m_Window;
-		std::string m_LayerName;
+		IWindow* m_Window = nullptr;
+		std::string m_LayerName = "";
 	};
 
 }
