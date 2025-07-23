@@ -4,9 +4,9 @@
 
 namespace Laura
 {
+
     SceneHierarchyPanel::SceneHierarchyPanel(std::shared_ptr<EditorState> editorState)
-		: m_EditorState(editorState)
-    {
+		: m_EditorState(editorState) {
     }
 
     void SceneHierarchyPanel::OnImGuiRender(std::weak_ptr<Scene> scene) {
@@ -44,7 +44,8 @@ namespace Laura
                                     | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 
         static bool destroyEntity = false; // since you can only delete one entity at a time the fact that this is used in the loop is fine
-        /// ITERATE OVER ENTITIES /////////////////////////////////////////////////////////////
+
+        // ITERATE OVER ENTITIES
         auto view = activeRegistry->view<entt::entity>();
         for (auto entityID : view) {
             bool entityChildrenOpen = false;

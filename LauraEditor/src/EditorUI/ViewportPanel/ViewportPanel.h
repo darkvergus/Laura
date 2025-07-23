@@ -6,12 +6,10 @@
 namespace Laura 
 {
 
-	class ViewportPanel
-	{
+	class ViewportPanel {
 	public:
 		ViewportPanel() = default;
 		~ViewportPanel() = default;
-
 		void OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState);
 	
 	private:

@@ -6,6 +6,7 @@
 
 namespace Laura
 {
+
 	void ThemePanel::OnImGuiRender() {
 		if (!m_EditorState->temp.isThemePanelOpen) {
 			return;

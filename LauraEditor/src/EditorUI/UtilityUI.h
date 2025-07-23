@@ -1,10 +1,12 @@
 #pragma once
+
 #include "Laura.h"
 #include "EditorUI/ThemePanel/ThemePanel.h"
 #include "EditorState.h"
 
 namespace Laura
 {
+
 	/*
 		Executes the OnConfirm function. If "doubleConfirmEnabled" is enabled in the editor state, 
 		a popup will prompt the user for confirmation first. To use this with a button click, 
@@ -56,7 +58,6 @@ namespace Laura
 			theme.PopColor();
 			ImGui::EndPopup();
 		}
-
 		ImGui::PopStyleVar();
 	}
 }

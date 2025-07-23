@@ -1,8 +1,9 @@
 #include "EditorUI\AssetsPanel\AssetsPanel.h"
 #include <format>
 
+namespace Laura 
+{
 
-namespace Laura {
 	void AssetsPanel::OnImGuiRender() {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
 

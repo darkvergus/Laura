@@ -3,6 +3,7 @@
 
 namespace Laura
 {
+
 	EditorLayer::EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
 							 std::shared_ptr<Asset::ResourcePool> resourcePool,
 							 std::shared_ptr<Asset::Manager> assetManager,
@@ -88,5 +89,4 @@ namespace Laura
 
 	void EditorLayer::onUpdate() {
 	}
-
 }

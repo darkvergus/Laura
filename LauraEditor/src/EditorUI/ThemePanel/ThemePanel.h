@@ -1,17 +1,18 @@
 #pragma once 
+
 #include "Laura.h"
 #include "EditorState.h"
 
 namespace Laura
 {
-	class ThemePanel
-	{
+
+	class ThemePanel {
 	public:
 		inline ThemePanel(std::shared_ptr<EditorState> editorState)
 			: m_EditorState(editorState) {
 		}
-		~ThemePanel() = default;
 
+		~ThemePanel() = default;
 		void OnImGuiRender();
 
 	private:

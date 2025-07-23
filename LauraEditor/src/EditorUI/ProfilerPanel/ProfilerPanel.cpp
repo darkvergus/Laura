@@ -2,13 +2,15 @@
 #include <implot.h>
 #include "ProfilerPanel.h"
 
-namespace Laura {
+namespace Laura 
+{
 
     void ProfilerPanel::OnImGuiRender(std::shared_ptr<Profiler> profiler) {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
 
-        if (!m_EditorState->temp.isProfilerPanelOpen)
+        if (!m_EditorState->temp.isProfilerPanelOpen) {
             return;
+        }
 
         if (!profiler->globalTimerSet) {
             LOG_ENGINE_WARN("Unable to render Profiler Panel - No Global Timer Set");
@@ -80,9 +82,6 @@ namespace Laura {
 
                 if (ImGui::BeginPopup(label.c_str())) {
                     ImGui::Text("%s Options", label.c_str());
-                    if (ImGui::MenuItem(ICON_FA_FILE_ARROW_DOWN " Export...")) {
-                    }
-
                     ImGui::Separator();
                     ImGui::Spacing();
                     ImGui::ColorPicker4("##clrpckr", (float*)&lineStyle.color, ImGuiColorEditFlags_NoInputs);

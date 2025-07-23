@@ -3,6 +3,7 @@
 
 namespace Laura
 {
+
     std::pair<bool, std::string> EditorTheme::SerializeToYAML(const std::filesystem::path& filepath) {
         if (filepath.extension() != EDITOR_THEME_FILE_EXTENSION) {
             return { false, "Invalid file extension for theme file (or none selected): " + filepath.string() };

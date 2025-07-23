@@ -7,6 +7,7 @@
 
 namespace Laura 
 {
+
 	class AssetsPanel {
 	public:
 		AssetsPanel(std::shared_ptr<EditorState> editorState, 

@@ -1,10 +1,11 @@
 #include "ViewportPanel.h"
 #include <IconsFontAwesome6.h>
 #include <imgui_internal.h>
+
 namespace Laura
 {
-	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState)
-	{
+
+	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState) {
 		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoCollapse;
 		
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -35,46 +36,37 @@ namespace Laura
 		bool DimensionsChanged = (ImageDimensions != m_PrevImageDimensions || WindowDimensions != m_PrevWindowDimensions);
 		bool PositionChanged = (TLWindowPosition != m_PrevWindowPosition);
 
-		if (editorState->persistent.viewportMode == ViewportMode::CenterToViewport)
-		{
-			if (DimensionsChanged || PositionChanged || ForceUpdate)
-			{
+		if (editorState->persistent.viewportMode == ViewportMode::CenterToViewport) {
+			if (DimensionsChanged || PositionChanged || ForceUpdate) {
 				glm::ivec2 OffsetTopLeftCorner = (WindowDimensions - ImageDimensions) / 2;
 				m_TopLeftImageCoords = OffsetTopLeftCorner + TLWindowPosition;
 				m_BottomRightImageCoords = OffsetTopLeftCorner + TLWindowPosition + ImageDimensions;
 			}
 		}
 
-		if (editorState->persistent.viewportMode == ViewportMode::StretchToViewport)
-		{
-			if (DimensionsChanged || PositionChanged || ForceUpdate)
-			{
+		if (editorState->persistent.viewportMode == ViewportMode::StretchToViewport) {
+			if (DimensionsChanged || PositionChanged || ForceUpdate) {
 				m_TopLeftImageCoords = TLWindowPosition;
 				m_BottomRightImageCoords = TLWindowPosition + WindowDimensions;
 			}
 		}
 
-		if (editorState->persistent.viewportMode == ViewportMode::FitToViewport)
-		{
+		if (editorState->persistent.viewportMode == ViewportMode::FitToViewport) {
 			// if the ViewportPanel has been resized or the renderer output image size has been changed
 
-			if (DimensionsChanged || PositionChanged || ForceUpdate)
-			{
-				if (DimensionsChanged || ForceUpdate)
-				{
+			if (DimensionsChanged || PositionChanged || ForceUpdate) {
+				if (DimensionsChanged || ForceUpdate) {
 					m_PrevWindowDimensions = WindowDimensions;
 					m_PrevImageDimensions = ImageDimensions;
 
 					float WindowAspectRatio = (float)WindowDimensions.x / (float)WindowDimensions.y;
 					float ImageAspectRatio = (float)ImageDimensions.x / (float)ImageDimensions.y;
 					// if true width is the limiting factor (spans the entire width)
-					if (WindowAspectRatio <= ImageAspectRatio)
-					{
+					if (WindowAspectRatio <= ImageAspectRatio) {
 						m_TargetImageDimensions.x = WindowDimensions.x;
 						m_TargetImageDimensions.y = ceil(WindowDimensions.x / ImageAspectRatio);
 					}
-					else // height is the limiting factor (spans the entire height)
-					{
+					else { // height is the limiting factor (spans the entire height)
 						m_TargetImageDimensions.x = ceil(WindowDimensions.y * ImageAspectRatio);
 						m_TargetImageDimensions.y = WindowDimensions.y;
 					}
@@ -107,22 +99,20 @@ namespace Laura
 		style.Colors[ImGuiCol_WindowBg] = originalWindowBG;
 	}
 
-	void ViewportPanel::DrawVieportSettingsButton(std::shared_ptr<EditorState> editorState)
-	{
+	void ViewportPanel::DrawVieportSettingsButton(std::shared_ptr<EditorState> editorState) {
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 		ImGui::Spacing();
 		ImGui::SameLine(panelDims.x - lineHeight);
-		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, { lineHeight, lineHeight }))
-		{
+		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, { lineHeight, lineHeight })) {
 			editorState->temp.isViewportSettingsPanelOpen = true;
 		}
 	}
 
-	void ViewportPanel::DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState)
-	{
-		if (!editorState->temp.isViewportSettingsPanelOpen)
+	void ViewportPanel::DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState) {
+		if (!editorState->temp.isViewportSettingsPanelOpen) {
 			return;
+		}
 
 		static ImGuiWindowFlags ViewportSettingsFlags = ImGuiWindowFlags_NoDocking |
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;

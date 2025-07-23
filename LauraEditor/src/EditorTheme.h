@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Laura.h"
 #include <imgui.h>
 #include <filesystem> 
@@ -7,11 +8,11 @@
 #include <array>
 #include <cassert>
 
+#define EDITOR_THEME_FILE_EXTENSION ".lrtheme"
+
 namespace Laura
 {
-	#define EDITOR_THEME_FILE_EXTENSION ".lrtheme"
 	
-	// how used in code
 	enum EditorCol_ {
 		EditorCol_Primary1,
 		EditorCol_Primary2,
@@ -33,7 +34,6 @@ namespace Laura
 		EditorCol_COUNT
 	};
 	
-	// how appear serialized in the file
 	constexpr const char* EditorColStrings[] = {
 		"EditorCol_Primary1",
 		"EditorCol_Primary2",
@@ -97,6 +97,7 @@ namespace Laura
 		}
 
 		void ApplyAllToImgui();
+
 	private:
 		std::array<ImVec4, EditorCol_COUNT> m_ColorPallete; // stores the actual colors of the theme
 		

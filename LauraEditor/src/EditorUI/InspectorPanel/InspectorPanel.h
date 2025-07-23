@@ -1,7 +1,7 @@
 #pragma once 
+
 #include <IconsFontAwesome6.h>
 #include <imgui_internal.h>
-
 #include "Laura.h"
 #include "EditorState.h"
 #include "EditorTheme.h"
@@ -10,8 +10,8 @@
 
 namespace Laura
 {
-	class InspectorPanel
-	{
+
+	class InspectorPanel {
 	public:
 		InspectorPanel(std::shared_ptr<EditorState> editorState);
 		~InspectorPanel() = default;
@@ -20,13 +20,11 @@ namespace Laura
 
 	private:
 		template<typename T, typename UILambda>
-		inline void DrawComponent(const std::string& TreenodeTitle, EntityHandle& entity, UILambda uiLambda, bool removable = true)
-		{
+		inline void DrawComponent(const std::string& TreenodeTitle, EntityHandle& entity, UILambda uiLambda, bool removable = true) {
 			const ImGuiTreeNodeFlags treenodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap
 													| ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 			static bool deleteComponent = false;
-			if (entity.HasComponent<T>())
-			{
+			if (entity.HasComponent<T>()) {
 				ImVec2 panelDims = ImGui::GetContentRegionAvail();
 				float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 
@@ -39,10 +37,8 @@ namespace Laura
 				bool componentTreeNodeOpen = ImGui::TreeNodeEx(TreenodeTitle.c_str(), treenodeFlags);
 				ImGui::SameLine(panelDims.x - 1.5 * lineHeight - 0.2);
 
-				if (removable)
-				{
-					if (ImGui::Button(ICON_FA_TRASH_CAN))
-					{
+				if (removable) {
+					if (ImGui::Button(ICON_FA_TRASH_CAN)) {
 						deleteComponent = true;
 						ImGui::OpenPopup(ICON_FA_TRASH_CAN " Delete Component");
 					}
@@ -53,24 +49,20 @@ namespace Laura
 				}
 
 				ImGui::SameLine(panelDims.x - lineHeight * 0.5);
-				if (ImGui::Button(ICON_FA_GEARS))
-				{
+				if (ImGui::Button(ICON_FA_GEARS)) {
 					ImGui::OpenPopup("ComponentSettings");
 				}
 				ImGui::PopStyleVar();
 
-				if (ImGui::BeginPopup("ComponentSettings"))
-				{
-					if (ImGui::MenuItem("Reset"))
-					{
+				if (ImGui::BeginPopup("ComponentSettings")) {
+					if (ImGui::MenuItem("Reset")) {
 						entity.RemoveComponent<T>();
 						entity.AddComponent<T>();
 					}
 					ImGui::EndPopup();
 				}
 
-				if (componentTreeNodeOpen)
-				{
+				if (componentTreeNodeOpen) {
 					float avail_width = ImGui::GetContentRegionAvail().x;
 					float margin_right = 5.0f;  // pixels to leave empty on the right
 					ImGui::BeginChild("test", ImVec2(avail_width - margin_right, 0), ImGuiChildFlags_AutoResizeY);

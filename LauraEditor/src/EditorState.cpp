@@ -2,6 +2,7 @@
 
 namespace Laura
 {
+
     bool serializeState(const std::shared_ptr<const EditorState>& state) {
         std::string filepath = EDITOR_STATE_FILE_PATH;
 
@@ -32,7 +33,7 @@ namespace Laura
         }
     }
 
-	bool deserializeState(const std::shared_ptr<EditorState>& state){
+	bool deserializeState(const std::shared_ptr<EditorState>& state) {
         std::string filepath = EDITOR_STATE_FILE_PATH;
 
         try {

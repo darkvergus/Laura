@@ -26,5 +26,4 @@ namespace Laura
 	Application* CreateApplication() {
 		return new LauraEditor();
 	}
-
 }

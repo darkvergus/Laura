@@ -1,16 +1,18 @@
 #pragma once
+
 #include "Laura.h"
 #include "EditorState.h"
 #include <imgui_internal.h>
 
 namespace Laura
 {
+
 	// Since the transform component can only get and set values through its own functions, we need to pass the set function as a lambda
 	template <typename T>
-	void TransformVec3Slider(	std::shared_ptr<EditorState> editorState, 
-								const char* label, 
-								glm::vec3 vector, 
-								const T& setVector) {
+	void TransformVec3Slider(std::shared_ptr<EditorState> editorState, 
+							 const char* label, 
+							 glm::vec3 vector, 
+							 const T& setVector) {
 
 		EditorTheme& theme = editorState->temp.editorTheme;
 
@@ -30,7 +32,8 @@ namespace Laura
 
 		ImGui::PushID(label);
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0, 0 });
-		{ // adding a scope for clarity
+
+		{
 			ImGui::SetNextItemWidth(lineheight);
 			theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
 			theme.PushColor(ImGuiCol_ButtonHovered, EditorCol_Secondary2);

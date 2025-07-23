@@ -6,15 +6,15 @@
 namespace Laura
 {
 
-	class ProfilerPanel
-	{
+	class ProfilerPanel {
 	public:
 		ProfilerPanel(std::shared_ptr<EditorState> editorState)
-			: m_EditorState(editorState) {}
+			: m_EditorState(editorState) {
+		}
 
 		~ProfilerPanel() = default;
-
 		void OnImGuiRender(std::shared_ptr<Profiler> profiler);
+		
 	private:
 		
 		struct plotLineStyle {

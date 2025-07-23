@@ -2,7 +2,6 @@
 
 #include <Laura.h>
 
-
 namespace Laura {
 
 	namespace DNDPayloadTypes {
@@ -14,6 +13,4 @@ namespace Laura {
 		LR_GUID guid;
 		char title[256];
 	};
-
-	// ...
 }

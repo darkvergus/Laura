@@ -3,6 +3,7 @@
 
 namespace Laura 
 {
+
 	void RenderSettingsPanel::OnImGuiRender() {
 		EditorTheme& theme = m_EditorState->temp.editorTheme;
 
@@ -33,7 +34,7 @@ namespace Laura
         				if (ImGui::Selectable(m_ResolutionOptions[n].label, selected)) {
             				current_idx = n;
         				}
-        				if (selected) ImGui::SetItemDefaultFocus();
+						if (selected) { ImGui::SetItemDefaultFocus(); }
     				}
     				ImGui::EndCombo();
 				}
@@ -62,9 +63,9 @@ namespace Laura
 					ImGui::Checkbox("##VisualizeBVHCheckbox", &m_IsBVHVisualization);
 				}
 				theme.PopColor();
-
 				ImGui::EndTabItem();
 			}
+
 			if (ImGui::BeginTabItem("Runtime")) {
 				theme.PushColor(ImGuiCol_Text, EditorCol_Accent1);
 				ImGui::Text("General");

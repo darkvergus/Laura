@@ -1,4 +1,5 @@
 #pragma once
+
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <cassert>
@@ -9,6 +10,7 @@
 
 namespace Laura
 {
+
 	enum struct ViewportMode {
 		FitToViewport,
 		StretchToViewport,
@@ -42,9 +44,12 @@ template<>
 struct YAML::convert<Laura::ViewportMode> {
 	static YAML::Node encode(const Laura::ViewportMode& rhs) {
 		switch (rhs) {
-			case Laura::ViewportMode::StretchToViewport:	return Node("StretchToViewport");
-			case Laura::ViewportMode::CenterToViewport:		return Node("CenterToViewport");
-			default:										return Node("FitToViewport");
+			case Laura::ViewportMode::StretchToViewport:	
+				return Node("StretchToViewport");
+			case Laura::ViewportMode::CenterToViewport:		
+				return Node("CenterToViewport");
+			default:
+				return Node("FitToViewport");
 		}
 	}
 

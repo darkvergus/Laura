@@ -14,6 +14,7 @@ namespace Laura
 
 		~RenderSettingsPanel() = default;
 		void OnImGuiRender();
+
 	private:
 		struct ResolutionOption {
 			glm::vec2 size;      // {width, height}
@@ -51,5 +52,4 @@ namespace Laura
 		
 		std::shared_ptr<EditorState> m_EditorState;
 	};
-
 }

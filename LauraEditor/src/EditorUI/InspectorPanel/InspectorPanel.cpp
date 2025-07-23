@@ -1,9 +1,9 @@
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
 #include "EditorUI/InspectorPanel/TransformUI.h"
 
-
 namespace Laura
 {
+
 	/// INSPECTOR PANEL METHODS //////////////////////////////////////////////////////////////
 	InspectorPanel::InspectorPanel(std::shared_ptr<EditorState> editorState)
 		: m_EditorState(editorState) {
@@ -25,7 +25,7 @@ namespace Laura
         entt::entity selectedEntity = m_EditorState->temp.selectedEntity;
         EntityHandle entity(selectedEntity, activeRegistry);
 
-		/// TAG COMPONENT UI //////////////////////////////////////////////////////////////////
+		// TAG COMPONENT
         if (entity.HasComponent<TagComponent>()) {
 			std::string& tag = entity.GetComponent<TagComponent>().Tag;
 			char buffer[256];
@@ -41,13 +41,13 @@ namespace Laura
 			ImGui::Dummy({ 0.0f, 5.0f });
 		}
 
-		/// TRANSFORM COMPONENT UI ////////////////////////////////////////////////////////////
+		// TRANSFORM COMPONENT
 		DrawComponent<TransformComponent>(std::string(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT " Transform"), entity, [&](EntityHandle& _entity) {
 				DrawTransformSliders(m_EditorState, _entity);
 			}
 		);
 
-		/// CAMERA COMPOENENT UI //////////////////////////////////////////////////////////////
+		// CAMERA COMPOENENT
 		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&theme, &sceneShared](EntityHandle& entity) {
 				auto& cameraComponent = entity.GetComponent<CameraComponent>();
 
@@ -74,7 +74,7 @@ namespace Laura
 			}
 		);
 
-		/// MESH COMPONENT UI /////////////////////////////////////////////////////////////////
+		// MESH COMPONENT
 		DrawComponent<MeshComponent>(std::string(ICON_FA_CUBE " Mesh"), entity, [&theme](EntityHandle& entity) {
 				std::string& sourceName = entity.GetComponent<MeshComponent>().sourceName;
 				ImGui::Dummy({ 0.0f, 5.0f });
@@ -98,8 +98,7 @@ namespace Laura
 			}
 		);
 
-
-		/// ADD COMPONENT BUTTON /////////////////////////
+		// ADD COMPONENT BUTTON
 		ImGui::Dummy(ImVec2(0.0f, 5.0f));
 		ImGui::Separator();
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();

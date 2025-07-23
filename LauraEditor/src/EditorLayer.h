@@ -1,6 +1,6 @@
 #pragma once
-#include <Laura.h>
 
+#include <Laura.h>
 #include "EditorState.h"
 #include "EditorUI/ViewportPanel/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel/SceneHierarchyPanel.h"
@@ -12,8 +12,8 @@
 
 namespace Laura
 {
-	class EditorLayer : public ILayer
-	{
+
+	class EditorLayer : public ILayer {
 	public:
 		EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
 					std::shared_ptr<Asset::ResourcePool> resourcePool, 
@@ -30,11 +30,6 @@ namespace Laura
 	private:
 		void DrawMainMenu();
 
-		glm::ivec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;
-		ImVec2 topLeftTextureCoords, bottomRightTextureCoords;
-		float aspectRatio;
-
-	private:
 		// Engine
 		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
 		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
