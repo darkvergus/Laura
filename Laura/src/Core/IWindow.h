@@ -2,10 +2,8 @@
 
 #include "lrpch.h"
 
-#include "events/Events.h"
-
-#include "events/KeyCodes.h"
-#include "events/MouseCodes.h"
+#include "Events/KeyEvents.h"
+#include "Events/MouseEvents.h"
 
 namespace Laura {
 
@@ -46,7 +44,7 @@ namespace Laura {
 		virtual bool shouldClose() = 0;
 
 		// expects a function that takes an Event* as a parameter and returns void
-		virtual void setEventCallback(const std::function<void(Event*)>& callback) = 0;
+		virtual void setEventCallback(const std::function<void(std::shared_ptr<IEvent>)>& callback) = 0;
 
 		/// createWindow is a factory method that creates a window with the given properties.
 		/// reutrns a heap pointer

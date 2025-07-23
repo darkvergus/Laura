@@ -5,12 +5,13 @@
 #include <imgui_impl_opengl3.h>
 #include <IconsFontAwesome6.h>
 #include <iconsFontAwesome6Brands.h>
+#include <GLFW\glfw3.h>
 
 #include <implot.h>
 
 #include "lrpch.h"
 
-#include "core/Events/Events.h"
+#include "core/Events/IEvent.h"
 
 namespace Laura {
 
@@ -36,13 +37,13 @@ namespace Laura {
         // FONTS - merging Font Awesome with the default font (Icons)
         ImGuiIO& io = ImGui::GetIO();
 
-        io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Fonts/roboto/Roboto-Bold.ttf", 15.0f);
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Fonts/roboto/Roboto-Regular.ttf", 15.0f);
+        io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Assets/Fonts/roboto/Roboto-Bold.ttf", 15.0f);
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Assets/Fonts/roboto/Roboto-Regular.ttf", 15.0f);
 
         ImFontConfig config;
         config.MergeMode = true;  // Merge Font Awesome with the default font
         static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-        io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf", 13.0f, &config, icon_ranges);
+        io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Assets/Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf", 13.0f, &config, icon_ranges);
 
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls

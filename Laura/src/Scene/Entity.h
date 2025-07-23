@@ -5,12 +5,12 @@
 namespace Laura
 {
 
-	class Entity
+	class EntityHandle
 	{
 	public:
-		Entity() = default;
-		Entity(entt::entity entity, entt::registry* registry);
-		~Entity();
+		EntityHandle() = default;
+		EntityHandle(entt::entity entity, entt::registry* registry);
+		~EntityHandle();
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) const

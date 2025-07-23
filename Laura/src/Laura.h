@@ -1,11 +1,15 @@
 #pragma once
 
 #include "Core/application.h"
-#include "Core/ILayer.h"
-#include "Core/LayerStack.h"
-#include "Core/Events/Events.h"
-#include "Core/Events/KeyCodes.h"
-#include "Core/Events/MouseCodes.h"
+#include "Core/Layers/ILayer.h"
+#include "Core/Layers/LayerStack.h"
+
+#include "Core/Events/IEvent.h"
+#include "Core/Events/KeyEvents.h"
+#include "Core/Events/MouseEvents.h"
+#include "Core/Events/SceneEvents.h"
+#include "Core/Events/RenderEvents.h"
+
 #include "Core/GUID.h"
 #include "Core/Profiler.h"
 

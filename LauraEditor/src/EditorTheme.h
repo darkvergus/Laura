@@ -1,5 +1,6 @@
 #pragma once
 #include "Laura.h"
+#include <imgui.h>
 #include <filesystem> 
 #include <yaml-cpp/yaml.h>
 #include <deque>

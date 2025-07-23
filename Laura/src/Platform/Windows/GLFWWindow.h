@@ -30,7 +30,7 @@ namespace Laura {
 		bool shouldClose() override;
 
 
-		void setEventCallback(const std::function<void(Event*)>& callback) override;
+		void setEventCallback(const std::function<void(std::shared_ptr<IEvent>)>& callback) override;
 
 
 
@@ -38,7 +38,7 @@ namespace Laura {
 		GLFWwindow* m_NativeWindow;
 		OpenGLContext* m_Context;
 		WindowProps m_WindowProps;
-		std::function<void(Event*)> notifyDispatcher;
+		std::function<void(std::shared_ptr<IEvent>)> dispatchEvent;
 
 		/// These are callback methods called by GLFW when an event occurs.
 		/// They are static methods because GLFW requires them to be static. The method gets the EventDispatcher

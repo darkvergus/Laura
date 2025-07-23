@@ -22,8 +22,11 @@ namespace Laura
 		return m_Frame;
 	}
 
-	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const
-	{
+	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const {
+		if (scene == nullptr) {
+			return nullptr;
+		}
+
 		auto t = m_Profiler->timer("Renderer::Parse()");
 
 		auto pScene = std::make_shared<Renderer::ParsedScene>();
@@ -31,7 +34,7 @@ namespace Laura
 		// find a main camera
 		auto cameraView = scene->GetRegistry()->view<TransformComponent, CameraComponent>();
 		for (auto entity : cameraView) {
-			Entity e(entity, scene->GetRegistry());
+			EntityHandle e(entity, scene->GetRegistry());
 
 			if (!e.GetComponent<CameraComponent>().isMain)
 				continue;
@@ -48,7 +51,7 @@ namespace Laura
 		auto renderableView = scene->GetRegistry()->view<TransformComponent, MeshComponent>();
 		pScene->MeshEntityLookupTable.reserve(renderableView.size_hint());
 		for (auto entity : renderableView) {
-			Entity e(entity, scene->GetRegistry());
+			EntityHandle e(entity, scene->GetRegistry());
 
 			LR_GUID& guid = e.GetComponent<MeshComponent>().guid;
 

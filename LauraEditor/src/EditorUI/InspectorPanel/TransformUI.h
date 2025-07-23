@@ -84,7 +84,7 @@ namespace Laura
 		ImGui::Columns(1);
 	}
 
-	inline void DrawTransformSliders(std::shared_ptr<EditorState> editorState, Entity entity) {
+	inline void DrawTransformSliders(std::shared_ptr<EditorState> editorState, EntityHandle entity) {
 		auto& transform = entity.GetComponent<TransformComponent>();
 		TransformVec3Slider(editorState, "Position", transform.GetTranslation(), [&transform](glm::vec3 vector) {
 				transform.SetTranslation(vector); 

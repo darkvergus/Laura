@@ -16,11 +16,11 @@ namespace Laura
 		InspectorPanel(std::shared_ptr<EditorState> editorState);
 		~InspectorPanel() = default;
 
-		void OnImGuiRender(std::shared_ptr<Scene> scene);
+		void OnImGuiRender(std::weak_ptr<Scene> scene);
 
 	private:
 		template<typename T, typename UILambda>
-		inline void DrawComponent(const std::string& TreenodeTitle, Entity& entity, UILambda uiLambda, bool removable = true)
+		inline void DrawComponent(const std::string& TreenodeTitle, EntityHandle& entity, UILambda uiLambda, bool removable = true)
 		{
 			const ImGuiTreeNodeFlags treenodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap
 													| ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
@@ -88,7 +88,7 @@ namespace Laura
 		}
 
         template<typename T>
-        void GiveEntityComponentButton(Entity entity, const char* label, const char* icon) {
+        void GiveEntityComponentButton(EntityHandle entity, const char* label, const char* icon) {
 			if (entity.HasComponent<T>()) { ImGui::BeginDisabled(); }
 
 			if (ImGui::Selectable((icon + std::string(" ") + label).c_str(), false)) { 

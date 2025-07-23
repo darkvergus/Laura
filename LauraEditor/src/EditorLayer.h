@@ -15,7 +15,7 @@ namespace Laura
 	class EditorLayer : public ILayer
 	{
 	public:
-		EditorLayer(std::shared_ptr<Renderer> renderer, 
+		EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
 					std::shared_ptr<Asset::ResourcePool> resourcePool, 
 					std::shared_ptr<Asset::Manager> assetManager, 
 					std::shared_ptr<Profiler> profiler
@@ -25,22 +25,28 @@ namespace Laura
 		virtual void onDetach() override;
 		virtual void onUpdate() override;
 		virtual void onImGuiRender() override;
-		virtual void onEvent(Event* event) override;
+		virtual void onEvent(std::shared_ptr<IEvent> event) override;
+
 	private:
+		void DrawMainMenu();
+
 		glm::ivec2 prevViewportWindowSize, prevViewportWindowPos, viewportSize;
 		ImVec2 topLeftTextureCoords, bottomRightTextureCoords;
 		float aspectRatio;
 
 	private:
-		// > ENGINE RELATED < //
-		std::shared_ptr<Renderer> m_Renderer;
+		// Engine
+		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
 		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
 		std::shared_ptr<Asset::Manager> m_AssetManager;
 		std::shared_ptr<Profiler> m_Profiler;
-		std::shared_ptr<Scene> m_Scene;
 
-		// > EDITOR RELATED < //
-		std::shared_ptr<EditorState> m_EditorState;
+		// Values received from events
+		std::weak_ptr<Scene> m_Scene;
+		std::weak_ptr<IImage2D> m_LatestFrameRender;
+
+		// Editor
+		std::shared_ptr<EditorState> m_EditorState; // shared across panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		InspectorPanel m_InspectorPanel;
 		ViewportPanel m_ViewportPanel;

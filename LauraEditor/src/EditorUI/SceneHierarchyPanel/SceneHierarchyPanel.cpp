@@ -9,24 +9,30 @@ namespace Laura
     {
     }
 
-    void SceneHierarchyPanel::OnImGuiRender(std::shared_ptr<Scene> scene) {
+    void SceneHierarchyPanel::OnImGuiRender(std::weak_ptr<Scene> scene) {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
 
         ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
 
-        if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
-            if (ImGui::MenuItem("Empty")) {
-                scene->CreateEntity();
-            }
-            ImGui::EndMenu();
+        auto sceneShared = scene.lock();
+        if (sceneShared == nullptr) {
+            ImGui::End();
+            return;
         }
 
-        entt::registry* activeRegistry = scene->GetRegistry();
+        entt::registry* activeRegistry = sceneShared->GetRegistry();
         if(!activeRegistry) {
 			ImGui::End();
             LOG_ENGINE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
 			return;
 		}
+        
+        if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
+            if (ImGui::MenuItem("Empty")) {
+                sceneShared->CreateEntity();
+            }
+            ImGui::EndMenu();
+        }
         
         ImVec2 panelDims = ImGui::GetContentRegionAvail();
         float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
@@ -42,7 +48,7 @@ namespace Laura
         auto view = activeRegistry->view<entt::entity>();
         for (auto entityID : view) {
             bool entityChildrenOpen = false;
-            Entity entity(entityID, activeRegistry);
+            EntityHandle entity(entityID, activeRegistry);
             std::string& tag = entity.GetComponent<TagComponent>().Tag;
 
             // display selected entity
@@ -53,7 +59,7 @@ namespace Laura
                 ImGui::SameLine(panelDims.x - lineHeight * 0.5);
                 if (ImGui::Button(ICON_FA_TRASH_CAN)) { destroyEntity = true; }
                 ConfirmAndExecute(destroyEntity, ICON_FA_TRASH_CAN " Delete Entity", "Are you sure you want to delete this entity?", [&]() {
-                        scene->DestroyEntity(entity);
+                        sceneShared->DestroyEntity(entity);
                         m_EditorState->temp.selectedEntity = entt::null;
                     }, m_EditorState);
                 theme.PopColor();

@@ -11,17 +11,16 @@ namespace Laura
 		delete m_Registry;
 	}
 
-	Entity& Scene::CreateEntity() {
+	EntityHandle Scene::CreateEntity() {
 		entt::entity entityID = m_Registry->create();
-		Entity entity(entityID, m_Registry);
+		EntityHandle entity(entityID, m_Registry);
 		entity.AddComponent<TagComponent>("Empty Entity");
 		entity.AddComponent<GUIDComponent>();
 		return entity;
 	}
 
-	void Scene::DestroyEntity(const Entity& entity) {
+	void Scene::DestroyEntity(EntityHandle entity) {
 		m_Registry->destroy(entity.GetID());
-		LOG_ENGINE_INFO("Destroyed entity");
 	}
 
 	void Scene::OnStart() {

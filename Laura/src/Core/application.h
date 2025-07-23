@@ -3,23 +3,20 @@
 #include "lrpch.h"
 
 #include "Core/IWindow.h"
-#include "Core/LayerStack.h"
+#include "Core/Layers/LayerStack.h"
+#include "Core/Layers/SceneLayer.h"
+#include "Core/Layers/RenderLayer.h"
 #include "Core/ImGuiContext.h"
-
 #include "Renderer/Renderer.h"
 #include "Renderer/IRendererAPI.h"
-
 #include "Assets/Assets.h"
-
-#include "Events/Events.h"
-
+#include "Events/IEvent.h"
 #include "Core/Profiler.h"
 
+namespace Laura 
+{
 
-namespace Laura {
-
-    class Application
-    {
+    class Application {
     public:
         Application() = default;
         //Application(WindowProps windowProps);
@@ -27,14 +24,17 @@ namespace Laura {
         void run();
     protected:
         std::shared_ptr<IWindow>        _Window;
+
         std::shared_ptr<LayerStack>     _LayerStack;
         std::shared_ptr<ImGuiContext>   _ImGuiContextManager;
         std::shared_ptr<IRendererAPI>   _RendererAPI;
-        std::shared_ptr<Renderer>       _Renderer;
         std::shared_ptr<Profiler>       _Profiler;
 
         std::shared_ptr<Asset::ResourcePool> _ResourcePool;
         std::shared_ptr<Asset::Manager>      _AssetManager;
+
+        std::shared_ptr<SceneLayer>     _SceneLayer;
+        std::shared_ptr<RenderLayer>    _RenderLayer;
 
     protected:
         virtual void init();

@@ -9,21 +9,21 @@ namespace Laura
 		: m_EditorState(editorState) {
 	}
 
-    void InspectorPanel::OnImGuiRender(std::shared_ptr<Scene> scene) {
+    void InspectorPanel::OnImGuiRender(std::weak_ptr<Scene> scene) {
 		EditorTheme& theme = m_EditorState->temp.editorTheme;
-
+		
 		ImGui::SetNextWindowSizeConstraints({ 350, 50 }, {FLT_MAX, FLT_MAX});
-        if (m_EditorState->temp.selectedEntity == entt::null) {
-			ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
+		ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
+
+		auto sceneShared = scene.lock();
+        if (sceneShared == nullptr || m_EditorState->temp.selectedEntity == entt::null) {
 			ImGui::End();
 			return;
 		}
-
-        entt::registry* activeRegistry = scene->GetRegistry();
+		
+        entt::registry* activeRegistry = sceneShared->GetRegistry();
         entt::entity selectedEntity = m_EditorState->temp.selectedEntity;
-        Entity entity(selectedEntity, activeRegistry);
-
-        ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
+        EntityHandle entity(selectedEntity, activeRegistry);
 
 		/// TAG COMPONENT UI //////////////////////////////////////////////////////////////////
         if (entity.HasComponent<TagComponent>()) {
@@ -42,13 +42,13 @@ namespace Laura
 		}
 
 		/// TRANSFORM COMPONENT UI ////////////////////////////////////////////////////////////
-		DrawComponent<TransformComponent>(std::string(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT " Transform"), entity, [&](Entity& _entity) {
+		DrawComponent<TransformComponent>(std::string(ICON_FA_ARROWS_UP_DOWN_LEFT_RIGHT " Transform"), entity, [&](EntityHandle& _entity) {
 				DrawTransformSliders(m_EditorState, _entity);
 			}
 		);
 
 		/// CAMERA COMPOENENT UI //////////////////////////////////////////////////////////////
-		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&theme, &scene](Entity& entity) {
+		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&theme, &sceneShared](EntityHandle& entity) {
 				auto& cameraComponent = entity.GetComponent<CameraComponent>();
 
 				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
@@ -57,8 +57,8 @@ namespace Laura
 				ImGui::SameLine(150.0f);
 				theme.PushColor(ImGuiCol_CheckMark, EditorCol_Text1);
 				if (ImGui::Checkbox("##MainCameraCheckbox", &cameraComponent.isMain)) {
-					for (auto e : scene->GetRegistry()->view<CameraComponent>()) {
-						Entity otherEntity(e, scene->GetRegistry());
+					for (auto e : sceneShared->GetRegistry()->view<CameraComponent>()) {
+						EntityHandle otherEntity(e, sceneShared->GetRegistry());
 						if (otherEntity.GetComponent<GUIDComponent>().guid != entity.GetComponent<GUIDComponent>().guid) {
 							otherEntity.GetComponent<CameraComponent>().isMain = false;
 						}
@@ -75,7 +75,7 @@ namespace Laura
 		);
 
 		/// MESH COMPONENT UI /////////////////////////////////////////////////////////////////
-		DrawComponent<MeshComponent>(std::string(ICON_FA_CUBE " Mesh"), entity, [&theme](Entity& entity) {
+		DrawComponent<MeshComponent>(std::string(ICON_FA_CUBE " Mesh"), entity, [&theme](EntityHandle& entity) {
 				std::string& sourceName = entity.GetComponent<MeshComponent>().sourceName;
 				ImGui::Dummy({ 0.0f, 5.0f });
 				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);

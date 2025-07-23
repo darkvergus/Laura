@@ -11,8 +11,8 @@ namespace Laura
 	public:
 		Scene();
 		~Scene();
-		Entity& CreateEntity();
-		void DestroyEntity(const Entity& entity);
+		EntityHandle CreateEntity();
+		void DestroyEntity(EntityHandle entity);
 
 		void OnStart();
 		void OnUpdate();
