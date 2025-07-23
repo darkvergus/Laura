@@ -16,7 +16,6 @@ namespace Laura
 	{
 	public:
 		EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
-					std::shared_ptr<Renderer> renderer, 
 					std::shared_ptr<Asset::ResourcePool> resourcePool, 
 					std::shared_ptr<Asset::Manager> assetManager, 
 					std::shared_ptr<Profiler> profiler
@@ -38,12 +37,13 @@ namespace Laura
 	private:
 		// Engine
 		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
-		std::shared_ptr<Renderer> m_Renderer;
 		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
 		std::shared_ptr<Asset::Manager> m_AssetManager;
 		std::shared_ptr<Profiler> m_Profiler;
 
-		std::weak_ptr<Scene> m_Scene; // editor does not own the scene
+		// Values received from events
+		std::weak_ptr<Scene> m_Scene;
+		std::weak_ptr<IImage2D> m_LatestFrameRender;
 
 		// Editor
 		std::shared_ptr<EditorState> m_EditorState; // shared across panels

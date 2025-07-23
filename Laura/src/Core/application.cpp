@@ -18,14 +18,12 @@ namespace Laura
 
 		_ResourcePool = std::make_shared<Asset::ResourcePool>();
 		_AssetManager = std::make_shared<Asset::Manager>();
+		_AssetManager->SetResourcePool(_ResourcePool.get());
 
 		_RendererAPI = IRendererAPI::Create();
-		_Renderer = std::make_shared<Renderer>(_Profiler);
 
 		_SceneLayer = std::make_shared<SceneLayer>(_LayerStack);
-		_RenderLayer = std::make_shared<RenderLayer>(_LayerStack, _Profiler, _ResourcePool);
-
-		_RenderLayer->SetScene(_SceneLayer->GetScene());
+		_RenderLayer = std::make_shared<RenderLayer>(_LayerStack, _Profiler, _AssetManager, _ResourcePool);
 
 		_LayerStack->PushLayer(_RenderLayer);
 		_LayerStack->PushLayer(_SceneLayer);

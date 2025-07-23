@@ -1,17 +1,22 @@
-#include "Core\Layers\RenderLayer.h"
+#include "Core/Layers/RenderLayer.h"
+#include "Core/Events/RenderEvents.h"
+#include "Core/Events/SceneEvents.h"
 
 namespace Laura
 {
 	RenderLayer::RenderLayer(std::shared_ptr<IEventDispatcher> eventDispatcher, 
 							 std::shared_ptr<Profiler> profiler,
+							 std::shared_ptr<Asset::Manager> assetManager,
 							 std::shared_ptr<Asset::ResourcePool> resourcePool)
 		:	m_EventDispatcher(eventDispatcher), 
 			m_Profiler(profiler), 
+			m_AssetManager(assetManager),
 			m_ResourcePool(resourcePool),
 			m_Renderer(std::make_shared<Renderer>(profiler)) {
 	}
 
 	void RenderLayer::onAttach() {
+		m_Renderer->settings.skyboxGuid = m_AssetManager->LoadAsset(LR_RESOURCES_PATH "Assets/Skyboxes/kloofendal_48d_partly_cloudy_puresky_4k.hdr");
 		m_Renderer->settings.raysPerPixel = 1;
 		m_Renderer->settings.bouncesPerRay = 5;
 		m_Renderer->settings.maxAABBIntersections = 500;
@@ -30,18 +35,17 @@ namespace Laura
 	void RenderLayer::onDetach() {
 	}
 
-	void RenderLayer::onUpdate() {
-		if (m_Scene && m_ResourcePool) {
-			std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.get(), m_ResourcePool.get());
-			//m_EventDispatcher->DispatchEvent(FrameRenderEvent{renderedFrame});
-		}
+	void RenderLayer::onImGuiRender() {
 	}
 
-	void RenderLayer::onImGuiRender() {
-		// no rendering in this layer
+	void RenderLayer::onUpdate() {
+		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.lock().get(), m_ResourcePool.get());
+		m_EventDispatcher->dispatchEvent(std::make_shared<NewFrameRenderedEvent>(RenderedFrame));
 	}
 
 	void RenderLayer::onEvent(std::shared_ptr<IEvent> event) {
-		// no events should get here 
+		if (event->GetType() == EventType::SCENE_LOADED_EVENT) {
+			m_Scene = std::dynamic_pointer_cast<SceneLoadedEvent>(event)->scene;
+		}
 	}
 }

@@ -28,7 +28,6 @@ namespace Laura
         std::shared_ptr<LayerStack>     _LayerStack;
         std::shared_ptr<ImGuiContext>   _ImGuiContextManager;
         std::shared_ptr<IRendererAPI>   _RendererAPI;
-        std::shared_ptr<Renderer>       _Renderer;
         std::shared_ptr<Profiler>       _Profiler;
 
         std::shared_ptr<Asset::ResourcePool> _ResourcePool;

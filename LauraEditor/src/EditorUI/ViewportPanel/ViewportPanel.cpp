@@ -3,7 +3,7 @@
 #include <imgui_internal.h>
 namespace Laura
 {
-	void ViewportPanel::OnImGuiRender(std::shared_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState)
+	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState)
 	{
 		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoCollapse;
 		
@@ -20,15 +20,15 @@ namespace Laura
 
 		DrawViewportSettingsPanel(editorState);
 
-		if (image == nullptr)
-		{
+		auto imageShared = image.lock();
+		if (imageShared == nullptr) {
 			DrawVieportSettingsButton(editorState);
 			ImGui::PopStyleVar();
 			ImGui::End();
 			return;
 		}
 		
-		ImageDimensions = image->GetDimensions();
+		ImageDimensions = imageShared->GetDimensions();
 		WindowDimensions = glm::ivec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
 		TLWindowPosition = glm::ivec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
 
@@ -98,7 +98,7 @@ namespace Laura
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		ImVec2 TLImVec = ImVec2(m_TopLeftImageCoords.x, m_TopLeftImageCoords.y);
 		ImVec2 BRImVec = ImVec2(m_BottomRightImageCoords.x, m_BottomRightImageCoords.y);
-		drawList->AddImage((ImTextureID)image->GetID(), TLImVec, BRImVec, { 0, 1 }, { 1, 0 });
+		drawList->AddImage((ImTextureID)imageShared->GetID(), TLImVec, BRImVec, { 0, 1 }, { 1, 0 });
 
 		DrawVieportSettingsButton(editorState);
 

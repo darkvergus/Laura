@@ -12,7 +12,7 @@ namespace Laura
 		ViewportPanel() = default;
 		~ViewportPanel() = default;
 
-		void OnImGuiRender(std::shared_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState);
+		void OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState);
 	
 	private:
 		void DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState);
