@@ -1,5 +1,6 @@
 #include "EditorLayer.h"
 #include "imgui.h"
+#include "EditorUI/UtilityUI.h"
 
 namespace Laura
 {
@@ -47,20 +48,25 @@ namespace Laura
 	}
 
 	void EditorLayer::DrawMainMenu() {
+		static bool shouldCloseScene = false;
+		static bool shouldOpenScene = false;
+		static bool shouldSaveScene = false;
+		static bool shouldNewScene = false;
+
 		if (ImGui::BeginMainMenuBar()) {
+			// FILE TAB
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::BeginMenu("Scene")) {
-					if (ImGui::MenuItem("New")) {
-						m_EventDispatcher->dispatchEvent(std::make_shared<SceneCreateEvent>());
-					}
-					if (ImGui::MenuItem("Close")) {
-						m_EventDispatcher->dispatchEvent(std::make_shared<SceneCloseEvent>());
-					}
+					if (ImGui::MenuItem("New")) { shouldNewScene = true; }
+					if (ImGui::MenuItem("Open")) { shouldOpenScene = true; }
+					if (ImGui::MenuItem("Save")) { shouldSaveScene = true; }
+					if (ImGui::MenuItem("Close")) { shouldCloseScene = true; }
 					ImGui::EndMenu();
 				}
 				ImGui::EndMenu();
 			}
 
+			// VIEW TAB
 			if (ImGui::BeginMenu("View")) {
 				bool themePanelDisabled = m_EditorState->temp.isThemePanelOpen;
 				if (themePanelDisabled)			 { ImGui::BeginDisabled(); }
@@ -74,6 +80,51 @@ namespace Laura
 			}
 			ImGui::EndMainMenuBar();
 		}
+
+		// FILE > SCENE > NEW/OPEN/SAVE/CLOSE
+		if (shouldNewScene) {
+			m_EventDispatcher->dispatchEvent(std::make_shared<SceneCreateEvent>());
+			shouldNewScene = false;
+		}
+
+		if (shouldOpenScene) {
+			OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
+			char buff[MAX_PATH] = {};
+			ofn.lpstrFilter = SCENE_FILE_EXTENSION " Files\0 * " SCENE_FILE_EXTENSION "\0";
+			ofn.lpstrTitle = "Select Scene:";
+			ofn.nMaxFile = sizeof(buff);
+			ofn.lpstrFile = buff;
+			if (GetOpenFileNameA(&ofn)) {
+				std::filesystem::path openFilepath(buff);
+				m_EventDispatcher->dispatchEvent(std::make_shared<SceneOpenEvent>(openFilepath));
+			}
+			shouldOpenScene = false;
+		}
+
+		if (shouldSaveScene) {
+			OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
+			char buff[MAX_PATH] = "template" SCENE_FILE_EXTENSION;
+			ofn.lpstrFilter = SCENE_FILE_EXTENSION " Files\0 * " SCENE_FILE_EXTENSION "\0";
+			ofn.lpstrTitle = "Save Scene:";
+			ofn.nMaxFile = sizeof(buff);
+			ofn.lpstrFile = buff;
+			ofn.Flags = OFN_OVERWRITEPROMPT;
+			if (GetSaveFileNameA(&ofn)) {
+				std::filesystem::path saveFilepath(buff);
+				saveFilepath.replace_extension(EDITOR_THEME_FILE_EXTENSION);
+				m_EventDispatcher->dispatchEvent(std::make_shared<SceneSaveEvent>(saveFilepath));
+			}
+			shouldSaveScene = false;
+		}
+
+		ConfirmAndExecute(shouldCloseScene,
+			"Close Scene",
+			"Are you sure you want to close the scene? (If not saved changes will be lost)",
+			[&]() {
+				m_EventDispatcher->dispatchEvent(std::make_shared<SceneCloseEvent>());
+			},
+			m_EditorState
+		);
 	}
 
 	void EditorLayer::onUpdate() {

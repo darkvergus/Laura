@@ -59,5 +59,15 @@ namespace Laura
 		else if (event->GetType() == EventType::SCENE_CLOSE_EVENT) {
 			m_Scene = nullptr;
 		}
+
+		else if (event->GetType() == EventType::SCENE_OPEN_EVENT) {
+			auto sceneOpenEvent = std::dynamic_pointer_cast<SceneOpenEvent>(event);
+			m_Scene->Deserialize(sceneOpenEvent->filepath);
+		}
+
+		else if (event->GetType() == EventType::SCENE_SAVE_EVENT) {
+			auto sceneSaveEvent = std::dynamic_pointer_cast<SceneSaveEvent>(event);
+			m_Scene->Serialize(sceneSaveEvent->filepath);
+		}
 	}
 }

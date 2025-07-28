@@ -14,7 +14,7 @@ namespace Laura
             OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
             char buff[MAX_PATH] = {};
             ofn.lpstrFilter = "All Files\0*.*\0";
-            ofn.lpstrTitle = "Select Theme:";
+            ofn.lpstrTitle = "Select Asset:";
             ofn.nMaxFile = sizeof(buff);
             ofn.lpstrFile = buff;
             if (GetOpenFileNameA(&ofn)) {

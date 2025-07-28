@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Laura.h"
-#include "EditorUI/ThemePanel/ThemePanel.h"
 #include "EditorState.h"
 
 namespace Laura

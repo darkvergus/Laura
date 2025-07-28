@@ -11,6 +11,24 @@ namespace Laura
 		inline EventType GetType() const override { return EventType::SCENE_CREATE_EVENT; }
 	};
 
+	struct SceneOpenEvent : public IEvent {
+		std::filesystem::path filepath;
+
+		SceneOpenEvent(std::filesystem::path filepath)
+			: filepath(std::move(filepath)) {}
+
+		inline EventType GetType() const override { return EventType::SCENE_OPEN_EVENT; }
+	};
+
+	struct SceneSaveEvent : public IEvent {
+		std::filesystem::path filepath;
+
+		SceneSaveEvent(std::filesystem::path filepath)
+			: filepath(std::move(filepath)) {}
+
+		inline EventType GetType() const override { return EventType::SCENE_SAVE_EVENT; }
+	};
+
 	struct SceneCloseEvent : public IEvent {
 		SceneCloseEvent() = default;
 

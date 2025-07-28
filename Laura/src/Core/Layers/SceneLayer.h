@@ -14,8 +14,6 @@ namespace Laura
 	public:
 		SceneLayer(std::shared_ptr<IEventDispatcher> eventDispatcher, std::shared_ptr<Asset::Manager> assetManager);
 
-		inline std::shared_ptr<Scene> GetScene() const { return m_Scene; }
-
 		virtual void onAttach() override;
 		virtual void onDetach() override;
 		virtual void onUpdate() override;

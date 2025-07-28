@@ -19,21 +19,13 @@ namespace Laura
 		// EngineEvents.h
 		SCENE_CREATE_EVENT,
 		SCENE_CLOSE_EVENT,
+		SCENE_OPEN_EVENT,
+		SCENE_SAVE_EVENT,
 		SCENE_LOADED_EVENT,
 
 		NEW_FRAME_RENDERED_EVENT,
 
 		EVENT_COUNT
-	};
-
-	struct IEvent {
-		virtual ~IEvent() = default;
-		virtual EventType GetType() const = 0;
-
-		inline void Consume() { m_IsConsumed = true; }
-		inline bool IsConsumed() const { return m_IsConsumed; }
-	private:
-		bool m_IsConsumed = false;
 	};
 
 	inline std::ostream& operator<<(std::ostream& os, EventType type) {
@@ -47,10 +39,22 @@ namespace Laura
         	case EventType::MOUSE_SCROLL_EVENT:          return os << "MOUSE_SCROLL_EVENT";
         	case EventType::SCENE_CREATE_EVENT:          return os << "SCENE_CREATE_EVENT";
         	case EventType::SCENE_CLOSE_EVENT:           return os << "SCENE_CLOSE_EVENT";
+			case EventType::SCENE_OPEN_EVENT:			 return os << "SCENE_OPEN_EVENT";
+			case EventType::SCENE_SAVE_EVENT:			 return os << "SCENE_SAVE_EVENT";
         	case EventType::SCENE_LOADED_EVENT:          return os << "SCENE_LOADED_EVENT";
         	case EventType::NEW_FRAME_RENDERED_EVENT:    return os << "NEW_FRAME_RENDERED_EVENT";
         	case EventType::EVENT_COUNT:                 return os << "EVENT_COUNT";
         	default:                                     return os << "UNKNOWN_EVENT_TYPE";
     	}
 	}
+
+	struct IEvent {
+		virtual ~IEvent() = default;
+		virtual EventType GetType() const = 0;
+
+		inline void Consume() { m_IsConsumed = true; }
+		inline bool IsConsumed() const { return m_IsConsumed; }
+	private:
+		bool m_IsConsumed = false;
+	};
 }

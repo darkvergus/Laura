@@ -1,4 +1,4 @@
-#include "Scene/Scene.h"
+#include "Scene.h"
 
 namespace Laura
 {
@@ -30,5 +30,15 @@ namespace Laura
 	}
 
 	void Scene::OnShutdown() {
+	}
+
+	bool Laura::Scene::Serialize(const std::filesystem::path& filepath) {
+		std::cout << "Serializing: " << filepath.string() << std::endl;
+		return false;
+	}
+
+	bool Laura::Scene::Deserialize(const std::filesystem::path& filepath) {
+		std::cout << "Deserializing: " << filepath.string() << std::endl;
+		return false;
 	}
 }

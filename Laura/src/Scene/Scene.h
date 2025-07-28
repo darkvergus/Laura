@@ -1,8 +1,11 @@
 #pragma once
 
+#include <filesystem>
 #include "entt/entt.hpp"
 #include "Scene/Entity.h"
 #include "Scene/Components.h"
+
+#define SCENE_FILE_EXTENSION ".lrscn"
 
 namespace Laura
 {
@@ -17,6 +20,9 @@ namespace Laura
 		void OnStart();
 		void OnUpdate();
 		void OnShutdown();
+
+		bool Serialize(const std::filesystem::path& filepath);
+		bool Deserialize(const std::filesystem::path& filepath);
 
 		inline entt::registry* GetRegistry() const { return m_Registry; }
 
