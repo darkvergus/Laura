@@ -8,10 +8,6 @@
 namespace Laura
 {
 
-    AssetManager::AssetManager()
-        : m_ResourcePool(std::make_shared<ResourcePool>()) {
-    }
-
 	LR_GUID AssetManager::LoadMesh(const std::filesystem::path& path) {
 		auto timerStart = std::chrono::high_resolution_clock::now();
 

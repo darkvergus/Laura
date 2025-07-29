@@ -56,7 +56,7 @@ namespace Laura
 
 	class AssetManager {
 	public:
-		AssetManager();
+		AssetManager() : m_ResourcePool(std::make_shared<ResourcePool>()) {}
 		~AssetManager() = default;
 		
 		LR_GUID LoadAsset(const std::filesystem::path& path);
