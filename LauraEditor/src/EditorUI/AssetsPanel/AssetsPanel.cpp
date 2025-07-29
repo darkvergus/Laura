@@ -78,11 +78,11 @@ namespace Laura
         // decide on the icon and drag and drop destination based on asset type
         const char* icon = nullptr;
         const char* dndPayloadType = nullptr;
-        if (m_ResourcePool->Get<Asset::MeshMetadata>(guid) != nullptr) {
+        if (m_ResourcePool->Get<MeshMetadata>(guid) != nullptr) {
             icon = ICON_FA_CUBE;
             dndPayloadType = DNDPayloadTypes::MESH;
         }
-        else if (m_ResourcePool->Get<Asset::TextureMetadata>(guid) != nullptr) {
+        else if (m_ResourcePool->Get<TextureMetadata>(guid) != nullptr) {
             icon = ICON_FA_FILE_IMAGE;
             dndPayloadType = DNDPayloadTypes::TEXTURE;
         }
@@ -200,7 +200,7 @@ namespace Laura
         // AssetType specific data
 
         // Try cast to MeshMetadata
-        if (auto meshMetadata = dynamic_cast<Asset::MeshMetadata*>(metadata.get())) {
+        if (auto meshMetadata = dynamic_cast<MeshMetadata*>(metadata.get())) {
             theme.PushColor(ImGuiCol_Text, EditorCol_Accent1);
             ImGui::Text("Mesh Metadata");
             theme.PopColor();
@@ -212,7 +212,7 @@ namespace Laura
         }
 
         // Try cast to TextureMetadata
-        else if (auto texMetadata = dynamic_cast<Asset::TextureMetadata*>(metadata.get())) {
+        else if (auto texMetadata = dynamic_cast<TextureMetadata*>(metadata.get())) {
             theme.PushColor(ImGuiCol_Text, EditorCol_Accent1);
             ImGui::Text("Texture Metadata");
             theme.PopColor();

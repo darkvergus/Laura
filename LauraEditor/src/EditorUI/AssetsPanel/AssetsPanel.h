@@ -11,8 +11,8 @@ namespace Laura
 	class AssetsPanel {
 	public:
 		AssetsPanel(std::shared_ptr<EditorState> editorState, 
-					std::shared_ptr<Asset::Manager> assetManager, 
-					std::shared_ptr<Asset::ResourcePool> resourcePool)
+					std::shared_ptr<AssetManager> assetManager, 
+					std::shared_ptr<ResourcePool> resourcePool)
 			: m_EditorState(editorState),
 			  m_AssetManager(assetManager), 
 			  m_ResourcePool(resourcePool) {
@@ -26,8 +26,8 @@ namespace Laura
 		void DrawAssetMetadata();
 		
 		std::shared_ptr<EditorState> m_EditorState;
-		std::shared_ptr<Asset::Manager> m_AssetManager;
-		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
+		std::shared_ptr<AssetManager> m_AssetManager;
+		std::shared_ptr<ResourcePool> m_ResourcePool;
 
 		// UI related
 		const float BASE_TILE_WH_RATIO = 0.75f;

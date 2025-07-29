@@ -9,7 +9,7 @@ namespace Laura
 		m_CameraUBO = IUniformBuffer::Create(80, 0, BufferUsageType::DYNAMIC_DRAW);
 	}
 
-	std::shared_ptr<IImage2D> Renderer::Render(const Scene* scene, const Asset::ResourcePool* resourcePool) {
+	std::shared_ptr<IImage2D> Renderer::Render(const Scene* scene, const ResourcePool* resourcePool) {
 		auto t = m_Profiler->timer("Renderer::Render()");
 
 		const auto pScene = Parse(scene, resourcePool);
@@ -21,7 +21,7 @@ namespace Laura
 		return m_Frame;
 	}
 
-	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const {
+	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const ResourcePool* resourcePool) const {
 		if (scene == nullptr) {
 			return nullptr;
 		}
@@ -51,7 +51,7 @@ namespace Laura
 		for (auto entity : renderableView) {
 			EntityHandle e(entity, scene->GetRegistry());
 			LR_GUID& guid = e.GetComponent<MeshComponent>().guid;
-			std::shared_ptr<Asset::MeshMetadata> metadata = resourcePool->Get<Asset::MeshMetadata>(guid);
+			std::shared_ptr<MeshMetadata> metadata = resourcePool->Get<MeshMetadata>(guid);
 			if (!metadata) {
 				continue;
 			}
@@ -71,7 +71,7 @@ namespace Laura
 
 	// returns false if error occured, else true
 	// assumes a valid pScene
-	bool Renderer::SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const Asset::ResourcePool* resourcePool) {
+	bool Renderer::SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const ResourcePool* resourcePool) {
 		m_Profiler->timer("Renderer::SetupGPUResources()");
 
 		if (settings.ComputeShaderPath != m_Cache.ActiveShaderPath) {
@@ -125,11 +125,11 @@ namespace Laura
 
 		{
 			// SKYBOX
-    		uint32_t currTexBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::TextureBuffer);
+    		uint32_t currTexBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::TextureBuffer);
     		if (prevTexBuffVersion != currTexBuffVersion) {
         		prevTexBuffVersion = currTexBuffVersion;
 
-        		auto metadata = resourcePool->Get<Asset::TextureMetadata>(pScene->skyboxGUID);
+        		auto metadata = resourcePool->Get<TextureMetadata>(pScene->skyboxGUID);
         		if (metadata) {
             		const uint32_t SKYBOX_TEXTURE_UNIT = 1;
             		const unsigned char* data = &resourcePool->TextureBuffer[metadata->texStartIdx];
@@ -140,11 +140,11 @@ namespace Laura
 
 		// MESH BUFFER
 		{
-    		uint32_t currMeshBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::MeshBuffer);
+    		uint32_t currMeshBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::MeshBuffer);
     		if (prevMeshBuffVersion != currMeshBuffVersion) {
         		prevMeshBuffVersion = currMeshBuffVersion;
 
-        		uint32_t meshBuffer_sizeBytes = sizeof(Asset::Triangle) * resourcePool->MeshBuffer.size();
+        		uint32_t meshBuffer_sizeBytes = sizeof(Triangle) * resourcePool->MeshBuffer.size();
         		m_MeshBufferSSBO = IShaderStorageBuffer::Create(meshBuffer_sizeBytes, 5, BufferUsageType::STATIC_DRAW);
         		m_MeshBufferSSBO->Bind();
         		m_MeshBufferSSBO->AddData(0, meshBuffer_sizeBytes, resourcePool->MeshBuffer.data());
@@ -154,11 +154,11 @@ namespace Laura
 
 		// NODE BUFFER
 		{
-    		uint32_t currNodeBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::NodeBuffer);
+    		uint32_t currNodeBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::NodeBuffer);
     		if (prevNodeBuffVersion != currNodeBuffVersion) {
         		prevNodeBuffVersion = currNodeBuffVersion;
 
-        		uint32_t nodeBuffer_sizeBytes = sizeof(Asset::BVHAccel::Node) * resourcePool->NodeBuffer.size();
+        		uint32_t nodeBuffer_sizeBytes = sizeof(BVHAccel::Node) * resourcePool->NodeBuffer.size();
         		m_NodeBufferSSBO = IShaderStorageBuffer::Create(nodeBuffer_sizeBytes, 6, BufferUsageType::STATIC_DRAW);
         		m_NodeBufferSSBO->Bind();
         		m_NodeBufferSSBO->AddData(0, nodeBuffer_sizeBytes, resourcePool->NodeBuffer.data());
@@ -168,7 +168,7 @@ namespace Laura
 
 		// INDEX BUFFER
 		{
-    		uint32_t currIndexBuffVersion = resourcePool->GetUpdateVersion(Asset::ResourceType::IndexBuffer);
+    		uint32_t currIndexBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::IndexBuffer);
     		if (prevIndexBuffVersion != currIndexBuffVersion) {
         		prevIndexBuffVersion = currIndexBuffVersion;
 

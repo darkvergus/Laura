@@ -19,8 +19,8 @@ namespace Laura
 	public:
 		EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
 					std::shared_ptr<ImGuiContext> imGuiContext,
-					std::shared_ptr<Asset::ResourcePool> resourcePool, 
-					std::shared_ptr<Asset::Manager> assetManager, 
+					std::shared_ptr<ResourcePool> resourcePool, 
+					std::shared_ptr<AssetManager> assetManager, 
 					std::shared_ptr<Profiler> profiler
 		);
 
@@ -34,8 +34,8 @@ namespace Laura
 
 		// Engine
 		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
-		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
-		std::shared_ptr<Asset::Manager> m_AssetManager;
+		std::shared_ptr<ResourcePool> m_ResourcePool;
+		std::shared_ptr<AssetManager> m_AssetManager;
 		std::shared_ptr<Profiler> m_Profiler;
 
 		// Values received from events

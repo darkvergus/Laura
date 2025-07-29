@@ -5,7 +5,7 @@ namespace Laura
 {
 
 	SceneLayer::SceneLayer(std::shared_ptr<IEventDispatcher> eventDispatcher,
-						   std::shared_ptr<Asset::Manager> assetManager)
+						   std::shared_ptr<AssetManager> assetManager)
 		: m_EventDispatcher(eventDispatcher),
 		  m_AssetManager(assetManager),
 		  m_Scene(std::make_shared<Scene>()) {

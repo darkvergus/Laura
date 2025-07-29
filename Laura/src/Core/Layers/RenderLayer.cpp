@@ -7,7 +7,7 @@ namespace Laura
 
 	RenderLayer::RenderLayer(std::shared_ptr<IEventDispatcher> eventDispatcher, 
 							 std::shared_ptr<Profiler> profiler,
-							 std::shared_ptr<Asset::ResourcePool> resourcePool)
+							 std::shared_ptr<ResourcePool> resourcePool)
 		:	m_EventDispatcher(eventDispatcher), 
 			m_Profiler(profiler), 
 			m_ResourcePool(resourcePool),

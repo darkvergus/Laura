@@ -1,6 +1,6 @@
 #include "BVHAccel.h"
 
-namespace Laura::Asset
+namespace Laura
 {
 
 	BVHAccel::BVHAccel(const std::vector<Triangle>& meshBuffer, const uint32_t firstTriIdx, const uint32_t triCount) 

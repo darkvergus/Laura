@@ -1,13 +1,18 @@
-#include "Assets.h"
+#include "AssetManager.h"
+#include "Project/Assets/AssetManager.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stb_image/stb_image.h>
 
-namespace Laura::Asset
+namespace Laura
 {
 
-	LR_GUID Manager::LoadMesh(const std::filesystem::path& path) {
+    AssetManager::AssetManager()
+        : m_ResourcePool(std::make_shared<ResourcePool>()) {
+    }
+
+	LR_GUID AssetManager::LoadMesh(const std::filesystem::path& path) {
 		auto timerStart = std::chrono::high_resolution_clock::now();
 
         if (!m_ResourcePool) {
@@ -58,14 +63,14 @@ namespace Laura::Asset
                 );
             }
         }
-        m_ResourcePool->MarkUpdated(ResourceType::MeshBuffer);
+        m_ResourcePool->MarkUpdated(ResourcePool::ResourceType::MeshBuffer);
 
         LOG_ENGINE_INFO("Asset::Manager::LoadMesh({0}) loaded {1} triangles.", path.string(), numTris);
 
         BVHAccel BVH(meshBuffer, metadata->firstTriIdx, metadata->TriCount); // pass in the mesh
         BVH.Build(m_ResourcePool->NodeBuffer, m_ResourcePool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount); // populate in place
-        m_ResourcePool->MarkUpdated(ResourceType::NodeBuffer);
-        m_ResourcePool->MarkUpdated(ResourceType::IndexBuffer);
+        m_ResourcePool->MarkUpdated(ResourcePool::ResourceType::NodeBuffer);
+        m_ResourcePool->MarkUpdated(ResourcePool::ResourceType::IndexBuffer);
 
         LR_GUID guid;
 
@@ -73,11 +78,11 @@ namespace Laura::Asset
 		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
         
         m_ResourcePool->Metadata[guid] = { metadata, metadataExtension };
-        m_ResourcePool->MarkUpdated(ResourceType::Metadata);
+        m_ResourcePool->MarkUpdated(ResourcePool::ResourceType::Metadata);
         return guid;
     }
 
-	LR_GUID Manager::LoadTexture(const std::filesystem::path& path, const int desiredChannels) {
+	LR_GUID AssetManager::LoadTexture(const std::filesystem::path& path, const int desiredChannels) {
 		auto timerStart = std::chrono::high_resolution_clock::now();
         if (!m_ResourcePool){
             LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) called before a valid ResourcePool has been assigned!", path.string(), desiredChannels);
@@ -107,7 +112,7 @@ namespace Laura::Asset
         const size_t totalBytes = metadata->width * metadata->height * metadata->channels;
         textureBuffer.reserve(textureBuffer.size() + totalBytes);
         textureBuffer.insert(textureBuffer.end(), data, data + totalBytes);
-        m_ResourcePool->MarkUpdated(ResourceType::TextureBuffer);
+        m_ResourcePool->MarkUpdated(ResourcePool::ResourceType::TextureBuffer);
         stbi_image_free(data);
 	    	
         LR_GUID guid;
@@ -116,11 +121,12 @@ namespace Laura::Asset
 		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
         
         m_ResourcePool->Metadata[guid] = { metadata, metadataExtension };
-        m_ResourcePool->MarkUpdated(ResourceType::Metadata);
+        m_ResourcePool->MarkUpdated(ResourcePool::ResourceType::Metadata);
 		return guid;
 	}
 
-    LR_GUID Manager::LoadAsset(const std::filesystem::path& path) {
+
+    LR_GUID AssetManager::LoadAsset(const std::filesystem::path& path) {
         if (!path.has_extension()) {
             LOG_ENGINE_ERROR("LoadAsset: File has no extension: {}", path.string());
             return LR_GUID::INVALID;

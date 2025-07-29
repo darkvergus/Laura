@@ -7,8 +7,8 @@ namespace Laura
 
 	EditorLayer::EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
 							 std::shared_ptr<ImGuiContext> imGuiContext,
-							 std::shared_ptr<Asset::ResourcePool> resourcePool,
-							 std::shared_ptr<Asset::Manager> assetManager,
+							 std::shared_ptr<ResourcePool> resourcePool,
+							 std::shared_ptr<AssetManager> assetManager,
 							 std::shared_ptr<Profiler> profiler)
 		:	m_EventDispatcher(eventDispatcher),
 			m_ResourcePool(resourcePool),
@@ -132,7 +132,7 @@ namespace Laura
 	void EditorLayer::onUpdate() {
 		m_ImGuiContext->BeginFrame();
 		std::filesystem::path projectRoot = "";
-		if (projectRoot.string() == "") {
+		if (projectRoot.string() != "") {
 			bool showDemo = true;
 			ImGui::ShowDemoWindow(&showDemo);
 			m_Launcher.OnImGuiRender();

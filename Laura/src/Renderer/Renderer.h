@@ -2,7 +2,7 @@
 
 #include "lrpch.h"
 #include "Project/Scene/Scene.h"
-#include "Project/Assets/Assets.h"
+#include "Project/Assets/AssetManager.h"
 #include "Renderer/IRendererAPI.h"
 #include "Renderer/IComputeShader.h"
 #include "Renderer/ITexture2D.h"
@@ -70,13 +70,13 @@ namespace Laura
 		inline static void SetAPI(IRendererAPI::API api) { IRendererAPI::SetAPI(api); } // setter
 
 		void Init();
-		std::shared_ptr<IImage2D> Render(const Scene* scene, const Asset::ResourcePool* resourcePool);
+		std::shared_ptr<IImage2D> Render(const Scene* scene, const ResourcePool* resourcePool);
 
 		Settings settings{};
 
 	private:
-		std::shared_ptr<const ParsedScene> Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const;
-		bool SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const Asset::ResourcePool* resourcePool);
+		std::shared_ptr<const ParsedScene> Parse(const Scene* scene, const ResourcePool* resourcePool) const;
+		bool SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const ResourcePool* resourcePool);
 		void Draw(); // Draws directly to m_Frame
 
 		std::shared_ptr<IComputeShader> m_Shader;

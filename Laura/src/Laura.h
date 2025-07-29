@@ -25,7 +25,7 @@
 #include "Project/Scene/Entity.h"
 #include "Project/Scene/Components.h"
 
-#include "Project/Assets/Assets.h"
+#include "Project/Assets/AssetManager.h"
 #include "Project/Assets/AssetTypes.h"
 
 #include "lrpch.h"

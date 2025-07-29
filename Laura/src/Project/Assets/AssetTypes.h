@@ -4,7 +4,7 @@
 #include "Core/GUID.h"
 #include <filesystem>
 
-namespace Laura::Asset
+namespace Laura
 {
 
 	// According to std430 - 48 bytes

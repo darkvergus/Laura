@@ -7,7 +7,7 @@
 #include "Core/Layers/RenderLayer.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/IRendererAPI.h"
-#include "Project/Assets/Assets.h"
+#include "Project/Assets/AssetManager.h"
 #include "Events/IEvent.h"
 #include "Core/Profiler.h"
 
@@ -28,8 +28,8 @@ namespace Laura
         std::shared_ptr<IRendererAPI>   _RendererAPI;
         std::shared_ptr<Profiler>       _Profiler;
 
-        std::shared_ptr<Asset::ResourcePool> _ResourcePool;
-        std::shared_ptr<Asset::Manager>      _AssetManager;
+        std::shared_ptr<ResourcePool> _ResourcePool;
+        std::shared_ptr<AssetManager>      _AssetManager;
 
         std::shared_ptr<SceneLayer>     _SceneLayer;
         std::shared_ptr<RenderLayer>    _RenderLayer;
