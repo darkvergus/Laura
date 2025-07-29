@@ -61,13 +61,22 @@ namespace Laura
 		}
 
 		else if (event->GetType() == EventType::SCENE_OPEN_EVENT) {
+			if (m_Scene == nullptr) {
+				m_Scene = std::make_shared<Scene>();
+			}
+
 			auto sceneOpenEvent = std::dynamic_pointer_cast<SceneOpenEvent>(event);
-			m_Scene->Deserialize(sceneOpenEvent->filepath);
+			if (!m_Scene->Deserialize(sceneOpenEvent->filepath)) {
+				LOG_ENGINE_ERROR("Problem Deserializing scene {0}", sceneOpenEvent->filepath.string());
+			}
+			m_EventDispatcher->dispatchEvent(std::make_shared<SceneLoadedEvent>(m_Scene));
 		}
 
-		else if (event->GetType() == EventType::SCENE_SAVE_EVENT) {
+		else if (event->GetType() == EventType::SCENE_SAVE_EVENT && m_Scene != nullptr) {
 			auto sceneSaveEvent = std::dynamic_pointer_cast<SceneSaveEvent>(event);
-			m_Scene->Serialize(sceneSaveEvent->filepath);
+			if (!m_Scene->Serialize(sceneSaveEvent->filepath)) {
+				LOG_ENGINE_ERROR("Problem Serializing scene {0}", sceneSaveEvent->filepath.string());
+			}
 		}
 	}
 }

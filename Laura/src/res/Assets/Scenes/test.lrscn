@@ -1,0 +1,27 @@
+SkyboxGUID: 8222376867122418644
+Entities:
+  - TagComponent: Bunny
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-3.56259559e+29, 5.7453237e-44, 8.62363815e-31]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      SourceName: stanford_bunny_pbr.glb
+      MeshGUID: 11600660725340845401
+  - TagComponent: Dragon
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-3.56259559e+29, 5.7453237e-44, 8.62363815e-31]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      SourceName: stanford_dragon_pbr.glb
+      MeshGUID: 12993313615683453466
+  - TagComponent: Camera
+    TransformComponent:
+      Translation: [0, 40, -200]
+      Rotation: [-3.56259559e+29, 5.7453237e-44, 8.62363815e-31]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      IsMain: false
+      FOV: 30
+      FocalLength: 3.7320509

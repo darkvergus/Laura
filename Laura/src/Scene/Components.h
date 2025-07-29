@@ -27,9 +27,9 @@ namespace Laura
 		TransformComponent();
 		operator glm::mat4() const;
 
-		inline const glm::vec3& GetRotation() { return glm::degrees(m_Rotation); }
-		inline const glm::vec3& GetTranslation() { return m_Translation; }
-		inline const glm::vec3& GetScale() { return m_Scale; }
+		inline glm::vec3 GetRotation() { return glm::degrees(m_Rotation); }
+		inline glm::vec3 GetTranslation() { return m_Translation; }
+		inline glm::vec3 GetScale() { return m_Scale; }
 
 		// Returns the 4x4 Local to World Matrix
 		glm::mat4 GetMatrix() const;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <yaml-cpp/yaml.h>
 #include "entt/entt.hpp"
 #include "Scene/Entity.h"
 #include "Scene/Components.h"

@@ -111,7 +111,7 @@ namespace Laura
 			ofn.Flags = OFN_OVERWRITEPROMPT;
 			if (GetSaveFileNameA(&ofn)) {
 				std::filesystem::path saveFilepath(buff);
-				saveFilepath.replace_extension(EDITOR_THEME_FILE_EXTENSION);
+				saveFilepath.replace_extension(SCENE_FILE_EXTENSION);
 				m_EventDispatcher->dispatchEvent(std::make_shared<SceneSaveEvent>(saveFilepath));
 			}
 			shouldSaveScene = false;
