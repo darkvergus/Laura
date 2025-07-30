@@ -19,13 +19,8 @@ namespace Laura
         bool SetActiveScene(LR_GUID guid);
         std::shared_ptr<Scene> GetActiveScene() const;
 
-        bool SetBootScene(LR_GUID guid);
-        std::shared_ptr<Scene> GetBootScene() const;
-
-        void SetBootSceneAsActiveScene();
-
-        bool Serialize(const std::filesystem::path& projectRoot) const;
-        bool Deserialize(const std::filesystem::path& projectRoot);
+        bool SaveScenes(const std::filesystem::path& projectRoot) const;
+        bool LoadScenes(const std::filesystem::path& projectRoot);
 
     private:
         std::unordered_map<LR_GUID, std::shared_ptr<Scene>> m_Scenes;
@@ -35,5 +30,8 @@ namespace Laura
         // helper funcs
         static std::vector<std::filesystem::path> FindFilesInFolder(
             const std::filesystem::path& folder, const std::string& extension);
+
+        static LR_GUID GuidFromSceneFilepath(const std::filesystem::path& filepath);
+        static std::filesystem::path SceneFilepathFromGuid(const std::filesystem::path& projectRoot, LR_GUID guid);
     };
 }

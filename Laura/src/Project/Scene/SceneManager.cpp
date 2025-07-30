@@ -37,38 +37,34 @@ namespace Laura
         return nullptr;
     }
 
-    bool SceneManager::SetBootScene(LR_GUID guid) {
-        if (m_Scenes.find(guid) == m_Scenes.end()) {
-            return false;
-        }
-        m_BootSceneGUID = guid;
-        return true;
+    bool SceneManager::SaveScenes(const std::filesystem::path& projectRoot) const {
+       bool successAll = true;
+
+		// Remove orphaned scene files
+		for (const auto& filepath : FindFilesInFolder(projectRoot, SCENE_FILE_EXTENSION)) {
+			LR_GUID guid = GuidFromFilename(filepath.filename());
+
+			if (m_Scenes.find(guid) == m_Scenes.end()) {
+				std::error_code ec;
+				std::filesystem::remove(filepath, ec);
+				if (ec) {
+					successAll = false;
+				}
+			}
+		}
+
+		// serialize all scenes
+		for (const auto& [guid, scene] : m_Scenes) {
+            auto filepath = SceneFilepathFromGuid(projectRoot, scene->GetGUID());
+			if (!scene->Serialize(filepath)) {
+				successAll = false;
+			}
+		}
+
+		return successAll; 
     }
 
-    std::shared_ptr<Scene> SceneManager::GetBootScene() const {
-        if (m_BootSceneGUID == LR_GUID::INVALID) {
-            return nullptr;
-        }
-        if (auto it = m_Scenes.find(m_BootSceneGUID); it != m_Scenes.end()) {
-            return it->second;
-        }
-        return nullptr;
-    }
-
-    bool SceneManager::SetBootSceneAsActiveScene() {
-        return SetActiveScene(m_BootSceneGUID);
-    }
-
-    bool SceneManager::Serialize(const std::filesystem::path& projectRoot) const {
-        bool successAll = true;
-        for (const auto& [guid, scene] : m_Scenes) {
-            bool success = scene->Serialize(projectRoot);
-            if (!success) { successAll = false; }
-        }
-        return successAll;
-    }
-
-    bool SceneManager::Deserialize(const std::filesystem::path& projectRoot) {
+    bool SceneManager::LoadScenes(const std::filesystem::path& projectRoot) {
         bool successAll = true;
         for (const auto& scenepath : FindFilesInFolder(projectRoot, SCENE_FILE_EXTENSION)) {
             auto scene = std::make_shared<Scene>();
@@ -96,5 +92,20 @@ namespace Laura
 			}
 		}
 		return result; 
+    }
+
+    std::filesystem::path SceneManager::SceneFilepathFromGuid(const std::filesystem::path& projectRoot, LR_GUID guid) {
+        return projectRoot / (std::to_string(static_cast<uint64_t>(guid)) + SCENE_FILE_EXTENSION);
+    }
+
+    LR_GUID SceneManager::GuidFromSceneFilepath(const std::filesystem::path& filepath) {
+        std::string stem = filepath.filename().stem().string(); // remove extension
+        try {
+            uint64_t value = std::stoull(stem); // convert String TO Unsigned Long Long - STOULL 
+            return LR_GUID(value);
+        }
+        catch (const std::exception&) {
+            return LR_GUID::INVALID;
+        }
     }
 }
