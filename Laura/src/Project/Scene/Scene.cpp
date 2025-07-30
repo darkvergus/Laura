@@ -121,10 +121,10 @@ namespace Laura
 
 		m_Registry->clear();
 		if (root["SceneGUID"]) {
-			m_SceneGUID = (LR_GUID)root["SkyboxGUID"].as<uint64_t>();
+			m_SceneGUID = (LR_GUID)root["SceneGUID"].as<uint64_t>();
 		}
 		if (root["SceneName"]) {
-			m_SceneGUID = root["SkyboxGUID"].as<std::string>();
+			m_SceneGUID = root["SceneName"].as<std::string>();
 		}
 		if (root["SkyboxGUID"]) {
 			m_SkyboxGUID = (LR_GUID)root["SkyboxGUID"].as<uint64_t>();

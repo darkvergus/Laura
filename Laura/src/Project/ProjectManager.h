@@ -5,6 +5,8 @@
 #include "Project/Scene/SceneManager.h"
 #include "Project/Assets/AssetManager.h"
 
+#define PROJECT_FILE_EXTENSION ".lrproj"
+
 namespace Laura 
 {
 
@@ -16,26 +18,27 @@ namespace Laura
 		}
 		~ProjectManager() = default;
 
-		bool NewProject(std::filesystem::path projectRoot);
+		void NewProject(std::filesystem::path projectRoot);
 		bool OpenProject(std::filesystem::path projectRoot);
 		bool SaveProject();
 		void CloseProject();
 
-		std::filesystem::path GetProjectRoot() const;
-		std::filesystem::path GetProjectFilepath() const;
-		std::string GetProjectFilename() const;
 
-		bool isProjectOpen() const;
+		inline std::filesystem::path GetProjectFolderpath() const { return m_ProjectFolderpath; }
+		inline std::string GetProjectFoldername() const { return m_ProjectFolderpath.filename().string(); }
+
+		inline bool isProjectOpen() const { return !m_ProjectFolderpath.empty() }
 		
 		inline std::weak_ptr<SceneManager> GetSceneManager() { return m_SceneManager; }
 		inline std::weak_ptr<AssetManager> GetAssetManager() { return m_AssetManager; }
 
 	private:
-		std::filesystem::path m_ActiveProjectRoot;
-		std::string m_ProjectFilename = "NewProject";
+		bool SerializeProjFile() const;
+		bool DeserializeProjFile();
 
-		LR_GUID m_BootScene = LR_GUID::INVALID;
-		std::shared_ptr<SceneManager> m_SceneManager;
-		std::shared_ptr<AssetManager> m_AssetManager;
+		std::filesystem::path m_ProjectFolderpath;
+		LR_GUID m_BootSceneGUID = LR_GUID::INVALID;
+		std::shared_ptr<SceneManager> m_SceneManager = nullptr;
+		std::shared_ptr<AssetManager> m_AssetManager = nullptr;
 	};
 }
