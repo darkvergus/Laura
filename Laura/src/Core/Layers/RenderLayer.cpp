@@ -7,10 +7,10 @@ namespace Laura
 
 	RenderLayer::RenderLayer(std::shared_ptr<IEventDispatcher> eventDispatcher, 
 							 std::shared_ptr<Profiler> profiler,
-							 std::shared_ptr<ResourcePool> resourcePool)
+							 std::shared_ptr<AssetPool> resourcePool)
 		:	m_EventDispatcher(eventDispatcher), 
 			m_Profiler(profiler), 
-			m_ResourcePool(resourcePool),
+			m_AssetPool(resourcePool),
 			m_Renderer(std::make_shared<Renderer>(profiler)) {
 	}
 
@@ -32,7 +32,7 @@ namespace Laura
 	}
 
 	void RenderLayer::onUpdate() {
-		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.lock().get(), m_ResourcePool.get());
+		std::shared_ptr<IImage2D> RenderedFrame = m_Renderer->Render(m_Scene.lock().get(), m_AssetPool.get());
 		m_EventDispatcher->dispatchEvent(std::make_shared<NewFrameRenderedEvent>(RenderedFrame));
 	}
 

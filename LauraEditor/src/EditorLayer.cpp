@@ -7,11 +7,11 @@ namespace Laura
 
 	EditorLayer::EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
 							 std::shared_ptr<ImGuiContext> imGuiContext,
-							 std::shared_ptr<ResourcePool> resourcePool,
+							 std::shared_ptr<AssetPool> resourcePool,
 							 std::shared_ptr<AssetManager> assetManager,
 							 std::shared_ptr<Profiler> profiler)
 		:	m_EventDispatcher(eventDispatcher),
-			m_ResourcePool(resourcePool),
+			m_AssetPool(resourcePool),
 			m_AssetManager(assetManager),
 			m_Profiler(profiler),
 
@@ -24,7 +24,7 @@ namespace Laura
 			m_ThemePanel(m_EditorState),
 			m_ProfilerPanel(m_EditorState),
 			m_RenderSettingsPanel(m_EditorState),
-			m_AssetsPanel(m_EditorState, m_AssetManager, m_ResourcePool){
+			m_AssetsPanel(m_EditorState, m_AssetManager, m_AssetPool){
 	}
 
 	void EditorLayer::onAttach() {

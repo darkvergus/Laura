@@ -36,7 +36,7 @@ namespace Laura
                 float column_x1 = ImGui::GetCursorScreenPos().x; // left border x
                 float column_x2 = column_x1 + ImGui::GetColumnWidth(); // right border x
                 ImGui::Indent(manualSpacing);
-                for (const auto& [guid, metadataPair] : m_ResourcePool->Metadata) {
+                for (const auto& [guid, metadataPair] : m_AssetPool->Metadata) {
                     const auto& [metadata, metadataExtension] = metadataPair;
                     std::string filename = metadataExtension->sourcePath.filename().string();
                     DrawAssetTile(guid, filename.c_str());
@@ -78,11 +78,11 @@ namespace Laura
         // decide on the icon and drag and drop destination based on asset type
         const char* icon = nullptr;
         const char* dndPayloadType = nullptr;
-        if (m_ResourcePool->Get<MeshMetadata>(guid) != nullptr) {
+        if (m_AssetPool->Get<MeshMetadata>(guid) != nullptr) {
             icon = ICON_FA_CUBE;
             dndPayloadType = DNDPayloadTypes::MESH;
         }
-        else if (m_ResourcePool->Get<TextureMetadata>(guid) != nullptr) {
+        else if (m_AssetPool->Get<TextureMetadata>(guid) != nullptr) {
             icon = ICON_FA_FILE_IMAGE;
             dndPayloadType = DNDPayloadTypes::TEXTURE;
         }
@@ -162,8 +162,8 @@ namespace Laura
         }
 
         // Check (asset missing in resource pool but editor UI displays it)
-        const auto& it = m_ResourcePool->Metadata.find(m_SelectedTile);
-        if (it == m_ResourcePool->Metadata.end()) {
+        const auto& it = m_AssetPool->Metadata.find(m_SelectedTile);
+        if (it == m_AssetPool->Metadata.end()) {
             theme.PushColor(ImGuiCol_Text, EditorCol_Error);
             ImGui::Text("[ERROR] Invalid Asset");
             theme.PopColor();

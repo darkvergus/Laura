@@ -5,165 +5,278 @@
 #include "AssetManager.h"
 #include "AssetManager.h"
 #include "AssetManager.h"
+#include "AssetManager.h"
 #include "Project/Assets/AssetManager.h"
+#include "Project/ProjectUtilities.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <stb_image/stb_image.h>
+#include <yaml-cpp/yaml.h>
+#include <optional>
 
 namespace Laura
 {
-    LR_GUID AssetManager::LoadMesh(const std::filesystem::path& assetpath) {
-		auto timerStart = std::chrono::high_resolution_clock::now();
-       
 
-        if (!m_AssetPool) {
-            LOG_ENGINE_CRITICAL("Asset::Manager::AddIntoAssetPool({0}) called before a valid AssetPool has been assigned!", assetpath.string());
+	// META FILE ------------------------------------------------------------------------------
+    bool SaveMetafile(const std::filesystem::path& metafilePath, const AssetMetafile& assetMetafile) {
+        LOG_ENGINE_INFO("Saving Metafile: {0}", metafilePath.string());
+
+        YAML::Emitter out;
+        out << YAML::BeginMap 
+            << YAML::Key << "GUID" << YAML::Value << (uint64_t)assetMetafile.guid 
+            << YAML::EndMap;
+
+		std::ofstream fout(filepath);
+		if (!fout.is_open()) {
+			LOG_ENGINE_WARN("SaveMetaFile Failed to open file: {0}", metafilePath.string());
+			return false;
+		}
+		fout << out.c_str();
+		return true;
+    }
+
+
+    std::optional<AssetMetafile> LoadMetafile(const std::filesystem::path& metafilePath) {
+        LOG_ENGINE_INFO("Loading Metafile: {0}", metafilePath.string());
+
+        if (!std::filesystem::exists(metafilePath)) {
+            LOG_ENGINE_WARN("Filepath does not exist: {0}", metafilePath.string());
+            return std::nullopt;
+        }
+
+        YAML::Node root;
+        try {
+            root = YAML::LoadFile(metafilePath.string());
+            AssetMetafile metafile;
+            metafile.guid = (LR_GUID)root["GUID"].as<uint64_t>();
+            return std::make_optional(metafile);
+        }
+        catch (const std::exception& e) {
+            LOG_ENGINE_WARN("Failed to load metafile {}: {}", metafilePath.string(), e.what());
+	        return std::nullopt;
+        }
+    }
+
+
+     
+
+    // ASSET MANAGER ---------------------------------------------------------------------------
+    AssetManager::AssetManager()
+        : m_AssetPool(std::make_shared<AssetPool>()) {
+    }
+
+
+    LR_GUID AssetManager::ImportAsset(const std::filesystem::path& assetpath) {
+        if (!std::filesystem::exists(assetpath) || std::filesystem::is_directory(assetpath)) {
+            LOG_ENGINE_WARN("Invalid assetpath: {0}", assetpath.string());
             return LR_GUID::INVALID;
         }
-
-        Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(assetpath.string(), aiProcessPreset_TargetRealtime_MaxQuality);
-        if (!scene) {
-            LOG_ENGINE_CRITICAL("Asset::Manager::AddIntoAssetPool({0}) failed to load!", assetpath.string());
-            return LR_GUID::INVALID;
-        }
-
-        // count the number of triangles in file
-        size_t numTris = 0;
-        for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-            numTris += scene->mMeshes[i]->mNumFaces;
-        }
-        
-        std::vector<Triangle>& meshBuffer = m_AssetPool->MeshBuffer;
-        // populate some metadata
-        auto metadata = std::make_shared<MeshMetadata>();
-        metadata->firstTriIdx = meshBuffer.size();
-        metadata->TriCount = numTris;
-        auto metadataExtension = std::make_shared<MeshMetadataExtension>();
-        metadataExtension->sourcePath = assetpath;
-        metadataExtension->fileSizeInBytes = std::filesystem::file_size(assetpath);
-        
-        meshBuffer.reserve(meshBuffer.size() + metadata->TriCount);
-
-        for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-            const aiMesh* subMesh = scene->mMeshes[i];
-            const auto verts = subMesh->mVertices;
-            for (unsigned int j = 0; j < subMesh->mNumFaces; ++j) {
-                const auto& face = subMesh->mFaces[j];
-
-                if (face.mNumIndices != 3) {
-                    continue;
-                }
-
-                auto idxs = face.mIndices;
-                meshBuffer.emplace_back( Triangle({ 
-                    glm::vec4(verts[idxs[0]].x, verts[idxs[0]].y, verts[idxs[0]].z, 0.0f),
-                    glm::vec4(verts[idxs[1]].x, verts[idxs[1]].y, verts[idxs[1]].z, 0.0f),
-                    glm::vec4(verts[idxs[2]].x, verts[idxs[2]].y, verts[idxs[2]].z, 0.0f)
-                    })
-                );
-            }
-        }
-        m_AssetPool->MarkUpdated(AssetPool::ResourceType::MeshBuffer);
-
-        LOG_ENGINE_INFO("Asset::Manager::AddIntoAssetPool({0}) loaded {1} triangles.", assetpath.string(), numTris);
-
-        BVHAccel BVH(meshBuffer, metadata->firstTriIdx, metadata->TriCount); // pass in the mesh
-        BVH.Build(m_AssetPool->NodeBuffer, m_AssetPool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount); // populate in place
-        m_AssetPool->MarkUpdated(AssetPool::ResourceType::NodeBuffer);
-        m_AssetPool->MarkUpdated(AssetPool::ResourceType::IndexBuffer);
 
         LR_GUID guid;
+        AssetMetafile metafile{guid};
+        auto metaFilepath = AppendExtension(assetpath, ASSET_META_FILE_EXTENSION);
+        if (!SaveMetafile(metaFilepath, metafile)) {
+            return LR_GUID::INVALID;
+        }
 
-		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
-        
-        m_AssetPool->Metadata[guid] = { metadata, metadataExtension };
-        m_AssetPool->MarkUpdated(AssetPool::ResourceType::Metadata);
+        if (!LoadAssetFile(assetpath, guid)) {
+            std::filesystem::remove(metaFilepath); // cleanup metafile
+            LOG_ENGINE_WARN("Failed to load asset after saving metafile. Removed metafile: {}", metaFilepath.string());
+            return LR_GUID::INVALID;
+        }
         return guid;
     }
 
 
-	LR_GUID AssetManager::LoadTexture(const std::filesystem::path& assetpath, const int desiredChannels) {
-		auto timerStart = std::chrono::high_resolution_clock::now();
-        if (!m_AssetPool){
-            LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) called before a valid AssetPool has been assigned!", assetpath.string(), desiredChannels);
-            return LR_GUID::INVALID;
-        }
-
-        int width, height, channels;
-        stbi_set_flip_vertically_on_load(1); // ensure (0,0) is bottom-left
-		unsigned char* data = stbi_load(assetpath.string().c_str(), &width, &height, &channels, desiredChannels);
-        if (!data) {
-			LOG_ENGINE_CRITICAL("Asset::Manager::LoadTexture({0}, {1}) failed to load!", assetpath.string(), desiredChannels);
-			return LR_GUID::INVALID;
+	void AssetManager::SaveAssetPoolToFolder(const std::filesystem::path& folderpath) {
+		// Delete all existing metafiles which don't have GUID within the asset pool
+		for (const auto& metapath : FindFilesInFolder(folderpath, ASSET_META_FILE_EXTENSION)) {
+			auto maybeMetafile = LoadMetafile(metapath);
+			if (!maybeMetafile.has_value()) {
+				LOG_ENGINE_WARN("Unable to check metafile GUID: {0}", metapath.string());
+				continue;
+			}
+			LR_GUID guid = maybeMetafile->guid;
+			if (m_AssetPool->Metadata.find(guid) == m_AssetPool->Metadata.end()) {
+				std::filesystem::remove(metapath);
+			}
 		}
-        
-        std::vector<unsigned char>& textureBuffer = m_AssetPool->TextureBuffer;
 
-        auto metadata = std::make_shared<TextureMetadata>();
-        metadata->texStartIdx = textureBuffer.size();
-        metadata->width = width;
-        metadata->height = height;
-        metadata->channels = (desiredChannels == 0) ? channels : desiredChannels;
-
-        auto metadataExtension = std::make_shared<TextureMetadataExtension>();
-        metadataExtension->sourcePath = assetpath;
-        metadataExtension->fileSizeInBytes = std::filesystem::file_size(assetpath);
-
-        const size_t totalBytes = metadata->width * metadata->height * metadata->channels;
-        textureBuffer.reserve(textureBuffer.size() + totalBytes);
-        textureBuffer.insert(textureBuffer.end(), data, data + totalBytes);
-        m_AssetPool->MarkUpdated(AssetPool::ResourceType::TextureBuffer);
-        stbi_image_free(data);
-	    	
-        LR_GUID guid;
-
-		std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-		metadataExtension->loadTimeMs = std::chrono::duration<double, std::milli>(end - timerStart).count();
-        
-        m_AssetPool->Metadata[guid] = { metadata, metadataExtension };
-        m_AssetPool->MarkUpdated(AssetPool::ResourceType::Metadata);
-		return guid;
+		// Save metafiles for all assets in the asset pool
+		for (const auto& [guid, metadataPair] : m_AssetPool->Metadata) {
+			const auto& [metadata, metadataExtension] = metadataPair;
+			if (metadataExtension && IsFileInFolder(metadataExtension->sourcePath, folderpath)) {
+				AssetMetafile metafile{ guid };
+				auto metapath = AppendExtension(metadataExtension->sourcePath, ASSET_META_FILE_EXTENSION);
+				if (!SaveMetafile(metapath, metafile)) {
+					LOG_ENGINE_WARN("Unable to save metafile: {0}", metapath.string());
+				}
+			} else {
+				LOG_ENGINE_WARN("Asset not found in the folder: {0}", 
+							   metadataExtension ? metadataExtension->sourcePath.string() : "<no sourcePath>");
+			}
+		}
 	}
 
 
-    LR_GUID AssetManager::AddIntoAssetPool(const std::filesystem::path& assetpath) {
-        if (!assetpath.has_extension()) {
-            LOG_ENGINE_ERROR("AddIntoAssetPool: File has no extension: {}", assetpath.string());
-            return LR_GUID::INVALID;
-        }
+	void AssetManager::LoadAssetPoolFromFolder(const std::filesystem::path& folderpath) {
+		for (const auto& metapath : FindFilesInFolder(folderpath, ASSET_META_FILE_EXTENSION)) {
+			// check if the asset file exists next to the .lrmeta file
+			const auto assetpath = StripExtension(metapath);
+			if (!std::filesystem::exists(assetpath)) {
+				LOG_ENGINE_WARN("Missing asset file for metafile: {}", metapath.string());
+				continue;
+			}
 
-        std::string ext = assetpath.extension().string();
-        for ( const auto& SUPPORTED_EXT : SUPPORTED_MESH_FILE_FORMATS) {
-            if (ext == SUPPORTED_EXT) {
-                return AddIntoAssetPool(assetpath);
-            }
-        }
-        for (auto SUPPORTED_EXT : SUPPORTED_TEXTURE_FILE_FORMATS) {
-            if (ext == SUPPORTED_EXT) {
-                return LoadTexture(assetpath, 4);
-            }
-        }
+			auto maybeMetafile = LoadMetafile(metapath);
+			if (!maybeMetafile.has_value()) {
+				LOG_ENGINE_WARN("Unable to load metafile: {}", metapath.string());
+				continue;
+			}
 
-        LOG_ENGINE_WARN("AddIntoAssetPool: Unknown file extension: {}", ext);
-        return LR_GUID::INVALID;
-    }
+			if (!LoadAssetFile(assetpath, maybeMetafile->guid)) {
+				LOG_ENGINE_WARN("Failed to load asset: {}", assetpath.string());
+				continue;
+			}
+		}
+	}
 
-    bool AssetManager::SerializeAssetPool(const std::filesystem::path& projectFolderpath) {
-        // TODO
-        // any .lrmeta which is not within the assetpool metadata but has .lrmeta in the folder should be removed (cleanup of deleted assets)
-        // create a .lrmeta file for each asset in the assetpool only if the asset file exists in the directory - take the metadata filepath
-        // done
-        return true;
-    }
 
-    bool AssetManager::DeserializeAssetPool(const std::filesystem::path& projectFolderpath) {
-        // TODO
-        // read all .lrmeta files in the projectFolderpath
-        // load all assets with filepath same as .lrmeta but stripped of the .lrmeta extension only if also has a pair of the actual asset file next to it
-        // done
-        return true;
-    }
+	bool AssetManager::LoadAssetFile(const std::filesystem::path& assetpath, LR_GUID guid) {
+		if (!std::filesystem::exists(assetpath) || !std::filesystem::is_regular_file(assetpath) || !assetpath.has_extension()) {
+			LOG_ENGINE_ERROR("Invalid asset path: {0}", assetpath.string());
+			return false;
+		}
+
+		const std::string extension = assetpath.extension().string();
+		for (const auto& SUPPORTED_FORMAT : SUPPORTED_MESH_FILE_FORMATS) {
+			if (extension == SUPPORTED_FORMAT) {
+				return LoadMesh(assetpath, guid);
+			}
+		}
+		for (const auto& SUPPORTED_FORMAT : SUPPORTED_TEXTURE_FILE_FORMATS) {
+			if (extension == SUPPORTED_FORMAT) {
+				return LoadTexture(assetpath, 4, guid);
+			}
+		}
+		LOG_ENGINE_WARN("Unknown file extension: {}", extension);
+		return false;
+	}
+
+
+
+	bool AssetManager::LoadMesh(const std::filesystem::path& assetpath, LR_GUID guid) {
+		auto timerStart = std::chrono::high_resolution_clock::now();
+
+		if (!m_AssetPool) {
+			LOG_ENGINE_CRITICAL("LoadMesh({0}) called without a valid AssetPool!", assetpath.string());
+			return false;
+		}
+
+		Assimp::Importer importer;
+		const aiScene* scene = importer.ReadFile(assetpath.string(), aiProcessPreset_TargetRealtime_MaxQuality);
+		if (!scene) {
+			LOG_ENGINE_CRITICAL("LoadMesh({0}, {1}) failed to load scene.", assetpath.string(), static_cast<uint64_t>(guid));
+			return false;
+		}
+
+		size_t triCount = 0;
+		for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+			triCount += scene->mMeshes[i]->mNumFaces;
+
+		std::vector<Triangle>& meshBuffer = m_AssetPool->MeshBuffer;
+
+		auto metadata = std::make_shared<MeshMetadata>();
+		metadata->firstTriIdx = meshBuffer.size();
+		metadata->TriCount = triCount;
+
+		auto metadataExtension = std::make_shared<MeshMetadataExtension>();
+		metadataExtension->sourcePath = assetpath;
+		metadataExtension->fileSizeInBytes = std::filesystem::file_size(assetpath);
+
+		meshBuffer.reserve(meshBuffer.size() + triCount);
+
+		for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+			const aiMesh* subMesh = scene->mMeshes[i];
+			const aiVector3D* verts = subMesh->mVertices;
+
+			for (unsigned int j = 0; j < subMesh->mNumFaces; ++j) {
+				const aiFace& face = subMesh->mFaces[j];
+				if (face.mNumIndices != 3) continue;
+
+				const auto& idx = face.mIndices;
+				meshBuffer.emplace_back(Triangle({
+					glm::vec4(verts[idx[0]].x, verts[idx[0]].y, verts[idx[0]].z, 0.0f),
+					glm::vec4(verts[idx[1]].x, verts[idx[1]].y, verts[idx[1]].z, 0.0f),
+					glm::vec4(verts[idx[2]].x, verts[idx[2]].y, verts[idx[2]].z, 0.0f)
+				}));
+			}
+		}
+
+		m_AssetPool->MarkUpdated(AssetPool::ResourceType::MeshBuffer);
+
+		// Build BVH
+		BVHAccel bvh(meshBuffer, metadata->firstTriIdx, metadata->TriCount);
+		bvh.Build(m_AssetPool->NodeBuffer, m_AssetPool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount);
+
+		m_AssetPool->MarkUpdated(AssetPool::ResourceType::NodeBuffer);
+		m_AssetPool->MarkUpdated(AssetPool::ResourceType::IndexBuffer);
+
+		metadataExtension->loadTimeMs =
+			std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - timerStart).count();
+
+		m_AssetPool->Metadata[guid] = { metadata, metadataExtension };
+		m_AssetPool->MarkUpdated(AssetPool::ResourceType::Metadata);
+
+		LOG_ENGINE_INFO("LoadMesh({0}, {1}) loaded {2} triangles.", assetpath.string(), guid, triCount);
+		return true;
+	}
+
+
+
+	bool AssetManager::LoadTexture(const std::filesystem::path& assetpath, int channels, LR_GUID guid) {
+		auto timerStart = std::chrono::high_resolution_clock::now();
+
+		if (!m_AssetPool) {
+			LOG_ENGINE_CRITICAL("LoadTexture({0}) called without a valid AssetPool!", assetpath.string());
+			return false;
+		}
+
+		int width, height, channelsInFile;
+		stbi_set_flip_vertically_on_load(1); // OpenGL-style orientation
+		unsigned char* data = stbi_load(assetpath.string().c_str(), &width, &height, &channelsInFile, channels);
+		if (!data) {
+			LOG_ENGINE_CRITICAL("LoadTexture({0}, channels={1}, guid={2}) failed to load.", assetpath.string(), channels, guid);
+			return false;
+		}
+
+		const int actualChannels = (channels == 0) ? channelsInFile : channels;
+		const size_t totalBytes = width * height * actualChannels;
+
+		std::vector<unsigned char>& textureBuffer = m_AssetPool->TextureBuffer;
+		textureBuffer.reserve(textureBuffer.size() + totalBytes);
+		textureBuffer.insert(textureBuffer.end(), data, data + totalBytes);
+		stbi_image_free(data);
+
+		auto metadata = std::make_shared<TextureMetadata>();
+		metadata->texStartIdx = textureBuffer.size() - totalBytes;
+		metadata->width = width;
+		metadata->height = height;
+		metadata->channels = actualChannels;
+
+		auto metadataExt = std::make_shared<TextureMetadataExtension>();
+		metadataExt->sourcePath = assetpath;
+		metadataExt->fileSizeInBytes = std::filesystem::file_size(assetpath);
+		metadataExt->loadTimeMs =
+			std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - timerStart).count();
+
+		m_AssetPool->Metadata[guid] = { metadata, metadataExt };
+		m_AssetPool->MarkUpdated(AssetPool::ResourceType::TextureBuffer);
+		m_AssetPool->MarkUpdated(AssetPool::ResourceType::Metadata);
+
+		LOG_ENGINE_INFO("LoadTexture({0}, {1}) loaded {2}x{3} texture ({4} channels).",
+						assetpath.string(), guid, width, height, actualChannels);
+		return true;
+	}
 }

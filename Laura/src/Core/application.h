@@ -28,7 +28,7 @@ namespace Laura
         std::shared_ptr<IRendererAPI>   _RendererAPI;
         std::shared_ptr<Profiler>       _Profiler;
 
-        std::shared_ptr<ResourcePool> _ResourcePool;
+        std::shared_ptr<AssetPool> _ResourcePool;
         std::shared_ptr<AssetManager>      _AssetManager;
 
         std::shared_ptr<SceneLayer>     _SceneLayer;

@@ -14,7 +14,7 @@ namespace Laura
 		// make window forward events to the layerStack
 		_Window->setEventCallback([this](std::shared_ptr<IEvent> event) { _LayerStack->dispatchEvent(event); });
 
-		_ResourcePool = std::make_shared<ResourcePool>();
+		_ResourcePool = std::make_shared<AssetPool>();
 		_AssetManager = std::make_shared<AssetManager>();
 		_AssetManager->SetResourcePool(_ResourcePool.get());
 

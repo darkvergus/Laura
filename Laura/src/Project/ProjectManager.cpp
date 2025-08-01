@@ -14,8 +14,8 @@ namespace Laura
 		}
 		m_ProjectFolderpath = projectFolderpath;
 		m_BootScene = LR_GUID::INVALID; // no boot scene yet configured
-		m_AssetManager = std::make_shared<AssetManager>(m_ProjectFolderpath);
-		m_SceneManager = std::make_shared<SceneManager>(m_ProjectFolderpath);
+		m_AssetManager = std::make_shared<AssetManager>();
+		m_SceneManager = std::make_shared<SceneManager>();
 		return SaveProject();
 	}
 

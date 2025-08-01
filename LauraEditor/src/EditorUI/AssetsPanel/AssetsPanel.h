@@ -12,10 +12,10 @@ namespace Laura
 	public:
 		AssetsPanel(std::shared_ptr<EditorState> editorState, 
 					std::shared_ptr<AssetManager> assetManager, 
-					std::shared_ptr<ResourcePool> resourcePool)
+					std::shared_ptr<AssetPool> resourcePool)
 			: m_EditorState(editorState),
 			  m_AssetManager(assetManager), 
-			  m_ResourcePool(resourcePool) {
+			  m_AssetPool(resourcePool) {
 		}
 		~AssetsPanel() = default;
 	
@@ -27,7 +27,7 @@ namespace Laura
 		
 		std::shared_ptr<EditorState> m_EditorState;
 		std::shared_ptr<AssetManager> m_AssetManager;
-		std::shared_ptr<ResourcePool> m_ResourcePool;
+		std::shared_ptr<AssetPool> m_AssetPool;
 
 		// UI related
 		const float BASE_TILE_WH_RATIO = 0.75f;

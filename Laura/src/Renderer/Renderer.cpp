@@ -9,7 +9,7 @@ namespace Laura
 		m_CameraUBO = IUniformBuffer::Create(80, 0, BufferUsageType::DYNAMIC_DRAW);
 	}
 
-	std::shared_ptr<IImage2D> Renderer::Render(const Scene* scene, const ResourcePool* resourcePool) {
+	std::shared_ptr<IImage2D> Renderer::Render(const Scene* scene, const AssetPool* resourcePool) {
 		auto t = m_Profiler->timer("Renderer::Render()");
 
 		const auto pScene = Parse(scene, resourcePool);
@@ -21,7 +21,7 @@ namespace Laura
 		return m_Frame;
 	}
 
-	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const ResourcePool* resourcePool) const {
+	std::shared_ptr<const Renderer::ParsedScene> Renderer::Parse(const Scene* scene, const AssetPool* resourcePool) const {
 		if (scene == nullptr) {
 			return nullptr;
 		}
@@ -71,7 +71,7 @@ namespace Laura
 
 	// returns false if error occured, else true
 	// assumes a valid pScene
-	bool Renderer::SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const ResourcePool* resourcePool) {
+	bool Renderer::SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const AssetPool* resourcePool) {
 		m_Profiler->timer("Renderer::SetupGPUResources()");
 
 		if (settings.ComputeShaderPath != m_Cache.ActiveShaderPath) {
@@ -125,7 +125,7 @@ namespace Laura
 
 		{
 			// SKYBOX
-    		uint32_t currTexBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::TextureBuffer);
+    		uint32_t currTexBuffVersion = resourcePool->GetUpdateVersion(AssetPool::ResourceType::TextureBuffer);
     		if (prevTexBuffVersion != currTexBuffVersion) {
         		prevTexBuffVersion = currTexBuffVersion;
 
@@ -140,7 +140,7 @@ namespace Laura
 
 		// MESH BUFFER
 		{
-    		uint32_t currMeshBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::MeshBuffer);
+    		uint32_t currMeshBuffVersion = resourcePool->GetUpdateVersion(AssetPool::ResourceType::MeshBuffer);
     		if (prevMeshBuffVersion != currMeshBuffVersion) {
         		prevMeshBuffVersion = currMeshBuffVersion;
 
@@ -154,7 +154,7 @@ namespace Laura
 
 		// NODE BUFFER
 		{
-    		uint32_t currNodeBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::NodeBuffer);
+    		uint32_t currNodeBuffVersion = resourcePool->GetUpdateVersion(AssetPool::ResourceType::NodeBuffer);
     		if (prevNodeBuffVersion != currNodeBuffVersion) {
         		prevNodeBuffVersion = currNodeBuffVersion;
 
@@ -168,7 +168,7 @@ namespace Laura
 
 		// INDEX BUFFER
 		{
-    		uint32_t currIndexBuffVersion = resourcePool->GetUpdateVersion(ResourcePool::ResourceType::IndexBuffer);
+    		uint32_t currIndexBuffVersion = resourcePool->GetUpdateVersion(AssetPool::ResourceType::IndexBuffer);
     		if (prevIndexBuffVersion != currIndexBuffVersion) {
         		prevIndexBuffVersion = currIndexBuffVersion;
 
