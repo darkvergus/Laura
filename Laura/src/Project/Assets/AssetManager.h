@@ -44,7 +44,7 @@ namespace Laura
 
 		// Versioning system to track buffer updates across multiple listeners (e.g., renderer).
 		// Listeners compare a static `lastUpdateId` against `GetUpdateVersion()` to detect changes.
-		enum struct ResourceType {
+		enum struct AssetType {
 			Metadata,
 			MeshBuffer,
 			IndexBuffer,
@@ -52,10 +52,10 @@ namespace Laura
 			TextureBuffer,
 			COUNT
 		};
-		inline void MarkUpdated(ResourceType type) { m_UpdateVersions[static_cast<size_t>(type)]++; }
-		inline uint32_t GetUpdateVersion(ResourceType type) const { return m_UpdateVersions[static_cast<size_t>(type)]; }
+		inline void MarkUpdated(AssetType type) { m_UpdateVersions[static_cast<size_t>(type)]++; }
+		inline uint32_t GetUpdateVersion(AssetType type) const { return m_UpdateVersions[static_cast<size_t>(type)]; }
 	private:
-		std::array<uint32_t, static_cast<size_t>(ResourceType::COUNT)> m_UpdateVersions = {}; // initialize with 0s
+		std::array<uint32_t, static_cast<size_t>(AssetType::COUNT)> m_UpdateVersions = {}; // initialize with 0s
 	};
 	
 	
@@ -69,18 +69,18 @@ namespace Laura
 	// ============================================================================
 	#define ASSET_META_FILE_EXTENSION ".lrmeta"
 
-	struct AssetMetafile {
-		AssetMetafile(LR_GUID guid) : guid(guid) {}
-		LR_GUID guid;
+	struct AssetMetaFile {
+		AssetMetaFile(LR_GUID guid) : guid(guid) {}
+		LR_GUID guid = LR_GUID::INVALID;
 	};
 
 	/// Serialize the 'assetMetafile' as-is at the location 'metapath'.
 	/// Returns true on success.
-	bool SaveMetaFile(const std::filesystem::path& metapath, const AssetMetafile& assetMetafile);
+	bool SaveMetaFile(const std::filesystem::path& metapath, const AssetMetaFile& assetMetafile);
 
-	/// Deserialize from 'metapath' and return 'AssetMetafile'.
+	/// Deserialize from 'metapath' and return 'AssetMetaFile'.
 	/// Returns std::nullopt if unsuccessful.
-	std::optional<AssetMetafile> LoadMetaFile(const std::filesystem::path& metapath);
+	std::optional<AssetMetaFile> LoadMetaFile(const std::filesystem::path& metapath);
 
 
 

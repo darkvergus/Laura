@@ -11,7 +11,17 @@ namespace Laura
 {
 
 	// META FILE ------------------------------------------------------------------------------
-    bool SaveMetaFile(const std::filesystem::path& metafilePath, const AssetMetafile& assetMetafile) {
+    bool SaveMetaFile(const std::filesystem::path& metafilePath, const AssetMetaFile& assetMetafile) {
+		if (!(metafilePath.has_extension() && metafilePath.extension() == SCENE_FILE_EXTENSION)) {
+			LOG_ENGINE_WARN("SaveMetaFile: invalid file extension '{}'.", metafilePath.string());
+			return false;
+		}
+
+		if (!std::filesystem::exists(metafilePath.parent_path())) {
+			LOG_ENGINE_WARN("SaveMetaFile: parent directory '{}' does not exist.", metafilePath.parent_path().string());
+			return false;
+		}
+
         YAML::Emitter out;
         out << YAML::BeginMap 
             << YAML::Key << "GUID" << YAML::Value << (uint64_t)assetMetafile.guid 
@@ -28,16 +38,18 @@ namespace Laura
     }
 
 
-    std::optional<AssetMetafile> LoadMetaFile(const std::filesystem::path& metafilePath) {
-        if (!std::filesystem::exists(metafilePath)) {
-			LOG_ENGINE_WARN("LoadMetaFile: file does not exist: {0}", metafilePath.string());
-            return std::nullopt;
-        }
+    std::optional<AssetMetaFile> LoadMetaFile(const std::filesystem::path& metafilePath) {
+		if (!(std::filesystem::exists(metafilePath) && std::filesystem::is_regular_file(metafilePath) && 
+			metafilePath.has_extension() && metafilePath.extension() == ASSET_META_FILE_EXTENSION))
+		{
+			LOG_ENGINE_WARN("LoadMetaFile: invalid or missing meta file: {0}", metafilePath.string());
+			return nullptr;
+		}
 
         YAML::Node root;
         try {
             root = YAML::LoadFile(metafilePath.string());
-            AssetMetafile metafile;
+            AssetMetaFile metafile;
             metafile.guid = (LR_GUID)root["GUID"].as<uint64_t>();
 			LOG_ENGINE_INFO("LoadMetaFile: loaded metadata for GUID {0}", metafile.guid);
             return std::make_optional(metafile);
@@ -64,7 +76,7 @@ namespace Laura
         }
 
         LR_GUID guid;
-        AssetMetafile metafile{guid};
+        AssetMetaFile metafile{guid};
         auto metaFilepath = AppendExtension(assetpath, ASSET_META_FILE_EXTENSION);
         if (!SaveMetaFile(metaFilepath, metafile)) {
 			LOG_ENGINE_WARN("ImportAsset: failed to save metafile {0}", metaFilepath.string());
@@ -101,7 +113,7 @@ namespace Laura
 		for (const auto& [guid, metadataPair] : m_AssetPool->Metadata) {
 			const auto& [metadata, metadataExtension] = metadataPair;
 			if (metadataExtension && IsFileInFolder(metadataExtension->sourcePath, folderpath)) {
-				AssetMetafile metafile{ guid };
+				AssetMetaFile metafile{ guid };
 				auto metapath = AppendExtension(metadataExtension->sourcePath, ASSET_META_FILE_EXTENSION);
 				if (!SaveMetaFile(metapath, metafile)) {
 					LOG_ENGINE_WARN("SaveAssetPoolToFolder: failed to save metafile {0}", metapath.string());
@@ -214,20 +226,20 @@ namespace Laura
 			}
 		}
 
-		m_AssetPool->MarkUpdated(AssetPool::ResourceType::MeshBuffer);
+		m_AssetPool->MarkUpdated(AssetPool::AssetType::MeshBuffer);
 
 		// Build BVH
 		BVHAccel bvh(meshBuffer, metadata->firstTriIdx, metadata->TriCount);
 		bvh.Build(m_AssetPool->NodeBuffer, m_AssetPool->IndexBuffer, metadata->firstNodeIdx, metadata->nodeCount);
 
-		m_AssetPool->MarkUpdated(AssetPool::ResourceType::NodeBuffer);
-		m_AssetPool->MarkUpdated(AssetPool::ResourceType::IndexBuffer);
+		m_AssetPool->MarkUpdated(AssetPool::AssetType::NodeBuffer);
+		m_AssetPool->MarkUpdated(AssetPool::AssetType::IndexBuffer);
 
 		double loadTimeMs = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - timerStart).count();
 		metadataExtension->loadTimeMs = loadTimeMs;
 
 		m_AssetPool->Metadata[guid] = { metadata, metadataExtension };
-		m_AssetPool->MarkUpdated(AssetPool::ResourceType::Metadata);
+		m_AssetPool->MarkUpdated(AssetPool::AssetType::Metadata);
 
 		LOG_ENGINE_INFO("LoadMesh: loaded {0} triangles from {1} (GUID {2}) in {3:.2f} ms", 
 			triCount, assetpath.string(), guid, loadTimeMs);
@@ -274,8 +286,8 @@ namespace Laura
 		metadataExt->loadTimeMs = loadTimeMs;
 
 		m_AssetPool->Metadata[guid] = { metadata, metadataExt };
-		m_AssetPool->MarkUpdated(AssetPool::ResourceType::TextureBuffer);
-		m_AssetPool->MarkUpdated(AssetPool::ResourceType::Metadata);
+		m_AssetPool->MarkUpdated(AssetPool::AssetType::TextureBuffer);
+		m_AssetPool->MarkUpdated(AssetPool::AssetType::Metadata);
 
 		LOG_ENGINE_INFO("LoadTexture: loaded texture {0} (GUID {1}) {2}x{3} with {4} channels in {5:.2f} ms",
 			assetpath.string(), guid, width, height, actualChannels, loadTimeMs);

@@ -5,36 +5,78 @@
 #include "Project/Scene/SceneManager.h"
 #include "Project/Assets/AssetManager.h"
 
-#define PROJECT_FILE_EXTENSION ".lrproj"
-
 namespace Laura 
 {
 
+	// ============================================================================ 
+	// PROJECT FILE (.lrproj)
+	// ----------------------------------------------------------------------------
+	// Provides serialization and deserialization of project settings.
+	// Used internally by the ProjectManager to persist global project data.
+	// ============================================================================
+	#define PROJECT_FILE_EXTENSION ".lrproj"
+
+	struct ProjectFile {
+		ProjectFile(LR_GUID bootSceneGuid) : bootSceneGuid(bootSceneGuid) {}
+		LR_GUID bootSceneGuid = LR_GUID::INVALID;
+	};
+
+	/// Serialize the 'projectFile' as-is at the location 'projectFilepath'.
+	/// Returns true on success.
+	bool SaveProjectFile(const std::filesystem::path& projectFilepath, const ProjectFile& projectFile);
+
+	/// Deserialize from 'projectFilepath' and return 'ProjectFile'.
+	/// Returns std::nullopt if unsuccessful.
+	std::optional<ProjectFile> LoadProjectFile(const std::filesystem::path& projectFilepath);
+
+	/// Computes the absolute path to the project file (.lrproj) given the project folder.
+	/// Example: Input folder `/MyProject/` -> Output `/MyProject/MyProject.lrproj`
+	inline std::filesystem::path ComposeProjectFilepath(const std::filesystem::path& folderpath) {
+		std::string folderName = folderpath.filename().string();
+		return folderpath / (folderName + PROJECT_FILE_EXTENSION);
+	}
+
+
+
+
+	// ============================================================================
+	// PROJECT MANAGER
+	// ----------------------------------------------------------------------------
+	// High-level system responsible for creating, opening, saving, and managing
+	// the lifetime of a project.
+	// Owns the AssetManager and SceneManager used throughout the editor session.
+	// ============================================================================
 	class ProjectManager {
 	public:
 		ProjectManager() = default;
 		~ProjectManager() = default;
 
-		void NewProject(std::filesystem::path projectFolderpath);
-		bool OpenProject(std::filesystem::path projectFolderpath);
-		bool SaveProject();
+		/// Creates a new project in the given folder.
+		/// Initializes the AssetManager and SceneManager.
+		/// Saves an initial project file.
+		void NewProject(const std::filesystem::path& folderpath);
+
+		/// Opens an existing project from the given folder.
+		/// Loads the project file and initializes managers.
+		/// Returns true on success.
+		bool OpenProject(const std::filesystem::path& folderpath);
+
+		/// Saves the current project file (.lrproj) into the project folder.
+		/// Returns true on success.
+		bool SaveProject(const std::filesystem::path& folderpath);
+
+		/// Shuts down managers and clears project data without saving.
 		void CloseProject();
 
-
-		inline std::filesystem::path GetProjectFolderpath() const { return m_ProjectFolderpath; }
-		inline std::string GetProjectFoldername() const { return m_ProjectFolderpath.filename().string(); }
-
-		inline bool isProjectOpen() const { return !m_ProjectFolderpath.empty() }
-		
-		inline std::weak_ptr<SceneManager> GetSceneManager() { return m_SceneManager; }
-		inline std::weak_ptr<AssetManager> GetAssetManager() { return m_AssetManager; }
+		inline bool IsProjectOpen() const { return !m_ProjectPath.empty(); }
+		inline std::shared_ptr<SceneManager> GetSceneManager() const { return m_SceneManager; }
+		inline std::shared_ptr<AssetManager> GetAssetManager() const { return m_AssetManager; }
 
 	private:
-		bool SerializeProjFile(const std::filesystem::path& projectFolderpath) const;
-		bool DeserializeProjFile(const std::filesystem::path& projectFolderpath);
+		/// Filesystem path to the current project folder (where .lrproj lives).
+		std::filesystem::path m_ProjectPath;
+		ProjectFile m_ProjectFile;
 
-		std::filesystem::path m_ProjectFolderpath;
-		LR_GUID m_BootSceneGuid = LR_GUID::INVALID;
 		std::shared_ptr<SceneManager> m_SceneManager = nullptr;
 		std::shared_ptr<AssetManager> m_AssetManager = nullptr;
 	};
