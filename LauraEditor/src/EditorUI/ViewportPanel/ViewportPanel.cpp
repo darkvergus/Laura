@@ -5,7 +5,7 @@
 namespace Laura
 {
 
-	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState) {
+	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image) {
 		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoCollapse;
 		
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -19,11 +19,11 @@ namespace Laura
 		
 		ForceUpdate = false;
 
-		DrawViewportSettingsPanel(editorState);
+		DrawViewportSettingsPanel();
 
 		auto imageShared = image.lock();
 		if (imageShared == nullptr) {
-			DrawVieportSettingsButton(editorState);
+			DrawVieportSettingsButton();
 			ImGui::PopStyleVar();
 			ImGui::End();
 			return;
@@ -36,7 +36,7 @@ namespace Laura
 		bool DimensionsChanged = (ImageDimensions != m_PrevImageDimensions || WindowDimensions != m_PrevWindowDimensions);
 		bool PositionChanged = (TLWindowPosition != m_PrevWindowPosition);
 
-		if (editorState->persistent.viewportMode == ViewportMode::CenterToViewport) {
+		if (m_EditorState->persistent.viewportMode == ViewportMode::CenterToViewport) {
 			if (DimensionsChanged || PositionChanged || ForceUpdate) {
 				glm::ivec2 OffsetTopLeftCorner = (WindowDimensions - ImageDimensions) / 2;
 				m_TopLeftImageCoords = OffsetTopLeftCorner + TLWindowPosition;
@@ -44,14 +44,14 @@ namespace Laura
 			}
 		}
 
-		if (editorState->persistent.viewportMode == ViewportMode::StretchToViewport) {
+		if (m_EditorState->persistent.viewportMode == ViewportMode::StretchToViewport) {
 			if (DimensionsChanged || PositionChanged || ForceUpdate) {
 				m_TopLeftImageCoords = TLWindowPosition;
 				m_BottomRightImageCoords = TLWindowPosition + WindowDimensions;
 			}
 		}
 
-		if (editorState->persistent.viewportMode == ViewportMode::FitToViewport) {
+		if (m_EditorState->persistent.viewportMode == ViewportMode::FitToViewport) {
 			// if the ViewportPanel has been resized or the renderer output image size has been changed
 
 			if (DimensionsChanged || PositionChanged || ForceUpdate) {
@@ -92,25 +92,25 @@ namespace Laura
 		ImVec2 BRImVec = ImVec2(m_BottomRightImageCoords.x, m_BottomRightImageCoords.y);
 		drawList->AddImage((ImTextureID)imageShared->GetID(), TLImVec, BRImVec, { 0, 1 }, { 1, 0 });
 
-		DrawVieportSettingsButton(editorState);
+		DrawVieportSettingsButton();
 
 		ImGui::PopStyleVar();
 		ImGui::End();
 		style.Colors[ImGuiCol_WindowBg] = originalWindowBG;
 	}
 
-	void ViewportPanel::DrawVieportSettingsButton(std::shared_ptr<EditorState> editorState) {
+	void ViewportPanel::DrawVieportSettingsButton() {
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 		ImGui::Spacing();
 		ImGui::SameLine(panelDims.x - lineHeight);
 		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, { lineHeight, lineHeight })) {
-			editorState->temp.isViewportSettingsPanelOpen = true;
+			m_EditorState->temp.isViewportSettingsPanelOpen = true;
 		}
 	}
 
-	void ViewportPanel::DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState) {
-		if (!editorState->temp.isViewportSettingsPanelOpen) {
+	void ViewportPanel::DrawViewportSettingsPanel() {
+		if (!m_EditorState->temp.isViewportSettingsPanelOpen) {
 			return;
 		}
 
@@ -118,12 +118,13 @@ namespace Laura
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
-		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &editorState->temp.isViewportSettingsPanelOpen, ViewportSettingsFlags);
+		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &m_EditorState->temp.isViewportSettingsPanelOpen, ViewportSettingsFlags);
+
 		ImGui::Text("Viewport Mode");
 		
-		if (	ImGui::RadioButton("Center",	(int*)&editorState->persistent.viewportMode, (int)ViewportMode::CenterToViewport)  ||
-				ImGui::RadioButton("Stretch",	(int*)&editorState->persistent.viewportMode, (int)ViewportMode::StretchToViewport) ||
-				ImGui::RadioButton("Fit",		(int*)&editorState->persistent.viewportMode, (int)ViewportMode::FitToViewport)){
+		if (	ImGui::RadioButton("Center",	(int*)&m_EditorState->persistent.viewportMode, (int)ViewportMode::CenterToViewport)  ||
+				ImGui::RadioButton("Stretch",	(int*)&m_EditorState->persistent.viewportMode, (int)ViewportMode::StretchToViewport) ||
+				ImGui::RadioButton("Fit",		(int*)&m_EditorState->persistent.viewportMode, (int)ViewportMode::FitToViewport)){
 			ForceUpdate = true;
 		}
 

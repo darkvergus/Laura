@@ -17,11 +17,10 @@ namespace Laura
 
 	class EditorLayer : public ILayer {
 	public:
-		EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
-					std::shared_ptr<ImGuiContext> imGuiContext,
-					std::shared_ptr<AssetPool> resourcePool, 
-					std::shared_ptr<AssetManager> assetManager, 
-					std::shared_ptr<Profiler> profiler
+		EditorLayer(std::shared_ptr<Profiler> profiler,
+					std::weak_ptr<IEventDispatcher> eventDispatcher,
+					std::shared_ptr<ProjectManager> projectManager,
+					std::shared_ptr<ImGuiContext> imGuiContext
 		);
 
 		virtual void onAttach() override;
@@ -33,10 +32,9 @@ namespace Laura
 		void DrawMainMenu();
 
 		// Engine
-		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
-		std::shared_ptr<AssetPool> m_AssetPool;
-		std::shared_ptr<AssetManager> m_AssetManager;
 		std::shared_ptr<Profiler> m_Profiler;
+		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
+		std::shared_ptr<ProjectManager> m_ProjectManager;
 
 		// Values received from events
 		std::weak_ptr<Scene> m_Scene;

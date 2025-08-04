@@ -13,15 +13,20 @@ namespace Laura
 
 	class Launcher {
 	public:
-		Launcher(std::shared_ptr<EditorState> editorState) 
-			: m_EditorState(editorState) {
+		Launcher(std::shared_ptr<EditorState> editorState, std::shared_ptr<ProjectManager> projectManager) 
+			: m_EditorState(editorState), 
+			  m_ProjectManager(projectManager) {
 		}
 		~Launcher() = default;
 	
 		std::optional<std::filesystem::path> ShowFolderPickerDialog();
 		void OnImGuiRender();
+		void DrawCreateProjectWindow();
 
 	private:
 		std::shared_ptr<EditorState> m_EditorState;
+		std::shared_ptr<ProjectManager> m_ProjectManager;
+
+		bool m_CreateProjectWindowOpen = false;
 	};
 }

@@ -6,21 +6,48 @@ namespace Laura
 
 	void AssetsPanel::OnImGuiRender() {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
-
         ImGui::Begin(ICON_FA_CUBE " Assets");
 
-        theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
-        if (ImGui::Button("Import..")) {
-            OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
-            char buff[MAX_PATH] = {};
-            ofn.lpstrFilter = "All Files\0*.*\0";
-            ofn.lpstrTitle = "Select Asset:";
-            ofn.nMaxFile = sizeof(buff);
-            ofn.lpstrFile = buff;
-            if (GetOpenFileNameA(&ofn)) {
-                LR_GUID guid = m_AssetManager->LoadAsset(buff);
-            }
+        if (!m_ProjectManager->ProjectIsOpen()) {
+            ImGui::End();
+            return;
         }
+        auto assetManager = m_ProjectManager->GetAssetManager();
+        auto assetPool = assetManager->GetAssetPool();
+
+        theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
+        if (ImGui::Button("Add")) {
+			ImGui::OpenPopup("Add Menu");
+		}
+
+        if (ImGui::IsPopupOpen("Add Menu")) {
+            ImVec2 addButtonPos = ImGui::GetItemRectMin();
+            ImVec2 addButtonSize = ImGui::GetItemRectSize();
+            ImGui::SetNextWindowSizeConstraints(
+                ImVec2(FLT_MIN, FLT_MIN),
+                ImVec2(FLT_MAX, 300.0f) // if the popup contains too many compnents, adds a scrollbar
+            );
+            ImGui::SetNextWindowPos(ImVec2(addButtonPos.x, addButtonPos.y + addButtonSize.y));
+            ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f));
+        }
+
+		if (ImGui::BeginPopup("Add Menu", ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::MenuItem("Scene")) {
+
+            }
+            if (ImGui::MenuItem("Asset...")) {
+				OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
+				char buff[MAX_PATH] = {}; 
+				ofn.lpstrFilter = "All Files\0*.*\0";
+				ofn.lpstrTitle = "Select Asset:";
+				ofn.nMaxFile = sizeof(buff);
+				ofn.lpstrFile = buff;
+				if (GetOpenFileNameA(&ofn)) {
+					LR_GUID guid = assetManager->ImportAsset(buff);
+				}
+            }
+			ImGui::EndPopup();
+		}
         theme.PopColor(); 
 
         ImGui::SameLine();
@@ -36,7 +63,7 @@ namespace Laura
                 float column_x1 = ImGui::GetCursorScreenPos().x; // left border x
                 float column_x2 = column_x1 + ImGui::GetColumnWidth(); // right border x
                 ImGui::Indent(manualSpacing);
-                for (const auto& [guid, metadataPair] : m_AssetPool->Metadata) {
+                for (const auto& [guid, metadataPair] : assetPool->Metadata) {
                     const auto& [metadata, metadataExtension] = metadataPair;
                     std::string filename = metadataExtension->sourcePath.filename().string();
                     DrawAssetTile(guid, filename.c_str());
@@ -58,6 +85,11 @@ namespace Laura
 
 
     void AssetsPanel::DrawAssetTile(LR_GUID guid, const char* title) {
+        if (!m_ProjectManager->ProjectIsOpen()) {
+            return;
+        }
+        auto assetPool = m_ProjectManager->GetAssetManager()->GetAssetPool();
+
         ImGui::PushID((uint64_t)guid);
         EditorTheme& theme = m_EditorState->temp.editorTheme;
         ImDrawList* drawlist = ImGui::GetWindowDrawList();
@@ -78,11 +110,11 @@ namespace Laura
         // decide on the icon and drag and drop destination based on asset type
         const char* icon = nullptr;
         const char* dndPayloadType = nullptr;
-        if (m_AssetPool->Get<MeshMetadata>(guid) != nullptr) {
+        if (assetPool->find<MeshMetadata>(guid) != nullptr) {
             icon = ICON_FA_CUBE;
             dndPayloadType = DNDPayloadTypes::MESH;
         }
-        else if (m_AssetPool->Get<TextureMetadata>(guid) != nullptr) {
+        else if (assetPool->find<TextureMetadata>(guid) != nullptr) {
             icon = ICON_FA_FILE_IMAGE;
             dndPayloadType = DNDPayloadTypes::TEXTURE;
         }
@@ -145,6 +177,11 @@ namespace Laura
     }
     
     void AssetsPanel::DrawAssetMetadata() {
+        if (!m_ProjectManager->ProjectIsOpen()) {
+            return;
+        }
+        auto assetPool = m_ProjectManager->GetAssetManager()->GetAssetPool();
+
         ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x);
         EditorTheme& theme = m_EditorState->temp.editorTheme;
 
@@ -162,8 +199,8 @@ namespace Laura
         }
 
         // Check (asset missing in resource pool but editor UI displays it)
-        const auto& it = m_AssetPool->Metadata.find(m_SelectedTile);
-        if (it == m_AssetPool->Metadata.end()) {
+        const auto& it = assetPool->Metadata.find(m_SelectedTile);
+        if (it == assetPool->Metadata.end()) {
             theme.PushColor(ImGuiCol_Text, EditorCol_Error);
             ImGui::Text("[ERROR] Invalid Asset");
             theme.PopColor();

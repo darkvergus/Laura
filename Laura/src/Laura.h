@@ -7,7 +7,6 @@
 #include "Core/Events/IEvent.h"
 #include "Core/Events/KeyEvents.h"
 #include "Core/Events/MouseEvents.h"
-#include "Core/Events/SceneEvents.h"
 #include "Core/Events/RenderEvents.h"
 
 #include "Core/GUID.h"
@@ -25,8 +24,7 @@
 #include "Project/Scene/Entity.h"
 #include "Project/Scene/Components.h"
 
-#include "Project/Assets/AssetManager.h"
-#include "Project/Assets/AssetTypes.h"
+#include "Project/ProjectManager.h"
 
 #include "lrpch.h"
 

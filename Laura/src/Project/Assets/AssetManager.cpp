@@ -169,7 +169,7 @@ namespace Laura
 		for (const auto& SUPPORTED_FORMAT : SUPPORTED_TEXTURE_FILE_FORMATS) {
 			if (extension == SUPPORTED_FORMAT) {
 				LOG_ENGINE_INFO("LoadAssetFile: loading texture {0} for GUID {1}", assetpath.string(), (uint64_t)guid);
-				return LoadTexture(assetpath, 4, guid);
+				return LoadTexture(assetpath, guid, 4);
 			}
 		}
 

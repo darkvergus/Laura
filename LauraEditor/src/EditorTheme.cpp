@@ -71,12 +71,12 @@ namespace Laura
         m_ColorPallete[EditorCol_Primary3]    = ImVec4{0.01f, 0.01f, 0.01f, 1.0f};      // MenuBarBg
         m_ColorPallete[EditorCol_Secondary1]  = ImVec4{0.078f, 0.078f, 0.078f, 1.0f};   // Header, TabHovered, TabSelected, AddComponentButton
         m_ColorPallete[EditorCol_Secondary2]  = ImVec4{0.138f, 0.138f, 0.138f, 1.0f};   // SelectedHeader
-        m_ColorPallete[EditorCol_Accent1]     = ImVec4{0.26f, 0.59f, 0.98f, 1.00f};     // SliderGrabActive, TabDimmedSelectedOverline (blue)
+        m_ColorPallete[EditorCol_Accent1]     = ImVec4{0.26f, 0.59f, 0.98f, 1.0f};     // SliderGrabActive, TabDimmedSelectedOverline (blue)
         m_ColorPallete[EditorCol_Accent2]     = ImVec4{0.391f, 0.391f, 0.391f, 1.0f};   // CheckMark, SliderGrab
         m_ColorPallete[EditorCol_Text1]       = ImVec4{1.0f, 1.0f, 1.0f, 1.0f};         // Text
         m_ColorPallete[EditorCol_Text2]       = ImVec4{0.5f, 0.5f, 0.5f, 1.0f};         // TextDisabled
         m_ColorPallete[EditorCol_Background1] = ImVec4{0.109f, 0.109f, 0.109f, 1.0f};   // WindowBg, TransformButtonBg (X/Y/Z)
-        m_ColorPallete[EditorCol_Background2] = ImVec4{0.08f, 0.08f, 0.08f, 0.940f};    // PopupBg
+        m_ColorPallete[EditorCol_Background2] = ImVec4{0.08f, 0.08f, 0.08f, 1.0f};    // PopupBg
         m_ColorPallete[EditorCol_Error]       = ImVec4{0.609f, 0.109f, 0.109f, 1.0f};   // TransformButtonXActive
         m_ColorPallete[EditorCol_Warning]     = ImVec4{1.0f, 0.5f, 0.0f, 1.0f};         // Custom fallback
         m_ColorPallete[EditorCol_Success]     = ImVec4{0.109f, 0.609f, 0.109f, 1.0f};   // TransformButtonYActive

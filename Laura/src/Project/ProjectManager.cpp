@@ -74,7 +74,7 @@ namespace Laura
 		m_AssetManager = std::make_shared<AssetManager>();
 		m_SceneManager = std::make_shared<SceneManager>();
 
-		if (!SaveProject(folderpath)) {
+		if (!SaveProject()) {
 			LOG_ENGINE_ERROR("NewProject: failed to save initial project file at {0}", folderpath.string());
 			return false;
 		}
@@ -84,12 +84,16 @@ namespace Laura
 	}
 
 
-	bool ProjectManager::OpenProject(const std::filesystem::path& folderpath) {
-		if (!(std::filesystem::exists(folderpath) && std::filesystem::is_directory(folderpath))) {
-			LOG_ENGINE_ERROR("OpenProject: project folder is invalid or does not exist at {0}", folderpath.string());
+	bool ProjectManager::OpenProject(const std::filesystem::path& projectfilePath) {
+		if (!std::filesystem::exists(projectfilePath) ||
+			!std::filesystem::is_regular_file(projectfilePath) ||
+			projectfilePath.extension() != PROJECT_FILE_EXTENSION)
+		{
+			LOG_ENGINE_ERROR("OpenProject: invalid .lrproj file selected: {}", projectfilePath.string());
 			return false;
 		}
 
+		auto folderpath = projectfilePath.parent_path();
 		m_ProjectPath = folderpath;
 
 		std::filesystem::path projectFilepath = ComposeProjectFilepath(folderpath);
@@ -109,34 +113,27 @@ namespace Laura
 	}
 
 
-	bool ProjectManager::SaveProject(const std::filesystem::path& folderpath) {
-		if (!IsProjectOpen()) {
+	bool ProjectManager::SaveProject() {
+		if (!ProjectIsOpen()) {
 			LOG_ENGINE_WARN("SaveProject: no project is currently open");
 			return false;
 		}
 
-		if (!(std::filesystem::exists(folderpath) && std::filesystem::is_directory(folderpath))) {
-			LOG_ENGINE_ERROR("SaveProject: project folder is invalid or does not exist at {0}", folderpath.string());
-			return false;
-		}
-
-
 		bool success = true;
-		std::filesystem::path projectFilepath = ComposeProjectFilepath(folderpath);
+		std::filesystem::path projectFilepath = ComposeProjectFilepath(m_ProjectPath);
 
 		if (!SaveProjectFile(projectFilepath, m_ProjectFile)) {
 			LOG_ENGINE_ERROR("SaveProject: failed to serialize project file at {0}", projectFilepath.string());
 			success = false;
 		} else { LOG_ENGINE_INFO("SaveProject: wrote project data into {0}", projectFilepath.string()); }
 
-		m_SceneManager->SaveScenesToFolder(folderpath);
-		m_AssetManager->SaveAssetPoolToFolder(folderpath);
-
+		m_SceneManager->SaveScenesToFolder(m_ProjectPath);
+		m_AssetManager->SaveAssetPoolToFolder(m_ProjectPath);
 		return success;
 	}
 
 	void ProjectManager::CloseProject() {
-		if (!IsProjectOpen()) {
+		if (!ProjectIsOpen()) {
 			LOG_ENGINE_WARN("CloseProject: no project is currently open");
 			return;
 		}

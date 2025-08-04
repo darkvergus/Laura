@@ -1,6 +1,5 @@
 #include "Core/Layers/RenderLayer.h"
 #include "Core/Events/RenderEvents.h"
-#include "Core/Events/SceneEvents.h"
 
 namespace Laura
 {
@@ -32,7 +31,7 @@ namespace Laura
 	}
 
 	void RenderLayer::onUpdate() {
-		if (m_ProjectManager->IsProjectOpen()) { // Get...Manager should not return nullptr
+		if (m_ProjectManager->ProjectIsOpen()) { // Get...Manager should not return nullptr
 			const auto& scene = m_ProjectManager->GetSceneManager()->GetOpenScene();
 			const auto& assetPool = m_ProjectManager->GetAssetManager()->GetAssetPool();
 			std::shared_ptr<IImage2D> RenderedFrame = m_Renderer.Render(scene.get(), assetPool.get());

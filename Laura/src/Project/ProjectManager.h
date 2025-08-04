@@ -60,16 +60,16 @@ namespace Laura
 		/// Opens an existing project from the given folder.
 		/// Loads the project file and initializes managers.
 		/// Returns true on success.
-		bool OpenProject(const std::filesystem::path& folderpath);
+		bool OpenProject(const std::filesystem::path& projectfilePath);
 
 		/// Saves the current project file (.lrproj) into the project folder.
 		/// Returns true on success.
-		bool SaveProject(const std::filesystem::path& folderpath);
+		bool SaveProject();
 
 		/// Shuts down managers and clears project data without saving.
 		void CloseProject();
 
-		inline bool IsProjectOpen() const { return !m_ProjectPath.empty(); }
+		inline bool ProjectIsOpen() const { return !m_ProjectPath.empty(); }
 		inline std::shared_ptr<SceneManager> GetSceneManager() const { return m_SceneManager; }
 		inline std::shared_ptr<AssetManager> GetAssetManager() const { return m_AssetManager; }
 
