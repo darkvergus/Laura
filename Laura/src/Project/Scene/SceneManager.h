@@ -24,7 +24,7 @@ namespace Laura
 		/// - Assigns a new GUID.
 		/// - Adds it to the internal scene map.
 		/// - Returns the new scene's GUID.
-		LR_GUID CreateScene(const std::string& name);
+		LR_GUID CreateScene(const std::string& name = "Empty Scene");
 
 		/// Removes a scene from the project by its GUID.
 		/// - If the scene is currently active, clears that field.

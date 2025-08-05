@@ -130,10 +130,8 @@ namespace Laura
 		YAML::Node root;
 		try {
 			root = YAML::LoadFile(scenepath.string());
-			auto scene = std::make_shared<Scene>();
-
+			auto scene = std::make_shared<Scene>(root["SceneName"].as<std::string>());
 			scene->m_SceneGUID	= static_cast<LR_GUID>(root["SceneGUID"].as<uint64_t>());
-			scene->m_SceneName	= root["SceneName"].as<std::string>();
 			scene->m_SkyboxGUID = static_cast<LR_GUID>(root["SkyboxGUID"].as<uint64_t>());
 
 			auto entitiesNode = root["Entities"];

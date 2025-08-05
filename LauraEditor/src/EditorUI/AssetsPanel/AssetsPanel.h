@@ -21,7 +21,9 @@ namespace Laura
 
 	private:
 		void DrawAssetTile(LR_GUID guid, const char* title);
-		void DrawAssetMetadata();
+		void DrawSceneTile(LR_GUID guid, const char* title);
+		void DrawGenericTile(LR_GUID guid, const char* title, const char* icon, const char* dndPayloadType);
+		void DrawTileInfo();
 		
 		std::shared_ptr<EditorState> m_EditorState;
 		std::shared_ptr<ProjectManager> m_ProjectManager;

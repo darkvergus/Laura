@@ -75,6 +75,7 @@ namespace Laura
 
 		inline void SetBootSceneGuid(LR_GUID guid) { m_ProjectFile.bootSceneGuid = guid; }
 		inline LR_GUID GetBootSceneGuid() const { return m_ProjectFile.bootSceneGuid; }
+		inline bool IsBootScene(LR_GUID guid) { return m_ProjectFile.bootSceneGuid == guid; }
 
 	private:
 		/// Filesystem path to the current project folder (where .lrproj lives).

@@ -20,7 +20,7 @@ namespace Laura
 
 	class Scene {
 	public:
-		explicit Scene(std::string name = "NewScene")
+		explicit Scene(std::string name)
 			: m_SceneName(std::move(name)) {
 			m_Registry = new entt::registry();
 		}
@@ -44,6 +44,8 @@ namespace Laura
 		inline LR_GUID				GetGuid()		const { return m_SceneGUID;  }
 		inline LR_GUID				GetSkyboxGuid() const { return m_SkyboxGUID; }
 		inline const std::string&	GetName()		const { return m_SceneName;  }
+
+		inline std::string&			GetMutableName()	{ return m_SceneName; }
 
 		inline void			SetSkyboxGuid(LR_GUID guid) { m_SkyboxGUID = guid;			  }
 		inline void			SetName(std::string name)	{ m_SceneName  = std::move(name); }

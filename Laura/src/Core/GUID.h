@@ -20,10 +20,8 @@ namespace Laura
 		bool operator!=(const LR_GUID& other) const { return m_GUID != other.m_GUID; }
 		operator uint64_t() const { return m_GUID; } // uint64_t conversion operator 
 
-		inline std::string toString() const {
-			std::stringstream ss;
-			ss << m_GUID;
-			return ss.str();
+		inline std::string string() const {
+			return std::to_string(m_GUID);
 		}
 		
 	private:

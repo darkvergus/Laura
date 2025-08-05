@@ -33,6 +33,7 @@ namespace Laura
 		config.OversampleV = 3;
 		config.PixelSnapH = true;
         io.FontDefault = io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/Inter/Inter_18pt-Medium.ttf", 15.0f, &config);
+        //io.FontDefault = io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/source-sans/SourceSans3-Regular.ttf", 15.0f, &config);
 
         ImFontConfig iconConfig;
         iconConfig.MergeMode = true;  // Merge Font Awesome with the default font
