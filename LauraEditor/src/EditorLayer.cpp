@@ -56,11 +56,11 @@ namespace Laura
 			if (ImGui::BeginMenu("Window")) {
 				bool themePanelDisabled = m_EditorState->temp.isThemePanelOpen;
 				if (themePanelDisabled)			 { ImGui::BeginDisabled(); }
-				if (ImGui::MenuItem("Themes"  )) { m_EditorState->temp.isThemePanelOpen = true; }
+				if (ImGui::MenuItem(ICON_FA_BRUSH " THEMES"  )) { m_EditorState->temp.isThemePanelOpen = true; }
 				if (themePanelDisabled)			 { ImGui::EndDisabled(); }
 				bool profilerPanelDisabled = m_EditorState->temp.isProfilerPanelOpen;
 				if (profilerPanelDisabled)		 { ImGui::BeginDisabled(); }
-				if (ImGui::MenuItem("Profiler")) { m_EditorState->temp.isProfilerPanelOpen = true; }
+				if (ImGui::MenuItem(ICON_FA_STOPWATCH " PROFILER")) { m_EditorState->temp.isProfilerPanelOpen = true; }
 				if (profilerPanelDisabled)		 { ImGui::EndDisabled(); }
 				ImGui::EndMenu();
 			}
@@ -78,6 +78,8 @@ namespace Laura
 
 	void EditorLayer::onUpdate() {
 		m_ImGuiContext->BeginFrame();
+		m_EditorState->temp.editorTheme.ApplyAllToImgui(); // apply theme every frame
+
 		if (!m_ProjectManager->ProjectIsOpen()) {
 			m_Launcher.OnImGuiRender();
 			m_ImGuiContext->EndFrame();

@@ -14,8 +14,16 @@ namespace Laura
 	enum struct ViewportMode {
 		FitToViewport,
 		StretchToViewport,
-		CenterToViewport
+		CenterToViewport,
+		COUNT
 	};
+	inline constexpr const char* ViewportModeStr[] = { 
+		"Fit", 
+		"Stretch", 
+		"Center" 
+	};
+	static_assert(std::size(ViewportModeStr) == static_cast<size_t>(ViewportMode::COUNT),
+				  "ViewportModeStr must match ViewportMode enum");
 
 	struct EditorState {
 		struct {

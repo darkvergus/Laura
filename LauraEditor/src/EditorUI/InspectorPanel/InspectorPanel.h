@@ -21,6 +21,7 @@ namespace Laura
 	private:
 		template<typename T, typename UILambda>
 		inline void DrawComponent(const std::string& TreenodeTitle, EntityHandle& entity, UILambda uiLambda, bool removable = true) {
+			auto theme = m_EditorState->temp.editorTheme;
 			const ImGuiTreeNodeFlags treenodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap
 													| ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 			static bool deleteComponent = false;
@@ -36,7 +37,7 @@ namespace Laura
 
 				bool componentTreeNodeOpen = ImGui::TreeNodeEx(TreenodeTitle.c_str(), treenodeFlags);
 				ImGui::SameLine(panelDims.x - 1.5 * lineHeight - 0.2);
-
+				theme.PushColor(ImGuiCol_Button, EditorCol_Transparent);
 				if (removable) {
 					if (ImGui::Button(ICON_FA_TRASH)) {
 						deleteComponent = true;
@@ -61,7 +62,7 @@ namespace Laura
 					}
 					ImGui::EndPopup();
 				}
-
+				theme.PopColor(); // transparent button
 				if (componentTreeNodeOpen) {
 					float avail_width = ImGui::GetContentRegionAvail().x;
 					float margin_right = 5.0f;  // pixels to leave empty on the right

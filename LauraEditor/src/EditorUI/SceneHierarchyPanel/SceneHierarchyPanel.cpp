@@ -11,8 +11,7 @@ namespace Laura
 
     void SceneHierarchyPanel::OnImGuiRender() {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
-
-        ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
+        ImGui::Begin(ICON_FA_FOLDER_TREE " SCENE HIERARCHY");
 
         if (!m_ProjectManager->ProjectIsOpen()) {
             ImGui::End();
@@ -32,8 +31,7 @@ namespace Laura
             LOG_ENGINE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
 			return;
 		}
-        
-        if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
+        if (ImGui::BeginMenu("Add")) {
             if (ImGui::MenuItem("Empty")) {
                 scene->CreateEntity();
             }
@@ -58,9 +56,12 @@ namespace Laura
             EntityHandle entity(entityID, activeRegistry);
             std::string& tag = entity.GetComponent<TagComponent>().Tag;
 
+            theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
             // display selected entity
             if (entityID == m_EditorState->temp.selectedEntity) {
-                theme.PushColor(ImGuiCol_Header, EditorCol_Secondary2);
+                theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
+                theme.PushColor(ImGuiCol_Header, EditorCol_Secondary1);
+                theme.PushColor(ImGuiCol_Button, EditorCol_Transparent);
 
                 entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
                 ImGui::SameLine(panelDims.x - lineHeight * 0.5);
@@ -69,11 +70,12 @@ namespace Laura
                         scene->DestroyEntity(entity);
                         m_EditorState->temp.selectedEntity = entt::null;
                     }, m_EditorState);
-                theme.PopColor();
+                theme.PopColor(3);
 			}
 			else { // display non-selected entity
 				entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
 			}
+            theme.PopColor();
 
             if (ImGui::IsItemClicked()) {
                 m_EditorState->temp.selectedEntity = entityID;

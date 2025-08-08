@@ -30,7 +30,7 @@ namespace Laura
 		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background2);
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 }); // remove the border padding
-		ImGui::Begin(ICON_FA_EYE " Viewport", nullptr, ViewportFlags);
+		ImGui::Begin(ICON_FA_EYE " VIEWPORT", nullptr, ViewportFlags);
 		ImGui::BeginChild("DropArea");
 	
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -123,35 +123,48 @@ namespace Laura
 	}
 
 	void ViewportPanel::DrawVieportSettingsButton() {
+		auto theme = m_EditorState->temp.editorTheme;
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 		ImGui::Spacing();
 		ImGui::SameLine(panelDims.x - lineHeight);
+		theme.PushColor(ImGuiCol_Button, EditorCol_Background3);
 		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, { lineHeight, lineHeight })) {
 			m_EditorState->temp.isViewportSettingsPanelOpen = true;
 		}
+		theme.PopColor(); // button
 	}
 
 	void ViewportPanel::DrawViewportSettingsPanel() {
+		auto theme = m_EditorState->temp.editorTheme;
 		if (!m_EditorState->temp.isViewportSettingsPanelOpen) {
 			return;
 		}
 
 		static ImGuiWindowFlags ViewportSettingsFlags = ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+			ImGuiWindowFlags_NoCollapse;
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
-		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &m_EditorState->temp.isViewportSettingsPanelOpen, ViewportSettingsFlags);
-
-		ImGui::Text("Viewport Mode");
+		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
+		ImGui::SetNextWindowSizeConstraints({ 250.0f, 150.0f }, { FLT_MAX, FLT_MAX });
+		ImGui::Begin(ICON_FA_EYE " VIEWPORT OPTIONS", &m_EditorState->temp.isViewportSettingsPanelOpen, ViewportSettingsFlags);
 		
-		if (	ImGui::RadioButton("Center",	(int*)&m_EditorState->persistent.viewportMode, (int)ViewportMode::CenterToViewport)  ||
-				ImGui::RadioButton("Stretch",	(int*)&m_EditorState->persistent.viewportMode, (int)ViewportMode::StretchToViewport) ||
-				ImGui::RadioButton("Fit",		(int*)&m_EditorState->persistent.viewportMode, (int)ViewportMode::FitToViewport)){
-			ForceUpdate = true;
-		}
+		ViewportMode& mode = m_EditorState->persistent.viewportMode;
+		int currentMode = static_cast<int>(mode);
+		theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
+		ImGui::Text("Display: ");
+		theme.PopColor();
+		ImGui::SameLine();
+
+		theme.PushColor(ImGuiCol_FrameBg, EditorCol_Background1);
+			if (ImGui::Combo("##Viewport Mode", &currentMode, ViewportModeStr, IM_ARRAYSIZE(ViewportModeStr))) {
+				mode = static_cast<ViewportMode>(currentMode);
+				ForceUpdate = true;
+			}
+		theme.PopColor();
 
 		ImGui::End();
+		theme.PopColor();
 		ImGui::PopStyleVar();
 	}
 }

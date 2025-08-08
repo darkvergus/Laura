@@ -14,7 +14,7 @@ namespace Laura
             ImGui::SameLine(150);
         };
 
-		ImGui::Begin(ICON_FA_WRENCH " Render Settings");
+		ImGui::Begin(ICON_FA_WRENCH " RENDER SETTINGS");
 		float avail_width = ImGui::GetContentRegionAvail().x;
 		float margin_right = 5.0f;  // pixels to leave empty on the right
 
@@ -28,7 +28,8 @@ namespace Laura
 
 				DrawLabel("Resolution:");
 				static int current_idx = 0;
-				if (ImGui::BeginCombo("##resolution", m_ResolutionOptions[current_idx].label, ImGuiComboFlags_NoArrowButton)) {
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+				if (ImGui::BeginCombo("##resolution", m_ResolutionOptions[current_idx].label)) {
     				for (int n = 0; n < m_ResolutionOptions.size(); n++) {
         				bool selected = (current_idx == n);
         				if (ImGui::Selectable(m_ResolutionOptions[n].label, selected)) {
@@ -41,9 +42,11 @@ namespace Laura
 
 				float drag_speed = 0.1f;  // slower dragging speed
 				DrawLabel("Rays Per Pixel:");
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				ImGui::DragInt("##RaysPerPixelDragInt", &m_RaysPerPixel, drag_speed, 0, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
 
 				DrawLabel("Bounces Per Ray:");
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				ImGui::DragInt("##BouncesPerRayDragInt", &m_BouncesPerRay, drag_speed, 0, 100, "%d", ImGuiSliderFlags_AlwaysClamp);
 
 				theme.PushColor(ImGuiCol_CheckMark, EditorCol_Text1);

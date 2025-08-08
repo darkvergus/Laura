@@ -11,10 +11,9 @@ namespace Laura
 
     void InspectorPanel::OnImGuiRender() {
 		EditorTheme& theme = m_EditorState->temp.editorTheme;
-		float margin = 5.0f;
 		
 		ImGui::SetNextWindowSizeConstraints({ 350, 50 }, {FLT_MAX, FLT_MAX});
-		ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
+		ImGui::Begin(ICON_FA_CIRCLE_INFO " INSPECTOR");
 		
 
         if (!m_ProjectManager->ProjectIsOpen()) {
@@ -36,18 +35,19 @@ namespace Laura
 		
 		// TAG COMPONENT
         if (entity.HasComponent<TagComponent>()) {
+			theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 			std::string& tag = entity.GetComponent<TagComponent>().Tag;
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			strcpy(buffer, tag.c_str());
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(ICON_FA_TAG); ImGui::SameLine();
-			if (ImGui::InputText("##Tag", buffer, sizeof(buffer))) {
+			ImGui::Text(ICON_FA_TAG " Name:"); ImGui::SameLine();
+			theme.PopColor();
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			if (ImGui::InputTextWithHint("##Tag Component", "Entity Name", buffer, sizeof(buffer))) {
 				tag = std::string(buffer);
 			}
-			ImGui::Dummy({ 0.0f, 5.0f });
-			ImGui::Separator();
-			ImGui::Dummy({ 0.0f, 5.0f });
+			ImGui::Dummy({ 0.0f, 10.0f });
 		}
 
 		// TRANSFORM COMPONENT
@@ -79,7 +79,7 @@ namespace Laura
 				ImGui::Text("FOV");
 				theme.PopColor();
 				ImGui::SameLine();
-				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - margin);
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				ImGui::DragFloat("##fovDragInt", &cameraComponent.fov, 0.1f, 10.0f, 130.0f, "%.1f");
 			}
 		);

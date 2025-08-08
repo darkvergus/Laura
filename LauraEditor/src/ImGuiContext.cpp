@@ -68,6 +68,7 @@ namespace Laura
             style.GrabRounding = 2.0f;
             style.ScrollbarRounding = 2.0f;
             style.DockingSeparatorSize = 0.0f;
+            style.WindowBorderSize = 0.0f;
         }
 
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f);

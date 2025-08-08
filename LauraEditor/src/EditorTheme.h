@@ -25,6 +25,8 @@ namespace Laura
 		EditorCol_Text2,
 		EditorCol_Background1,
 		EditorCol_Background2,
+		EditorCol_Background3,
+		EditorCol_Transparent,
 		EditorCol_Error,
 		EditorCol_Warning,
 		EditorCol_Success,
@@ -46,6 +48,8 @@ namespace Laura
 		"EditorCol_Text2",
 		"EditorCol_Background1",
 		"EditorCol_Background2",
+		"EditorCol_Background3",
+		"EditorCol_Transparent",
 		"EditorCol_Error",
 		"EditorCol_Warning",
 		"EditorCol_Success",
@@ -95,6 +99,11 @@ namespace Laura
 			assert(0 <= col && col < EditorCol_COUNT && "Invalid EditorCol_ passed");
 			return m_ColorPallete[col];
 		}
+
+		inline static ImVec4 RGBA(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) {
+            constexpr float inv255 = 1.0f / 255.0f;
+            return ImVec4{ r * inv255, g * inv255, b * inv255, a * inv255 };
+        };
 
 		void ApplyAllToImgui();
 
