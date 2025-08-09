@@ -24,6 +24,10 @@ namespace Laura
 		_LayerStack->PushLayer(_RenderLayer);
 	}
 
+	void Application::shutdown(){
+		_LayerStack->onDetach();
+	}
+
 	void Application::run() {
 		init();
 		// mainloop
@@ -39,6 +43,7 @@ namespace Laura
 				_LayerStack->onUpdate();
 			}
 		}
+
 		shutdown();
 	}
 }

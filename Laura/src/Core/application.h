@@ -32,7 +32,7 @@ namespace Laura
 
     protected:
         virtual void init();
-        inline virtual void shutdown() {};
+        virtual void shutdown();
     };
 
     Application* CreateApplication();

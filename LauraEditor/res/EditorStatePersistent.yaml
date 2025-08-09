@@ -1,3 +1,2 @@
-doubleConfirmation: true
-viewportMode: FitToViewport
-editorThemeFilepath: ""
+ViewportMode: FitToViewport
+EditorThemeFilepath: ""

@@ -67,13 +67,22 @@ namespace Laura
 			ImGui::EndMainMenuBar();
 		}
 
-		ConfirmAndExecute(shouldCloseProject, 
-		"Close Project", 
-		"Are you sure you want to close the project?\nMake sure you've saved your work to avoid losing changes.", 
-		[&]() {
-			m_ProjectManager->CloseProject();
-		}, 
-		m_EditorState);
+		ConfirmWithCancel (
+			shouldCloseProject,
+			ICON_FA_DIAGRAM_PROJECT " Close Project",
+			"Save before closing?",
+			ICON_FA_FLOPPY_DISK " Save & Close Project",
+			"Close Project",
+			"Cancel",
+			[&]() { 
+				m_ProjectManager->SaveProject();
+				m_ProjectManager->CloseProject();
+			},
+			[&]() { 
+				m_ProjectManager->CloseProject(); 
+			},
+			m_EditorState	
+		);
 	}
 
 	void EditorLayer::onUpdate() {

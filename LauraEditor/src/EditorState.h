@@ -37,7 +37,6 @@ namespace Laura
 		// TO ADD new persistent entries, add them here and update the SERIALIZE and DESERIALIZE functions 
 		// (if the type is custom, also create a YAML::convert template specialization)
 		struct {
-			bool doubleConfirmEnabled = false;
 			ViewportMode viewportMode = ViewportMode::FitToViewport;
 			std::filesystem::path editorThemeFilepath = "";
 		} persistent;
