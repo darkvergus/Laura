@@ -5,40 +5,49 @@ namespace Laura
 {
 
 	/// INSPECTOR PANEL METHODS //////////////////////////////////////////////////////////////
-	InspectorPanel::InspectorPanel(std::shared_ptr<EditorState> editorState)
-		: m_EditorState(editorState) {
+	InspectorPanel::InspectorPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ProjectManager> projectManager)
+		: m_EditorState(editorState), m_ProjectManager(projectManager) {
 	}
 
-    void InspectorPanel::OnImGuiRender(std::weak_ptr<Scene> scene) {
+    void InspectorPanel::OnImGuiRender() {
 		EditorTheme& theme = m_EditorState->temp.editorTheme;
 		
 		ImGui::SetNextWindowSizeConstraints({ 350, 50 }, {FLT_MAX, FLT_MAX});
-		ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
+		ImGui::Begin(ICON_FA_CIRCLE_INFO " INSPECTOR");
+		
 
-		auto sceneShared = scene.lock();
-        if (sceneShared == nullptr || m_EditorState->temp.selectedEntity == entt::null) {
+        if (!m_ProjectManager->ProjectIsOpen()) {
+            ImGui::End();
+            return;
+        }
+
+        std::shared_ptr<Scene> scene = m_ProjectManager->GetSceneManager()->GetOpenScene();
+
+        if (scene == nullptr || m_EditorState->temp.selectedEntity == entt::null) {
 			ImGui::End();
 			return;
 		}
-		
-        entt::registry* activeRegistry = sceneShared->GetRegistry();
+
+		theme.PushColor(ImGuiCol_FrameBg, EditorCol_Primary2);
+        entt::registry* activeRegistry = scene->GetRegistry();
         entt::entity selectedEntity = m_EditorState->temp.selectedEntity;
         EntityHandle entity(selectedEntity, activeRegistry);
-
+		
 		// TAG COMPONENT
         if (entity.HasComponent<TagComponent>()) {
+			theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 			std::string& tag = entity.GetComponent<TagComponent>().Tag;
 			char buffer[256];
 			memset(buffer, 0, sizeof(buffer));
 			strcpy(buffer, tag.c_str());
 			ImGui::AlignTextToFramePadding();
-			ImGui::Text(ICON_FA_TAG); ImGui::SameLine();
-			if (ImGui::InputText("##Tag", buffer, sizeof(buffer))) {
+			ImGui::Text(ICON_FA_TAG " Name:"); ImGui::SameLine();
+			theme.PopColor();
+			ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+			if (ImGui::InputTextWithHint("##Tag Component", "Entity Name", buffer, sizeof(buffer))) {
 				tag = std::string(buffer);
 			}
-			ImGui::Dummy({ 0.0f, 5.0f });
-			ImGui::Separator();
-			ImGui::Dummy({ 0.0f, 5.0f });
+			ImGui::Dummy({ 0.0f, 10.0f });
 		}
 
 		// TRANSFORM COMPONENT
@@ -48,17 +57,17 @@ namespace Laura
 		);
 
 		// CAMERA COMPOENENT
-		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&theme, &sceneShared](EntityHandle& entity) {
+		DrawComponent<CameraComponent>(std::string(ICON_FA_VIDEO " Camera Component"), entity, [&](EntityHandle& entity) {
 				auto& cameraComponent = entity.GetComponent<CameraComponent>();
 
 				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				ImGui::Text("Main Camera:");
 				theme.PopColor();
-				ImGui::SameLine(150.0f);
+				ImGui::SameLine();
 				theme.PushColor(ImGuiCol_CheckMark, EditorCol_Text1);
 				if (ImGui::Checkbox("##MainCameraCheckbox", &cameraComponent.isMain)) {
-					for (auto e : sceneShared->GetRegistry()->view<CameraComponent>()) {
-						EntityHandle otherEntity(e, sceneShared->GetRegistry());
+					for (auto e : scene->GetRegistry()->view<CameraComponent>()) {
+						EntityHandle otherEntity(e, scene->GetRegistry());
 						if (otherEntity.GetComponent<GUIDComponent>().guid != entity.GetComponent<GUIDComponent>().guid) {
 							otherEntity.GetComponent<CameraComponent>().isMain = false;
 						}
@@ -69,7 +78,8 @@ namespace Laura
 				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				ImGui::Text("FOV");
 				theme.PopColor();
-				ImGui::SameLine(150.0f);
+				ImGui::SameLine();
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
 				ImGui::DragFloat("##fovDragInt", &cameraComponent.fov, 0.1f, 10.0f, 130.0f, "%.1f");
 			}
 		);
@@ -136,6 +146,7 @@ namespace Laura
 
 		// ensure that there is always some space under the Add Component button when scrolling to display the popup
 		ImGui::Dummy(ImVec2(0.0f, 100.0f)); 
+		theme.PopColor();
         ImGui::End();
     }
 }

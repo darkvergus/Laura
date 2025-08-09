@@ -14,17 +14,18 @@ namespace Laura
 		// make window forward events to the layerStack
 		_Window->setEventCallback([this](std::shared_ptr<IEvent> event) { _LayerStack->dispatchEvent(event); });
 
-		_ResourcePool = std::make_shared<Asset::ResourcePool>();
-		_AssetManager = std::make_shared<Asset::Manager>();
-		_AssetManager->SetResourcePool(_ResourcePool.get());
+		_ProjectManager = std::make_shared<ProjectManager>();
 
 		_RendererAPI = IRendererAPI::Create();
+		_RendererAPI->Init();
 
-		_SceneLayer = std::make_shared<SceneLayer>(_LayerStack, _AssetManager);
-		_RenderLayer = std::make_shared<RenderLayer>(_LayerStack, _Profiler, _ResourcePool);
+		_RenderLayer = std::make_shared<RenderLayer>(_LayerStack, _Profiler, _ProjectManager);
 
 		_LayerStack->PushLayer(_RenderLayer);
-		_LayerStack->PushLayer(_SceneLayer);
+	}
+
+	void Application::shutdown(){
+		_LayerStack->onDetach();
 	}
 
 	void Application::run() {
@@ -42,6 +43,7 @@ namespace Laura
 				_LayerStack->onUpdate();
 			}
 		}
+
 		shutdown();
 	}
 }

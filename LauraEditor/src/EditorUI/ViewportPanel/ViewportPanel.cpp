@@ -1,31 +1,51 @@
 #include "ViewportPanel.h"
 #include <IconsFontAwesome6.h>
 #include <imgui_internal.h>
+#include "EditorUI/DNDPayloads.h"
 
 namespace Laura
 {
 
-	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image, std::shared_ptr<EditorState> editorState) {
+	void ViewportPanel::DrawDropTargetForScene() {
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(DNDPayloadTypes::SCENE)) {
+				IM_ASSERT(payload->DataSize == sizeof(DNDPayload));
+				auto& scenePayload = *static_cast<DNDPayload*>(payload->Data);
+				if (m_ProjectManager->ProjectIsOpen()) {
+					if (auto sceneManager = m_ProjectManager->GetSceneManager()) {
+						sceneManager->SetOpenScene(scenePayload.guid);
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+	}
+
+	void ViewportPanel::OnImGuiRender(std::weak_ptr<IImage2D> image) {
 		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoCollapse;
-		
+		auto theme = m_EditorState->temp.editorTheme;
+
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec4 originalWindowBG = style.Colors[ImGuiCol_WindowBg];
-		style.Colors[ImGuiCol_WindowBg] = style.Colors[ImGuiCol_TitleBg]; // make the background blend with the titlebar
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 }); // remove the border padding
-		ImGui::Begin(ICON_FA_EYE " Viewport", nullptr, ViewportFlags);
-
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background2);
 		
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 }); // remove the border padding
+		ImGui::Begin(ICON_FA_EYE " VIEWPORT", nullptr, ViewportFlags);
+		ImGui::BeginChild("DropArea");
+	
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		ForceUpdate = false;
 
-		DrawViewportSettingsPanel(editorState);
+		DrawViewportSettingsPanel();
 
 		auto imageShared = image.lock();
 		if (imageShared == nullptr) {
-			DrawVieportSettingsButton(editorState);
+			DrawVieportSettingsButton();
+			ImGui::EndChild();
 			ImGui::PopStyleVar();
+			DrawDropTargetForScene();
 			ImGui::End();
+			theme.PopColor();
 			return;
 		}
 		
@@ -36,7 +56,7 @@ namespace Laura
 		bool DimensionsChanged = (ImageDimensions != m_PrevImageDimensions || WindowDimensions != m_PrevWindowDimensions);
 		bool PositionChanged = (TLWindowPosition != m_PrevWindowPosition);
 
-		if (editorState->persistent.viewportMode == ViewportMode::CenterToViewport) {
+		if (m_EditorState->persistent.viewportMode == ViewportMode::CenterToViewport) {
 			if (DimensionsChanged || PositionChanged || ForceUpdate) {
 				glm::ivec2 OffsetTopLeftCorner = (WindowDimensions - ImageDimensions) / 2;
 				m_TopLeftImageCoords = OffsetTopLeftCorner + TLWindowPosition;
@@ -44,14 +64,14 @@ namespace Laura
 			}
 		}
 
-		if (editorState->persistent.viewportMode == ViewportMode::StretchToViewport) {
+		if (m_EditorState->persistent.viewportMode == ViewportMode::StretchToViewport) {
 			if (DimensionsChanged || PositionChanged || ForceUpdate) {
 				m_TopLeftImageCoords = TLWindowPosition;
 				m_BottomRightImageCoords = TLWindowPosition + WindowDimensions;
 			}
 		}
 
-		if (editorState->persistent.viewportMode == ViewportMode::FitToViewport) {
+		if (m_EditorState->persistent.viewportMode == ViewportMode::FitToViewport) {
 			// if the ViewportPanel has been resized or the renderer output image size has been changed
 
 			if (DimensionsChanged || PositionChanged || ForceUpdate) {
@@ -92,42 +112,59 @@ namespace Laura
 		ImVec2 BRImVec = ImVec2(m_BottomRightImageCoords.x, m_BottomRightImageCoords.y);
 		drawList->AddImage((ImTextureID)imageShared->GetID(), TLImVec, BRImVec, { 0, 1 }, { 1, 0 });
 
-		DrawVieportSettingsButton(editorState);
+		DrawVieportSettingsButton();
 
+		ImGui::EndChild();
 		ImGui::PopStyleVar();
+		DrawDropTargetForScene();
+
 		ImGui::End();
-		style.Colors[ImGuiCol_WindowBg] = originalWindowBG;
+		theme.PopColor();
 	}
 
-	void ViewportPanel::DrawVieportSettingsButton(std::shared_ptr<EditorState> editorState) {
+	void ViewportPanel::DrawVieportSettingsButton() {
+		auto theme = m_EditorState->temp.editorTheme;
 		ImVec2 panelDims = ImGui::GetContentRegionAvail();
 		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
 		ImGui::Spacing();
 		ImGui::SameLine(panelDims.x - lineHeight);
+		theme.PushColor(ImGuiCol_Button, EditorCol_Background3);
 		if (ImGui::Button(ICON_FA_ELLIPSIS_VERTICAL, { lineHeight, lineHeight })) {
-			editorState->temp.isViewportSettingsPanelOpen = true;
+			m_EditorState->temp.isViewportSettingsPanelOpen = true;
 		}
+		theme.PopColor(); // button
 	}
 
-	void ViewportPanel::DrawViewportSettingsPanel(std::shared_ptr<EditorState> editorState) {
-		if (!editorState->temp.isViewportSettingsPanelOpen) {
+	void ViewportPanel::DrawViewportSettingsPanel() {
+		auto theme = m_EditorState->temp.editorTheme;
+		if (!m_EditorState->temp.isViewportSettingsPanelOpen) {
 			return;
 		}
 
 		static ImGuiWindowFlags ViewportSettingsFlags = ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize;
+			ImGuiWindowFlags_NoCollapse;
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
-		ImGui::Begin(ICON_FA_GEAR " Viewport Settings", &editorState->temp.isViewportSettingsPanelOpen, ViewportSettingsFlags);
-		ImGui::Text("Viewport Mode");
+		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
+		ImGui::SetNextWindowSizeConstraints({ 250.0f, 150.0f }, { FLT_MAX, FLT_MAX });
+		ImGui::Begin(ICON_FA_EYE " VIEWPORT OPTIONS", &m_EditorState->temp.isViewportSettingsPanelOpen, ViewportSettingsFlags);
 		
-		if (	ImGui::RadioButton("Center",	(int*)&editorState->persistent.viewportMode, (int)ViewportMode::CenterToViewport)  ||
-				ImGui::RadioButton("Stretch",	(int*)&editorState->persistent.viewportMode, (int)ViewportMode::StretchToViewport) ||
-				ImGui::RadioButton("Fit",		(int*)&editorState->persistent.viewportMode, (int)ViewportMode::FitToViewport)){
-			ForceUpdate = true;
-		}
+		ViewportMode& mode = m_EditorState->persistent.viewportMode;
+		int currentMode = static_cast<int>(mode);
+		theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
+		ImGui::Text("Display: ");
+		theme.PopColor();
+		ImGui::SameLine();
+
+		theme.PushColor(ImGuiCol_FrameBg, EditorCol_Background1);
+			if (ImGui::Combo("##Viewport Mode", &currentMode, ViewportModeStr, IM_ARRAYSIZE(ViewportModeStr))) {
+				mode = static_cast<ViewportMode>(currentMode);
+				ForceUpdate = true;
+			}
+		theme.PopColor();
 
 		ImGui::End();
+		theme.PopColor();
 		ImGui::PopStyleVar();
 	}
 }

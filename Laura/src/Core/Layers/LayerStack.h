@@ -22,6 +22,7 @@ namespace Laura
 		void PopLayer(std::shared_ptr<ILayer> layer);
 
 		void onUpdate();
+		void onDetach();
 		virtual void dispatchEvent(std::shared_ptr<IEvent> event) override;
 
 	private:

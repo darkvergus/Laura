@@ -24,6 +24,8 @@ namespace Laura
 		GLCall(glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
 		GLCall(glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 		GLCall(glTextureStorage2D(m_ID, 1, GL_RGBA32F, width, height));
+		const float zero[4] = {0.f, 0.f, 0.f, 0.f};
+		GLCall(glClearTexImage(m_ID, 0, GL_RGBA, GL_FLOAT, zero));
 
 		if (data) {	// Passing data to the texture if not nullptr
 			GLCall(glTextureSubImage2D(m_ID, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data));

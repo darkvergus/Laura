@@ -3,6 +3,7 @@
 #include <Laura.h>
 #include "EditorState.h"
 #include "ImGuiContext.h"
+#include "EditorUI/Launcher/Launcher.h"
 #include "EditorUI/ViewportPanel/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel/SceneHierarchyPanel.h"
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
@@ -16,11 +17,10 @@ namespace Laura
 
 	class EditorLayer : public ILayer {
 	public:
-		EditorLayer(std::weak_ptr<IEventDispatcher> eventDispatcher,
-					std::shared_ptr<ImGuiContext> imGuiContext,
-					std::shared_ptr<Asset::ResourcePool> resourcePool, 
-					std::shared_ptr<Asset::Manager> assetManager, 
-					std::shared_ptr<Profiler> profiler
+		EditorLayer(std::shared_ptr<Profiler> profiler,
+					std::shared_ptr<IEventDispatcher> eventDispatcher,
+					std::shared_ptr<ProjectManager> projectManager,
+					std::shared_ptr<ImGuiContext> imGuiContext
 		);
 
 		virtual void onAttach() override;
@@ -32,10 +32,9 @@ namespace Laura
 		void DrawMainMenu();
 
 		// Engine
-		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
-		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
-		std::shared_ptr<Asset::Manager> m_AssetManager;
 		std::shared_ptr<Profiler> m_Profiler;
+		std::shared_ptr<IEventDispatcher> m_EventDispatcher;
+		std::shared_ptr<ProjectManager> m_ProjectManager;
 
 		// Values received from events
 		std::weak_ptr<Scene> m_Scene;
@@ -45,6 +44,7 @@ namespace Laura
 		std::shared_ptr<EditorState> m_EditorState;
 		std::shared_ptr<ImGuiContext> m_ImGuiContext;
 
+		Launcher m_Launcher;
 		SceneHierarchyPanel m_SceneHierarchyPanel;
 		InspectorPanel m_InspectorPanel;
 		ViewportPanel m_ViewportPanel;

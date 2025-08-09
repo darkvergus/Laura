@@ -3,13 +3,11 @@
 #include "lrpch.h"
 #include "Core/IWindow.h"
 #include "Core/Layers/LayerStack.h"
-#include "Core/Layers/SceneLayer.h"
 #include "Core/Layers/RenderLayer.h"
-#include "Renderer/Renderer.h"
-#include "Renderer/IRendererAPI.h"
-#include "Assets/Assets.h"
-#include "Events/IEvent.h"
 #include "Core/Profiler.h"
+#include "Project/ProjectManager.h"
+#include "Renderer/IRendererAPI.h"
+#include "Events/IEvent.h"
 
 namespace Laura 
 {
@@ -28,15 +26,13 @@ namespace Laura
         std::shared_ptr<IRendererAPI>   _RendererAPI;
         std::shared_ptr<Profiler>       _Profiler;
 
-        std::shared_ptr<Asset::ResourcePool> _ResourcePool;
-        std::shared_ptr<Asset::Manager>      _AssetManager;
+        std::shared_ptr<ProjectManager> _ProjectManager;
 
-        std::shared_ptr<SceneLayer>     _SceneLayer;
         std::shared_ptr<RenderLayer>    _RenderLayer;
 
     protected:
         virtual void init();
-        inline virtual void shutdown() {};
+        virtual void shutdown();
     };
 
     Application* CreateApplication();

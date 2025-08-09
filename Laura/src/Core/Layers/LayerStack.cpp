@@ -18,10 +18,16 @@ namespace Laura
 		m_Layers.erase(std::remove(m_Layers.begin(), m_Layers.end(), layer), m_Layers.end());
 		layer->onDetach();
 	}
-
+	
 	void LayerStack::onUpdate() {
 		for (std::shared_ptr<ILayer> layer : m_Layers) {
 			layer->onUpdate();
+		}
+	}
+
+	void LayerStack::onDetach() {
+		for (std::shared_ptr<ILayer> layer : m_Layers) {
+			layer->onDetach();
 		}
 	}
 

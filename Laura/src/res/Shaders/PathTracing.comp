@@ -275,7 +275,7 @@ HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri){
 
 void BVH_traverse(Ray ray, inout MeshEntityHandle meshEntity, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
 {
-    const Material defaultMaterial = Material(vec4(0.0, 0.0, 0.0, 0.0), vec3(0.8, 0.75, 0.9));
+    const Material defaultMaterial = Material(vec4(1.0, 1.0, 1.0, 0.1), vec3(0.8, 0.75, 0.9));
     int stack[MAX_STACK_SIZE];
     int stackTop = 0; // -1 when empty
     stack[stackTop] = 0; // stack_init(0 = root)
