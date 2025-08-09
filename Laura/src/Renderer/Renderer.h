@@ -31,6 +31,8 @@ namespace Laura
 			glm::uvec2 Resolution{0};
 			std::filesystem::path ActiveShaderPath{};
 			uint32_t AccumulatedFrames = 0;
+
+			LR_GUID prevSkyboxGuid = LR_GUID::INVALID;
 		};
 
 		// Under the std430 - 80 bytes

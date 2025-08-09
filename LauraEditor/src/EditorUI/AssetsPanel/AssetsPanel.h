@@ -35,7 +35,7 @@ namespace Laura
 		const float TILE_SCALAR_MIN = 75.0f;
 		const float TILE_SCALAR_MAX = 110.0f;
 
-		LR_GUID m_SelectedTile = LR_GUID::INVALID;
+		LR_GUID m_SelectedTileGuid = LR_GUID::INVALID;
 		float m_TileScalar = TILE_SCALAR_MAX;
 
 		DNDPayload m_DNDPayload;

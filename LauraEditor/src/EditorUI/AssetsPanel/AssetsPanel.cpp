@@ -62,6 +62,13 @@ namespace Laura
             ImGui::TableNextColumn();
             ImGui::BeginChild("LeftPanel", ImVec2(0, ImGui::GetContentRegionAvail().y), false);
             {
+                if (ImGui::IsMouseClicked(0) &&
+                    ImGui::IsWindowHovered() &&
+                    !ImGui::IsAnyItemHovered() &&
+                    ImGui::GetDragDropPayload() == nullptr) {
+                m_SelectedTileGuid = LR_GUID::INVALID;
+                }
+
                 float horizontalSpacing = 15.0f;
                 float verticalSpacing = 3.0f;
                 ImGuiStyle& style = ImGui::GetStyle();
@@ -137,16 +144,11 @@ namespace Laura
 		EditorTheme& theme = m_EditorState->temp.editorTheme;
 		ImDrawList* drawlist = ImGui::GetWindowDrawList();
 
-		// Deselect on click outside a tile
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) {
-			m_SelectedTile = LR_GUID::INVALID;
-		}
-
 		// Render the Selectable
-		EditorCol_ tileBg = (m_SelectedTile == guid) ? EditorCol_Secondary1 : EditorCol_Primary3;
+		EditorCol_ tileBg = (m_SelectedTileGuid == guid) ? EditorCol_Secondary1 : EditorCol_Primary3;
 		theme.PushColor(ImGuiCol_Header, tileBg);
 		if (ImGui::Selectable("##tile", true, ImGuiSelectableFlags_None, { m_TileScalar * BASE_TILE_WH_RATIO, m_TileScalar })) {
-			m_SelectedTile = guid;
+			m_SelectedTileGuid = guid;
         }
         theme.PopColor();
 
@@ -166,7 +168,7 @@ namespace Laura
         ImVec2 tileCoordsTopLeft = ImGui::GetItemRectMin();
         ImVec2 tileCoordsBottomRight = ImGui::GetItemRectMax();
         ImVec2 tileDims = ImGui::GetItemRectSize();
-        if (m_SelectedTile != guid) {
+        if (m_SelectedTileGuid != guid) {
             drawlist->PushClipRect(tileCoordsTopLeft, tileCoordsBottomRight, true);
         }
          
@@ -218,7 +220,7 @@ namespace Laura
             wrapWidth
         );
 
-        if (m_SelectedTile != guid) {
+        if (m_SelectedTileGuid != guid) {
             drawlist->PopClipRect();
         }
 
@@ -245,11 +247,12 @@ namespace Laura
 
 
         // No asset selected
-        if (m_SelectedTile == LR_GUID::INVALID) {
+        if (m_SelectedTileGuid == LR_GUID::INVALID) {
             return;
         }
         
-        if (std::shared_ptr<Scene> scene = sceneManager->find(m_SelectedTile)) {
+        if (std::shared_ptr<Scene> scene = sceneManager->find(m_SelectedTileGuid)) {
+            assert(scene->guid == m_SelectedTileGuid);
             theme.PushColor(ImGuiCol_Text, EditorCol_Accent1);
             ImGui::AlignTextToFramePadding();
             ImGui::Text("General");
@@ -291,7 +294,7 @@ namespace Laura
 			}
             ConfirmAndExecute(shouldDeleteScene, ICON_FA_TRASH " Delete Scene", "Are you sure you want to delete this scene?", [&]() {
                 sceneManager->DeleteScene(scene->guid);
-                m_SelectedTile = LR_GUID::INVALID;
+                m_SelectedTileGuid = LR_GUID::INVALID;
 			}, m_EditorState);
 
             theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
@@ -323,7 +326,6 @@ namespace Laura
 					auto& texPayload = *static_cast<DNDPayload*>(payload->Data);
 					scene->skyboxName = texPayload.title; // copy char title[256] into std::string
 					scene->skyboxGuid = texPayload.guid;
-                    scene->MarkSkyboxUpdated();
 				}
 				ImGui::EndDragDropTarget();
 			}
@@ -350,7 +352,7 @@ namespace Laura
             DrawLabelValue("Guid:", scene->guid.string().c_str());
 
         }
-        else if (const auto& it = assetPool->Metadata.find(m_SelectedTile); it != assetPool->Metadata.end()) {
+        else if (const auto& it = assetPool->Metadata.find(m_SelectedTileGuid); it != assetPool->Metadata.end()) {
             theme.PushColor(ImGuiCol_Text, EditorCol_Accent1);
             ImGui::Text("General");
             theme.PopColor();
@@ -370,7 +372,7 @@ namespace Laura
             }
             ConfirmAndExecute(shouldDeleteAsset, ICON_FA_TRASH " Delete Asset", "Are you sure you want to delete this asset?", [&]() {
                 // TODO delete asset  assetManager->DeleteAsset(guid);
-                m_SelectedTile = LR_GUID::INVALID;
+                m_SelectedTileGuid = LR_GUID::INVALID;
 			}, m_EditorState);
 
             const auto& [metadata, metadataExtension] = it->second;
@@ -398,6 +400,7 @@ namespace Laura
 
             DrawLabelValue("File Size:", ConvertFileSize(metadataExtension->fileSizeInBytes));
             DrawLabelValue("Load Time:", std::format("{:.2f} ms", metadataExtension->loadTimeMs));
+            DrawLabelValue("Guid:", m_SelectedTileGuid.string());
 
             ImGui::Dummy({ 0.0f, 5.0f });
             // AssetType specific data

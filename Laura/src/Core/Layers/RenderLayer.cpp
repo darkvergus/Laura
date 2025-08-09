@@ -18,7 +18,7 @@ namespace Laura
 		m_Renderer.settings.bouncesPerRay = 5;
 		m_Renderer.settings.maxAABBIntersections = 500;
 		m_Renderer.settings.displayBVH = false;
-		m_Renderer.settings.ShouldAccumulate = false;
+		m_Renderer.settings.ShouldAccumulate = true;
 
 		// The FRAME_WIDTH and FRAME_HEIGHT define the dimensions of the render frame.
 		// These values represent the actual number of pixels that the renderer will process to produce the final image.

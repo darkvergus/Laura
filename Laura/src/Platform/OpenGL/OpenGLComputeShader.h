@@ -26,7 +26,7 @@ namespace Laura
 	private:
 		uint32_t m_ID;
 		glm::uvec3 m_WorkGroupSizes;
-		const std::string& m_Filepath;
+		const std::string m_Filepath;
 
 	private:
 		void CreateShader();

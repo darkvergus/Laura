@@ -6,7 +6,7 @@ namespace Laura
 {
 
 	EditorLayer::EditorLayer(std::shared_ptr<Profiler> profiler,
-							 std::weak_ptr<IEventDispatcher> eventDispatcher,
+							 std::shared_ptr<IEventDispatcher> eventDispatcher,
 							 std::shared_ptr<ProjectManager> projectManager,
 							 std::shared_ptr<ImGuiContext> imGuiContext)
 		:	m_EventDispatcher(eventDispatcher),

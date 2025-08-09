@@ -46,6 +46,7 @@ namespace Laura
 		<< YAML::Key << "SceneGUID"  << YAML::Value << static_cast<uint64_t>(scene->guid)
 		<< YAML::Key << "SceneName"  << YAML::Value << scene->name
 		<< YAML::Key << "SkyboxGUID" << YAML::Value << static_cast<uint64_t>(scene->skyboxGuid)
+		<< YAML::Key << "SkyboxName" << YAML::Value << scene->skyboxName
 		<< YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 		// iterate over all entities
 		for (auto& e : scene->GetRegistry()->view<entt::entity>()) {
@@ -130,9 +131,11 @@ namespace Laura
 		YAML::Node root;
 		try {
 			root = YAML::LoadFile(scenepath.string());
-			auto scene = std::make_shared<Scene>(root["SceneName"].as<std::string>());
+			auto scene = std::make_shared<Scene>();
 			scene->guid	= static_cast<LR_GUID>(root["SceneGUID"].as<uint64_t>());
+			scene->name = root["SceneName"].as<std::string>();
 			scene->skyboxGuid = static_cast<LR_GUID>(root["SkyboxGUID"].as<uint64_t>());
+			scene->skyboxName = root["SkyboxName"].as<std::string>();
 
 			auto entitiesNode = root["Entities"];
 			if (entitiesNode && entitiesNode.IsSequence()) {

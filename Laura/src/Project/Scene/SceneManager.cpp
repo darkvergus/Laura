@@ -4,7 +4,8 @@ namespace Laura
 {
 
 	LR_GUID SceneManager::CreateScene(const std::string& name) {
-		auto scene = std::make_shared<Scene>(name);
+		auto scene = std::make_shared<Scene>();
+		scene->name = name;
 		m_Scenes[scene->guid] = scene;
 		LOG_ENGINE_INFO("CreateScene: created new scene \"{0}\" with GUID {1}", name, (uint64_t)scene->guid);
 		return scene->guid;

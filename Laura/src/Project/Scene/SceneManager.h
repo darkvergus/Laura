@@ -76,7 +76,7 @@ namespace Laura
 				return LR_GUID(std::stoull(stem)); // convert stem to unsigned long long GUID
 			}
 			catch (const std::exception&) {
-				LOG_ENGINE_WARN("ExtractGuid: filename \"{0}\" isn’t a valid unsigned integer — skipping", scenepath.string());
+				LOG_ENGINE_WARN("ExtractGuid: filename \"{0}\" isn't a valid unsigned integer - skipping", scenepath.string());
 				return LR_GUID::INVALID;
 			}
 		}

@@ -20,8 +20,7 @@ namespace Laura
 
 	class Scene {
 	public:
-		explicit Scene(std::string name)
-			: name(std::move(name)) {
+		explicit Scene() {
 			m_Registry = new entt::registry();
 		}
 
@@ -48,14 +47,8 @@ namespace Laura
 		LR_GUID		skyboxGuid;
 		std::string skyboxName;
 
-		// Versioning system to track buffer updates across multiple listeners (e.g., renderer).
-		// Listeners compare a static `lastUpdateId` against `GetUpdateVersion()` to detect changes.
-		inline void MarkSkyboxUpdated() { m_SkyboxUpdateVersion++; }
-		inline uint32_t GetSkyboxUpdateVersion() const { return m_SkyboxUpdateVersion; }
-
 	private:
 		entt::registry* m_Registry;
-		size_t m_SkyboxUpdateVersion = 0;
 
 		friend bool SaveSceneFile(const std::filesystem::path& scenepath, std::shared_ptr<const Scene> scene);
 		friend std::shared_ptr<Scene> LoadSceneFile(const std::filesystem::path& scenepath);

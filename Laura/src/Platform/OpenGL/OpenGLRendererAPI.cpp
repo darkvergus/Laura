@@ -16,9 +16,4 @@ namespace Laura
 	void OpenGLRendererAPI::SetViewportSize(uint32_t width, uint32_t height) {
 		glViewport(0, 0, width, height);
 	}
-
-	void OpenGLRendererAPI::Dispatch(std::shared_ptr<IComputeShader> computeShader) {
-		computeShader->Bind();
-		computeShader->Dispatch();
-	}
 }

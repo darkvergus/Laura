@@ -97,9 +97,11 @@ namespace Laura
 		m_ProjectPath = folderpath;
 
 		std::filesystem::path projectFilepath = ComposeProjectFilepath(folderpath);
-		if (!LoadProjectFile(projectFilepath).has_value()) {
-			m_ProjectFile = ProjectFile{};
-			LOG_ENGINE_WARN("OpenProject: failed to deserialize project file at {0}", projectFilepath.string());
+		auto projectFile = LoadProjectFile(projectFilepath);
+		m_ProjectFile = projectFile.value_or(ProjectFile{});
+
+		if (!projectFile) {
+			LOG_ENGINE_WARN("OpenProject: failed to deserialize project file at {}", projectFilepath.string());
 		}
 
 		m_AssetManager = std::make_shared<AssetManager>();
@@ -107,6 +109,10 @@ namespace Laura
 
 		m_AssetManager->LoadAssetPoolFromFolder(folderpath);
 		m_SceneManager->LoadScenesFromFolder(folderpath);
+
+		if (m_ProjectFile.bootSceneGuid != LR_GUID::INVALID) {
+			m_SceneManager->SetOpenScene(m_ProjectFile.bootSceneGuid);
+		}
 
 		LOG_ENGINE_INFO("OpenProject: successfully opened project at {0}", folderpath.string());
 		return true;

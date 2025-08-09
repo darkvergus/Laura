@@ -17,6 +17,7 @@ namespace Laura
 		_ProjectManager = std::make_shared<ProjectManager>();
 
 		_RendererAPI = IRendererAPI::Create();
+		_RendererAPI->Init();
 
 		_RenderLayer = std::make_shared<RenderLayer>(_LayerStack, _Profiler, _ProjectManager);
 

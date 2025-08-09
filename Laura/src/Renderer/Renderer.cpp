@@ -87,7 +87,7 @@ namespace Laura
 			m_Cache.Resolution = settings.Resolution;
 		}
 
-		m_Cache.AccumulatedFrames = (settings.ShouldAccumulate) ? m_Cache.AccumulatedFrames++ : 0;
+		m_Cache.AccumulatedFrames = (settings.ShouldAccumulate) ? (m_Cache.AccumulatedFrames + 1) : 0;
 		{
 			// SETTINGS
 			uint32_t meshEntityCount = pScene->MeshEntityLookupTable.size();
@@ -122,17 +122,15 @@ namespace Laura
 		static uint32_t prevIndexBuffVersion = 0;
 		static uint32_t prevSkyboxTextureVersion = 0;
 
-		{
-			// SKYBOX
-    		if (scene && prevSkyboxTextureVersion != scene->GetSkyboxUpdateVersion()) {
-				prevSkyboxTextureVersion = scene->GetSkyboxUpdateVersion();
-        		auto metadata = assetPool->find<TextureMetadata>(pScene->skyboxGUID);
-        		if (metadata) {
-            		const uint32_t SKYBOX_TEXTURE_UNIT = 1;
-            		const unsigned char* data = &assetPool->TextureBuffer[metadata->texStartIdx];
-            		m_SkyboxTexture = ITexture2D::Create(data, metadata->width, metadata->height, SKYBOX_TEXTURE_UNIT);
-        		}
-    		}
+		// Update SKYBOX texture if guid changed 
+		if (scene && scene->skyboxGuid != m_Cache.prevSkyboxGuid) {
+			m_Cache.prevSkyboxGuid = scene->skyboxGuid;
+			auto metadata = assetPool->find<TextureMetadata>(pScene->skyboxGUID);
+			if (metadata) {
+				const uint32_t SKYBOX_TEXTURE_UNIT = 1;
+				const unsigned char* data = &assetPool->TextureBuffer[metadata->texStartIdx];
+				m_SkyboxTexture = ITexture2D::Create(data, metadata->width, metadata->height, SKYBOX_TEXTURE_UNIT);
+			}
 		}
 
 		// MESH BUFFER
@@ -176,14 +174,17 @@ namespace Laura
         		m_IndexBufferSSBO->Unbind();
     		}
 		}
+		return true;
 	}
 
 	void Renderer::Draw() {
 		auto t = m_Profiler->timer("Renderer::Draw()");
 		m_Shader->Bind();
-		m_Shader->setWorkGroupSizes(
-			glm::uvec3(ceil(settings.Resolution.x / 8), ceil(settings.Resolution.y / 4), 1)
-		);
+		m_Shader->setWorkGroupSizes(glm::uvec3(
+			(settings.Resolution.x + 7) / 8,
+			(settings.Resolution.y + 3) / 4,
+			1
+		  ));
 		m_Shader->Dispatch();
 	}
 }

@@ -29,7 +29,7 @@ namespace Laura
 
 		std::ofstream fout(metafilePath);
 		if (!fout.is_open()) {
-			LOG_ENGINE_ERROR("SaveMetaFile: could not open {0} for writing — permissions or path invalid", metafilePath.string());
+			LOG_ENGINE_ERROR("SaveMetaFile: could not open {0} for writing - permissions or path invalid", metafilePath.string());
 			return false;
 		}
 		fout << out.c_str();
@@ -76,16 +76,8 @@ namespace Laura
         }
 
         LR_GUID guid;
-        AssetMetaFile metafile{guid};
-        auto metaFilepath = AppendExtension(assetpath, ASSET_META_FILE_EXTENSION);
-        if (!SaveMetaFile(metaFilepath, metafile)) {
-			LOG_ENGINE_WARN("ImportAsset: failed to save metafile {0}", metaFilepath.string());
-            return LR_GUID::INVALID;
-        }
-
         if (!LoadAssetFile(assetpath, guid)) {
-            std::filesystem::remove(metaFilepath); // cleanup metafile
-			LOG_ENGINE_WARN("ImportAsset: failed to load asset after saving metafile, removed metafile {0}", metaFilepath.string());
+			LOG_ENGINE_WARN("ImportAsset: failed to load asset after saving metafile, removed metafile {0}", assetpath.string());
             return LR_GUID::INVALID;
         }
 
