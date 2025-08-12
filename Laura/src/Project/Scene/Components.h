@@ -58,7 +58,7 @@ namespace Laura
 
 	struct MaterialComponent {
 		glm::vec4 emission; // xyz: color, w: strength
-		glm::vec3 color;
+		glm::vec4 color; // w: padding
 	};
 
 	struct CameraComponent {

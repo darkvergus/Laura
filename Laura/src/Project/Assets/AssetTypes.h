@@ -13,6 +13,11 @@ namespace Laura
 		glm::vec4 v0 = {}, v1 = {}, v2 = {};
 	};
 
+    struct Material { // default - bright green
+        glm::vec4 emission = { 0.0f, 1.0f, 0.0f, 1.0f };
+        glm::vec4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+    };
+
 	struct Metadata {
         virtual ~Metadata() = default;
     };
