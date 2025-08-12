@@ -5,31 +5,35 @@
 namespace Laura
 {
 
-    SceneHierarchyPanel::SceneHierarchyPanel(std::shared_ptr<EditorState> editorState)
-		: m_EditorState(editorState) {
+    SceneHierarchyPanel::SceneHierarchyPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ProjectManager> projectManager)
+		: m_EditorState(editorState), m_ProjectManager(projectManager) {
     }
 
-    void SceneHierarchyPanel::OnImGuiRender(std::weak_ptr<Scene> scene) {
+    void SceneHierarchyPanel::OnImGuiRender() {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
+        ImGui::Begin(ICON_FA_FOLDER_TREE " SCENE HIERARCHY");
 
-        ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
-
-        auto sceneShared = scene.lock();
-        if (sceneShared == nullptr) {
+        if (!m_ProjectManager->ProjectIsOpen()) {
             ImGui::End();
             return;
         }
 
-        entt::registry* activeRegistry = sceneShared->GetRegistry();
+        std::shared_ptr<Scene> scene = m_ProjectManager->GetSceneManager()->GetOpenScene();
+
+        if (!scene) {
+            ImGui::End();
+            return;
+        }
+
+        entt::registry* activeRegistry = scene->GetRegistry();
         if(!activeRegistry) {
 			ImGui::End();
             LOG_ENGINE_WARN("SceneHierarchyPanel::OnImGuiRender: activeRegistry is nullptr.");
 			return;
 		}
-        
-        if (ImGui::BeginMenu(ICON_FA_SQUARE_PLUS " Add")) {
+        if (ImGui::BeginMenu("Add")) {
             if (ImGui::MenuItem("Empty")) {
-                sceneShared->CreateEntity();
+                scene->CreateEntity();
             }
             ImGui::EndMenu();
         }
@@ -52,22 +56,26 @@ namespace Laura
             EntityHandle entity(entityID, activeRegistry);
             std::string& tag = entity.GetComponent<TagComponent>().Tag;
 
+            theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
             // display selected entity
             if (entityID == m_EditorState->temp.selectedEntity) {
-                theme.PushColor(ImGuiCol_Header, EditorCol_Secondary2);
+                theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
+                theme.PushColor(ImGuiCol_Header, EditorCol_Secondary1);
+                theme.PushColor(ImGuiCol_Button, EditorCol_Transparent);
 
                 entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
                 ImGui::SameLine(panelDims.x - lineHeight * 0.5);
-                if (ImGui::Button(ICON_FA_TRASH_CAN)) { destroyEntity = true; }
-                ConfirmAndExecute(destroyEntity, ICON_FA_TRASH_CAN " Delete Entity", "Are you sure you want to delete this entity?", [&]() {
-                        sceneShared->DestroyEntity(entity);
+                if (ImGui::Button(ICON_FA_TRASH)) { destroyEntity = true; }
+                ConfirmAndExecute(destroyEntity, ICON_FA_TRASH " Delete Entity", "Are you sure you want to delete this entity?", [&]() {
+                        scene->DestroyEntity(entity);
                         m_EditorState->temp.selectedEntity = entt::null;
                     }, m_EditorState);
-                theme.PopColor();
+                theme.PopColor(3);
 			}
 			else { // display non-selected entity
 				entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
 			}
+            theme.PopColor();
 
             if (ImGui::IsItemClicked()) {
                 m_EditorState->temp.selectedEntity = entityID;

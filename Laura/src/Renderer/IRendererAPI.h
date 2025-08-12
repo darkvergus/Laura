@@ -17,7 +17,6 @@ namespace Laura
 		virtual void Init() = 0;
 		virtual void Clear(const glm::vec4& color) = 0;
 		virtual void SetViewportSize(uint32_t width, uint32_t height) = 0;
-		virtual void Dispatch(std::shared_ptr<IComputeShader> computeShader) = 0;
 
 		static std::shared_ptr<IRendererAPI> Create();
 		static API GetAPI() { return s_API; }

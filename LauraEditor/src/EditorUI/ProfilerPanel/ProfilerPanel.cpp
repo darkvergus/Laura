@@ -20,17 +20,15 @@ namespace Laura
         auto t = profiler->timer("ProfilerPanel");
 
         ImPlot::PushColormap(ImPlotColormap_Deep);
-        theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
-        ImGui::Begin(ICON_FA_STOPWATCH " Profiler", &m_EditorState->temp.isProfilerPanelOpen);
+        theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
+        ImGui::Begin(ICON_FA_STOPWATCH " PROFILER", &m_EditorState->temp.isProfilerPanelOpen);
 
         const char* playLabel = (profiler->isPaused) ? ICON_FA_PLAY : ICON_FA_PAUSE;
-        theme.PopColor();
-
+        theme.PushColor(ImGuiCol_Button, EditorCol_Transparent);
         if (ImGui::Button(playLabel)) {
             profiler->isPaused = !profiler->isPaused;
         }
-
-        theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
+        theme.PopColor();
 
         const ScrollingBuffer& buff = profiler->getGlobalBuffer();
         if (!buff.empty()) {
@@ -52,8 +50,10 @@ namespace Laura
         static int colorIndex = 0;
         static std::unordered_map<std::string, plotLineStyle> plotLineStyleMap;
         const ImPlotSubplotFlags SubPlot_Flags = ImPlotSubplotFlags_ShareItems | ImPlotSubplotFlags_NoTitle;
+        theme.PushColor(ImGuiCol_FrameBg, EditorCol_Background3);
         if (ImPlot::BeginSubplots("##SUBPLOTS", 1, 1, ImVec2(-1, -1), SubPlot_Flags, 0)) { // Using subplot to allow chart scale independently from legend
-            ImPlot::SetupLegend(ImPlotLocation_West, ImPlotLegendFlags_Sort);
+            ImPlot::SetupLegend(ImPlotLocation_South | ImPlotLocation_West, 
+                    ImPlotLegendFlags_Sort | ImPlotLegendFlags_Horizontal);
             ImPlot::BeginPlot("##LinePlot", ImVec2(-1, -1), ImPlotFlags_NoMouseText);
             ImPlot::SetupAxes(nullptr, nullptr, shouldAutoFit, shouldAutoFit | ImPlotAxisFlags_Opposite);
             ImPlot::SetupAxisFormat(ImAxis_Y1, "%gms");
@@ -98,8 +98,9 @@ namespace Laura
             ImPlot::EndPlot();
             ImPlot::EndSubplots();
         }
+        theme.PopColor(); // frameBg
         ImGui::End();
         ImPlot::PopColormap();
-        theme.PopColor();
+        theme.PopColor(); // windowBg
     }
 }

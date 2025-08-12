@@ -15,17 +15,17 @@ namespace Laura
 		void init() override {
 			Application::init();
 
-			_ImGuiContext = std::make_shared<ImGuiContext>(_Window);
-			_ImGuiContext->Init();
+			m_ImGuiContext = std::make_shared<ImGuiContext>(_Window);
+			m_ImGuiContext->Init();
 
-			_LayerStack->PushLayer(std::make_shared<EditorLayer>(_LayerStack, _ImGuiContext, _ResourcePool, _AssetManager, _Profiler));
+			_LayerStack->PushLayer(std::make_shared<EditorLayer>(_Profiler, _LayerStack, _ProjectManager, m_ImGuiContext));
 		}
 
 		~LauraEditor() {
 		}
 
-	protected:
-		std::shared_ptr<ImGuiContext> _ImGuiContext;
+	private:
+		std::shared_ptr<ImGuiContext> m_ImGuiContext;
 	};
 
 	Application* CreateApplication() {

@@ -11,11 +11,9 @@ namespace Laura
 	class AssetsPanel {
 	public:
 		AssetsPanel(std::shared_ptr<EditorState> editorState, 
-					std::shared_ptr<Asset::Manager> assetManager, 
-					std::shared_ptr<Asset::ResourcePool> resourcePool)
+					std::shared_ptr<ProjectManager> projectManager)
 			: m_EditorState(editorState),
-			  m_AssetManager(assetManager), 
-			  m_ResourcePool(resourcePool) {
+			  m_ProjectManager(projectManager) {
 		}
 		~AssetsPanel() = default;
 	
@@ -23,20 +21,21 @@ namespace Laura
 
 	private:
 		void DrawAssetTile(LR_GUID guid, const char* title);
-		void DrawAssetMetadata();
+		void DrawSceneTile(LR_GUID guid, const char* title);
+		void DrawGenericTile(LR_GUID guid, const char* title, const char* icon, const char* dndPayloadType);
+		void DrawTileInfo();
 		
 		std::shared_ptr<EditorState> m_EditorState;
-		std::shared_ptr<Asset::Manager> m_AssetManager;
-		std::shared_ptr<Asset::ResourcePool> m_ResourcePool;
+		std::shared_ptr<ProjectManager> m_ProjectManager;
 
 		// UI related
 		const float BASE_TILE_WH_RATIO = 0.75f;
-		const float BASE_TILE_ICON_FONT_SIZE = 0.3f;
-		const float BASE_TILE_TITLE_FONT_SIZE = 13.0f;
+		const float BASE_TILE_ICON_FONT_SIZE = 0.2f;
+		const float BASE_TILE_TITLE_FONT_SIZE = 16.0f;
 		const float TILE_SCALAR_MIN = 75.0f;
 		const float TILE_SCALAR_MAX = 110.0f;
 
-		LR_GUID m_SelectedTile = LR_GUID::INVALID;
+		LR_GUID m_SelectedTileGuid = LR_GUID::INVALID;
 		float m_TileScalar = TILE_SCALAR_MAX;
 
 		DNDPayload m_DNDPayload;

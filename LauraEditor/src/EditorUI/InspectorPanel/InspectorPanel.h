@@ -13,14 +13,15 @@ namespace Laura
 
 	class InspectorPanel {
 	public:
-		InspectorPanel(std::shared_ptr<EditorState> editorState);
+		InspectorPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ProjectManager> projectManager);
 		~InspectorPanel() = default;
 
-		void OnImGuiRender(std::weak_ptr<Scene> scene);
+		void OnImGuiRender();
 
 	private:
 		template<typename T, typename UILambda>
 		inline void DrawComponent(const std::string& TreenodeTitle, EntityHandle& entity, UILambda uiLambda, bool removable = true) {
+			auto theme = m_EditorState->temp.editorTheme;
 			const ImGuiTreeNodeFlags treenodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap
 													| ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
 			static bool deleteComponent = false;
@@ -36,14 +37,14 @@ namespace Laura
 
 				bool componentTreeNodeOpen = ImGui::TreeNodeEx(TreenodeTitle.c_str(), treenodeFlags);
 				ImGui::SameLine(panelDims.x - 1.5 * lineHeight - 0.2);
-
+				theme.PushColor(ImGuiCol_Button, EditorCol_Transparent);
 				if (removable) {
-					if (ImGui::Button(ICON_FA_TRASH_CAN)) {
+					if (ImGui::Button(ICON_FA_TRASH)) {
 						deleteComponent = true;
-						ImGui::OpenPopup(ICON_FA_TRASH_CAN " Delete Component");
+						ImGui::OpenPopup(ICON_FA_TRASH " Delete Component");
 					}
 
-					ConfirmAndExecute(deleteComponent, ICON_FA_TRASH_CAN " Delete Component", "Are you sure you want to delete this component?", [&]() {
+					ConfirmAndExecute(deleteComponent, ICON_FA_TRASH " Delete Component", "Are you sure you want to delete this component?", [&]() {
 						entity.RemoveComponent<T>();
 					}, m_EditorState);
 				}
@@ -57,11 +58,11 @@ namespace Laura
 				if (ImGui::BeginPopup("ComponentSettings")) {
 					if (ImGui::MenuItem("Reset")) {
 						entity.RemoveComponent<T>();
-						entity.AddComponent<T>();
+						entity.GetOrAddComponent<T>();
 					}
 					ImGui::EndPopup();
 				}
-
+				theme.PopColor(); // transparent button
 				if (componentTreeNodeOpen) {
 					float avail_width = ImGui::GetContentRegionAvail().x;
 					float margin_right = 5.0f;  // pixels to leave empty on the right
@@ -84,7 +85,7 @@ namespace Laura
 			if (entity.HasComponent<T>()) { ImGui::BeginDisabled(); }
 
 			if (ImGui::Selectable((icon + std::string(" ") + label).c_str(), false)) { 
-				entity.AddComponent<T>(); 
+				entity.GetOrAddComponent<T>(); 
 				return; // avoid calling EndDisabled()
 			}
 
@@ -93,5 +94,6 @@ namespace Laura
 
 	private:
 		std::shared_ptr<EditorState> m_EditorState;
+		std::shared_ptr<ProjectManager> m_ProjectManager;
 	};
 }

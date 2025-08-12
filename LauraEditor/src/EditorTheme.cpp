@@ -65,85 +65,87 @@ namespace Laura
         return { true, "" };
     }
 
-    void EditorTheme::LoadDefaultDark() {
-        m_ColorPallete[EditorCol_Primary1]    = ImVec4{0.3f, 0.305f, 0.31f, 1.0f};      // HeaderHovered, ButtonHovered
-        m_ColorPallete[EditorCol_Primary2]    = ImVec4{0.15f, 0.1505f, 0.151f, 1.0f};   // HeaderActive, ButtonActive, FrameBgActive
-        m_ColorPallete[EditorCol_Primary3]    = ImVec4{0.01f, 0.01f, 0.01f, 1.0f};      // MenuBarBg
-        m_ColorPallete[EditorCol_Secondary1]  = ImVec4{0.078f, 0.078f, 0.078f, 1.0f};   // Header, TabHovered, TabSelected, AddComponentButton
-        m_ColorPallete[EditorCol_Secondary2]  = ImVec4{0.138f, 0.138f, 0.138f, 1.0f};   // SelectedHeader
-        m_ColorPallete[EditorCol_Accent1]     = ImVec4{0.26f, 0.59f, 0.98f, 1.00f};     // SliderGrabActive, TabDimmedSelectedOverline (blue)
-        m_ColorPallete[EditorCol_Accent2]     = ImVec4{0.391f, 0.391f, 0.391f, 1.0f};   // CheckMark, SliderGrab
-        m_ColorPallete[EditorCol_Text1]       = ImVec4{1.0f, 1.0f, 1.0f, 1.0f};         // Text
-        m_ColorPallete[EditorCol_Text2]       = ImVec4{0.5f, 0.5f, 0.5f, 1.0f};         // TextDisabled
-        m_ColorPallete[EditorCol_Background1] = ImVec4{0.109f, 0.109f, 0.109f, 1.0f};   // WindowBg, TransformButtonBg (X/Y/Z)
-        m_ColorPallete[EditorCol_Background2] = ImVec4{0.08f, 0.08f, 0.08f, 0.940f};    // PopupBg
-        m_ColorPallete[EditorCol_Error]       = ImVec4{0.609f, 0.109f, 0.109f, 1.0f};   // TransformButtonXActive
-        m_ColorPallete[EditorCol_Warning]     = ImVec4{1.0f, 0.5f, 0.0f, 1.0f};         // Custom fallback
-        m_ColorPallete[EditorCol_Success]     = ImVec4{0.109f, 0.609f, 0.109f, 1.0f};   // TransformButtonYActive
-        m_ColorPallete[EditorCol_X]           = ImVec4{0.409f, 0.109f, 0.109f, 1.0f};   // TransformButtonXHovered
-        m_ColorPallete[EditorCol_Y]           = ImVec4{0.109f, 0.409f, 0.109f, 1.0f};   // TransformButtonYHovered
-        m_ColorPallete[EditorCol_Z]           = ImVec4{0.109f, 0.109f, 0.409f, 1.0f};   // TransformButtonZHovered
-        ApplyAllToImgui();
-    }
+	void EditorTheme::LoadDefaultDark() {
+		m_ColorPallete[EditorCol_Primary1]    = RGBA(77, 77, 79);
+		m_ColorPallete[EditorCol_Primary2]    = RGBA(70, 70, 77);
+		m_ColorPallete[EditorCol_Primary3]    = RGBA(30, 30, 30);
+		m_ColorPallete[EditorCol_Secondary1]  = RGBA(20, 20, 20);
+		m_ColorPallete[EditorCol_Secondary2]  = RGBA(55, 55, 61);
+		m_ColorPallete[EditorCol_Accent1]     = RGBA(66, 150, 250);
+		m_ColorPallete[EditorCol_Accent2]     = RGBA(83, 82, 91);
+		m_ColorPallete[EditorCol_Text1]       = RGBA(255, 255, 255);
+		m_ColorPallete[EditorCol_Text2]       = RGBA(128, 128, 128);
+		m_ColorPallete[EditorCol_Background1] = RGBA(37, 37, 38);
+		m_ColorPallete[EditorCol_Background2] = RGBA(30, 30, 30);
+		m_ColorPallete[EditorCol_Background3] = RGBA(51, 51, 51);
+		m_ColorPallete[EditorCol_Transparent] = RGBA(0, 0, 0, 0);
+		m_ColorPallete[EditorCol_Error]       = RGBA(155, 28, 28);
+		m_ColorPallete[EditorCol_Warning]     = RGBA(255, 128, 0);
+		m_ColorPallete[EditorCol_Success]     = RGBA(28, 155, 28);
+		m_ColorPallete[EditorCol_X]           = RGBA(104, 28, 28);
+		m_ColorPallete[EditorCol_Y]           = RGBA(28, 104, 28);
+		m_ColorPallete[EditorCol_Z]           = RGBA(28, 28, 104);
+		ApplyAllToImgui();
+	}
 
-    void EditorTheme::LoadDefaultLight() {
-        m_ColorPallete[EditorCol_Primary1]    = ImVec4{0.85f, 0.85f, 0.86f, 1.0f};       // HeaderHovered, ButtonHovered
-        m_ColorPallete[EditorCol_Primary2]    = ImVec4{0.75f, 0.75f, 0.76f, 1.0f};       // HeaderActive, ButtonActive, FrameBgActive
-        m_ColorPallete[EditorCol_Primary3]    = ImVec4{0.9f, 0.9f, 0.9f, 1.0f};          // MenuBarBg
-        m_ColorPallete[EditorCol_Secondary1]  = ImVec4{0.93f, 0.93f, 0.93f, 1.0f};       // Header, TabHovered, TabSelected, AddComponentButton
-        m_ColorPallete[EditorCol_Secondary2]  = ImVec4{0.82f, 0.82f, 0.82f, 1.0f};       // SelectedHeader
-        m_ColorPallete[EditorCol_Accent1]     = ImVec4{0.2f, 0.6f, 0.15f, 1.0f};         // SliderGrabActive (greenish)
-        m_ColorPallete[EditorCol_Accent2]     = ImVec4{0.3f, 0.3f, 0.3f, 1.0f};          // CheckMark, SliderGrab
-        m_ColorPallete[EditorCol_Text1]       = ImVec4{0.0f, 0.0f, 0.0f, 1.0f};          // Text (black)
-        m_ColorPallete[EditorCol_Text2]       = ImVec4{0.4f, 0.4f, 0.4f, 1.0f};          // TextDisabled
-        m_ColorPallete[EditorCol_Background1] = ImVec4{0.98f, 0.98f, 0.98f, 1.0f};       // WindowBg
-        m_ColorPallete[EditorCol_Background2] = ImVec4{0.95f, 0.95f, 0.95f, 1.0f};       // PopupBg
-        m_ColorPallete[EditorCol_Error]       = ImVec4{0.8f, 0.2f, 0.2f, 1.0f};          // TransformButtonXActive
-        m_ColorPallete[EditorCol_Warning]     = ImVec4{1.0f, 0.65f, 0.0f, 1.0f};         // Orange
-        m_ColorPallete[EditorCol_Success]     = ImVec4{0.2f, 0.6f, 0.2f, 1.0f};          // Green
-        m_ColorPallete[EditorCol_X]           = ImVec4{0.8f, 0.2f, 0.2f, 1.0f};          // TransformButtonXHovered
-        m_ColorPallete[EditorCol_Y]           = ImVec4{0.2f, 0.8f, 0.2f, 1.0f};          // TransformButtonYHovered
-        m_ColorPallete[EditorCol_Z]           = ImVec4{0.2f, 0.2f, 0.8f, 1.0f};          // TransformButtonZHovered
-        ApplyAllToImgui();
-    }
+  void EditorTheme::LoadDefaultLight() {
+	m_ColorPallete[EditorCol_Primary1]    = RGBA(180, 180, 185);   // UI highlights
+	m_ColorPallete[EditorCol_Primary2]    = RGBA(160, 160, 170);   // Hover backgrounds
+	m_ColorPallete[EditorCol_Primary3]    = RGBA(210, 210, 210);   // Panel backgrounds
+	m_ColorPallete[EditorCol_Secondary1]  = RGBA(225, 225, 225);   // Window background
+	m_ColorPallete[EditorCol_Secondary2]  = RGBA(190, 190, 200);   // Inactive UI areas
+	m_ColorPallete[EditorCol_Accent1]     = RGBA(90, 140, 200);    // Main accent blue (more subtle)
+	m_ColorPallete[EditorCol_Accent2]     = RGBA(110, 110, 120);   // Minor accents
+	m_ColorPallete[EditorCol_Text1]       = RGBA(30, 30, 30);      // Main text
+	m_ColorPallete[EditorCol_Text2]       = RGBA(90, 90, 90);      // Disabled/secondary text
+	m_ColorPallete[EditorCol_Background1] = RGBA(240, 240, 240);   // Window background
+	m_ColorPallete[EditorCol_Background2] = RGBA(225, 225, 225);   // Group panels
+	m_ColorPallete[EditorCol_Background3] = RGBA(200, 200, 200);   // Inner panels
+	m_ColorPallete[EditorCol_Transparent] = RGBA(0, 0, 0, 0);      // Transparent
+	m_ColorPallete[EditorCol_Error]       = RGBA(170, 50, 50);     // Errors
+	m_ColorPallete[EditorCol_Warning]     = RGBA(220, 140, 0);     // Warnings
+	m_ColorPallete[EditorCol_Success]     = RGBA(50, 170, 50);     // Success
+	m_ColorPallete[EditorCol_X]           = RGBA(140, 50, 50);     // Transform axis X
+	m_ColorPallete[EditorCol_Y]           = RGBA(50, 140, 50);     // Transform axis Y
+	m_ColorPallete[EditorCol_Z]           = RGBA(50, 50, 140);     // Transform axis Z
+	ApplyAllToImgui();
+} 
     void EditorTheme::ApplyAllToImgui() {
-    ImGuiStyle& style = ImGui::GetStyle();
-
-    style.Colors[ImGuiCol_WindowBg]                  = m_ColorPallete[EditorCol_Background1];
-    style.Colors[ImGuiCol_PopupBg]                   = m_ColorPallete[EditorCol_Background2];
-    style.Colors[ImGuiCol_Border]                    = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_Header]                    = m_ColorPallete[EditorCol_Primary3];
-    style.Colors[ImGuiCol_HeaderHovered]             = m_ColorPallete[EditorCol_Primary2];
-    style.Colors[ImGuiCol_HeaderActive]              = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_Button]                    = m_ColorPallete[EditorCol_Secondary1];
-    style.Colors[ImGuiCol_ButtonHovered]             = m_ColorPallete[EditorCol_Primary1];
-    style.Colors[ImGuiCol_ButtonActive]              = m_ColorPallete[EditorCol_Primary2];
-    style.Colors[ImGuiCol_CheckMark]                 = m_ColorPallete[EditorCol_Accent2];
-    style.Colors[ImGuiCol_SliderGrab]                = m_ColorPallete[EditorCol_Accent2];
-    style.Colors[ImGuiCol_SliderGrabActive]          = m_ColorPallete[EditorCol_Accent1];
-    style.Colors[ImGuiCol_FrameBg]                   = m_ColorPallete[EditorCol_Background1];
-    style.Colors[ImGuiCol_FrameBgHovered]            = m_ColorPallete[EditorCol_Background1];
-    style.Colors[ImGuiCol_FrameBgActive]             = m_ColorPallete[EditorCol_Primary2];
-    style.Colors[ImGuiCol_Tab]                       = m_ColorPallete[EditorCol_Background2];
-    style.Colors[ImGuiCol_TabHovered]                = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_TabActive]                 = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_TabSelectedOverline]       = m_ColorPallete[EditorCol_Accent1];
-    style.Colors[ImGuiCol_TabDimmedSelectedOverline] = m_ColorPallete[EditorCol_Primary1];
-    style.Colors[ImGuiCol_TabUnfocused]              = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_TabUnfocusedActive]        = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_TitleBg]                   = m_ColorPallete[EditorCol_Background2];
-    style.Colors[ImGuiCol_TitleBgActive]             = m_ColorPallete[EditorCol_Background2];
-    style.Colors[ImGuiCol_TitleBgCollapsed]          = m_ColorPallete[EditorCol_Background2];
-    style.Colors[ImGuiCol_ScrollbarGrab]             = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_ResizeGrip]                = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_ResizeGripHovered]         = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_ResizeGripActive]          = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_SeparatorHovered]          = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_SeparatorActive]           = m_ColorPallete[EditorCol_Secondary2];
-    style.Colors[ImGuiCol_Text]                      = m_ColorPallete[EditorCol_Text1];
-    style.Colors[ImGuiCol_TextDisabled]              = m_ColorPallete[EditorCol_Text2];
-    style.Colors[ImGuiCol_MenuBarBg]                 = m_ColorPallete[EditorCol_Primary3];
-}
-
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.Colors[ImGuiCol_WindowBg]                  = m_ColorPallete[EditorCol_Background1];
+		style.Colors[ImGuiCol_PopupBg]                   = m_ColorPallete[EditorCol_Background2];
+		style.Colors[ImGuiCol_Border]                    = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_Header]                    = m_ColorPallete[EditorCol_Primary3];
+		style.Colors[ImGuiCol_HeaderHovered]             = m_ColorPallete[EditorCol_Primary2];
+		style.Colors[ImGuiCol_HeaderActive]              = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_Button]                    = m_ColorPallete[EditorCol_Primary3];
+		style.Colors[ImGuiCol_ButtonHovered]             = m_ColorPallete[EditorCol_Primary1];
+		style.Colors[ImGuiCol_ButtonActive]              = m_ColorPallete[EditorCol_Primary2];
+		style.Colors[ImGuiCol_CheckMark]                 = m_ColorPallete[EditorCol_Text1];
+		style.Colors[ImGuiCol_SliderGrab]                = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_SliderGrabActive]          = m_ColorPallete[EditorCol_Accent1];
+		style.Colors[ImGuiCol_FrameBg]                   = m_ColorPallete[EditorCol_Primary3];
+		style.Colors[ImGuiCol_FrameBgHovered]            = m_ColorPallete[EditorCol_Primary1];
+		style.Colors[ImGuiCol_FrameBgActive]             = m_ColorPallete[EditorCol_Primary2];
+		style.Colors[ImGuiCol_Tab]                       = m_ColorPallete[EditorCol_Background2];
+		style.Colors[ImGuiCol_TabHovered]                = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_TabActive]                 = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_TabSelectedOverline]       = m_ColorPallete[EditorCol_Accent1];
+		style.Colors[ImGuiCol_TabDimmedSelectedOverline] = m_ColorPallete[EditorCol_Accent2];
+		style.Colors[ImGuiCol_TabUnfocused]              = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_TabUnfocusedActive]        = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_TitleBg]                   = m_ColorPallete[EditorCol_Background2];
+		style.Colors[ImGuiCol_TitleBgActive]             = m_ColorPallete[EditorCol_Background2];
+		style.Colors[ImGuiCol_TitleBgCollapsed]          = m_ColorPallete[EditorCol_Background2];
+		style.Colors[ImGuiCol_ScrollbarGrab]             = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_ResizeGrip]                = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_ResizeGripHovered]         = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_ResizeGripActive]          = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_SeparatorHovered]          = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_SeparatorActive]           = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_Text]                      = m_ColorPallete[EditorCol_Text1];
+		style.Colors[ImGuiCol_TextDisabled]              = m_ColorPallete[EditorCol_Text2];
+		style.Colors[ImGuiCol_MenuBarBg]                 = m_ColorPallete[EditorCol_Secondary1];
+	}
 }

@@ -14,8 +14,16 @@ namespace Laura
 	enum struct ViewportMode {
 		FitToViewport,
 		StretchToViewport,
-		CenterToViewport
+		CenterToViewport,
+		COUNT
 	};
+	inline constexpr const char* ViewportModeStr[] = { 
+		"Fit", 
+		"Stretch", 
+		"Center" 
+	};
+	static_assert(std::size(ViewportModeStr) == static_cast<size_t>(ViewportMode::COUNT),
+				  "ViewportModeStr must match ViewportMode enum");
 
 	struct EditorState {
 		struct {
@@ -29,7 +37,6 @@ namespace Laura
 		// TO ADD new persistent entries, add them here and update the SERIALIZE and DESERIALIZE functions 
 		// (if the type is custom, also create a YAML::convert template specialization)
 		struct {
-			bool doubleConfirmEnabled = false;
 			ViewportMode viewportMode = ViewportMode::FitToViewport;
 			std::filesystem::path editorThemeFilepath = "";
 		} persistent;

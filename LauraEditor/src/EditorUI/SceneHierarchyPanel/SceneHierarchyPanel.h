@@ -8,11 +8,12 @@ namespace Laura
 
 	class SceneHierarchyPanel {
 	public:
-		SceneHierarchyPanel(std::shared_ptr<EditorState> editorState);
+		SceneHierarchyPanel(std::shared_ptr<EditorState> editorState, std::shared_ptr<ProjectManager> projectManager);
 		~SceneHierarchyPanel() = default;
-		void OnImGuiRender(std::weak_ptr<Scene> scene);
+		void OnImGuiRender();
 
 	private:
 		std::shared_ptr<EditorState> m_EditorState;
+		std::shared_ptr<ProjectManager> m_ProjectManager;
 	};
 }

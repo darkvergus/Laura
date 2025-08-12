@@ -12,7 +12,7 @@ namespace Laura
 {
 
     ImGuiContext::ImGuiContext(std::shared_ptr<IWindow> window)
-        : m_Window(window) {
+        : m_Window(window), m_FontRegistry(std::make_shared<ImGuiContextFontRegistry>()) {
     }
 
     ImGuiContext::~ImGuiContext() {
@@ -27,16 +27,25 @@ namespace Laura
         ImGui::CreateContext();
         ImPlot::CreateContext();
  
-        // FONTS - merging Font Awesome with the default font (Icons)
         ImGuiIO& io = ImGui::GetIO();
+        io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/Roboto/Roboto-Regular.ttf", 15.0f);
+        io.FontDefault = io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/Noto_Sans/NotoSans-Regular.ttf", 16.0f);
 
-        io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Assets/Fonts/roboto/Roboto-Bold.ttf", 15.0f);
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Assets/Fonts/roboto/Roboto-Regular.ttf", 15.0f);
+        ImFontConfig iconConfig;
+        iconConfig.MergeMode = true;  // Merge Font Awesome with the default font
+        static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+        io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf", 13.0f, &iconConfig, iconRanges);
 
-        ImFontConfig config;
-        config.MergeMode = true;  // Merge Font Awesome with the default font
-        static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-        io.Fonts->AddFontFromFileTTF(LR_RESOURCES_PATH "Assets/Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf", 13.0f, &config, icon_ranges);
+        ImFontConfig highResIconConfig;
+		highResIconConfig.MergeMode = false; // dont merge to main font (separate)
+		highResIconConfig.PixelSnapH = true;
+		m_FontRegistry->HighResIcons = io.Fonts->AddFontFromFileTTF(
+			EDITOR_RESOURCES_PATH "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf",
+			40.0f,
+			&highResIconConfig,
+			iconRanges
+		);
+        ImGui::GetIO().UserData = m_FontRegistry.get();
 
         (void)io;
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -55,7 +64,11 @@ namespace Laura
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             style.WindowRounding = 0.0f;
             style.TabRounding = 0.0f;
-            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+            style.TabBarBorderSize = 0.0f;
+            style.GrabRounding = 2.0f;
+            style.ScrollbarRounding = 2.0f;
+            style.DockingSeparatorSize = 0.0f;
+            style.WindowBorderSize = 0.0f;
         }
 
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f);

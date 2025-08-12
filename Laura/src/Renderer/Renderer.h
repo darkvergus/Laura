@@ -1,8 +1,8 @@
 #pragma once
 
 #include "lrpch.h"
-#include "Scene/Scene.h"
-#include "Assets/Assets.h"
+#include "Project/Scene/Scene.h"
+#include "Project/Assets/AssetManager.h"
 #include "Renderer/IRendererAPI.h"
 #include "Renderer/IComputeShader.h"
 #include "Renderer/ITexture2D.h"
@@ -31,6 +31,8 @@ namespace Laura
 			glm::uvec2 Resolution{0};
 			std::filesystem::path ActiveShaderPath{};
 			uint32_t AccumulatedFrames = 0;
+
+			LR_GUID prevSkyboxGuid = LR_GUID::INVALID;
 		};
 
 		// Under the std430 - 80 bytes
@@ -70,13 +72,13 @@ namespace Laura
 		inline static void SetAPI(IRendererAPI::API api) { IRendererAPI::SetAPI(api); } // setter
 
 		void Init();
-		std::shared_ptr<IImage2D> Render(const Scene* scene, const Asset::ResourcePool* resourcePool);
+		std::shared_ptr<IImage2D> Render(const Scene* scene, const AssetPool* resourcePool);
 
 		Settings settings{};
 
 	private:
-		std::shared_ptr<const ParsedScene> Parse(const Scene* scene, const Asset::ResourcePool* resourcePool) const;
-		bool SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const Asset::ResourcePool* resourcePool);
+		std::shared_ptr<const ParsedScene> Parse(const Scene* scene, const AssetPool* resourcePool) const;
+		bool SetupGPUResources(std::shared_ptr<const ParsedScene> pScene, const Scene* scene, const AssetPool* resourcePool);
 		void Draw(); // Draws directly to m_Frame
 
 		std::shared_ptr<IComputeShader> m_Shader;

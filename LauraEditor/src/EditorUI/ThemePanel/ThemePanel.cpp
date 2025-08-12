@@ -15,9 +15,11 @@ namespace Laura
 		static std::string errorMessage = "";
 		auto& theme = m_EditorState->temp.editorTheme;
 		ImGuiWindowFlags ThemePanelFlags = ImGuiWindowFlags_NoDocking;
+		ImGui::SetNextWindowSizeConstraints({400.0f, 300.0f}, {FLT_MAX, FLT_MAX});
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
-		ImGui::Begin(ICON_FA_BRUSH " Themes", &m_EditorState->temp.isThemePanelOpen, ThemePanelFlags);
+		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
+		ImGui::Begin(ICON_FA_BRUSH " THEMES", &m_EditorState->temp.isThemePanelOpen, ThemePanelFlags);
 
 		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -146,9 +148,7 @@ namespace Laura
         			ImGui::Text(name);
         			ImGui::NextColumn();
 					ImGui::PushID(i);
-					if (ImGui::ColorEdit4("##color", (float*)&theme[static_cast<EditorCol_>(i)], ImGuiColorEditFlags_AlphaBar)) {
-						theme.ApplyAllToImgui();
-					}
+					ImGui::ColorEdit4("##color", (float*)&theme[static_cast<EditorCol_>(i)], ImGuiColorEditFlags_AlphaBar);
 					ImGui::PopID();
         			ImGui::NextColumn();
     			}
@@ -161,6 +161,7 @@ namespace Laura
 		}
 
 		ImGui::End();
+		theme.PopColor();
 		ImGui::PopStyleVar();
 		ImGui::PopStyleVar();
 	}
