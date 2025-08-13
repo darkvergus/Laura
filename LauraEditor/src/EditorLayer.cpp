@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include "EditorLayer.h"
 #include "EditorUI/UtilityUI.h"
+#include "EditorUI/MainMenuPanel/MainMenuPanel.h"
 #include "EditorUI/ViewportPanel/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel/SceneHierarchyPanel.h"
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
@@ -25,6 +26,7 @@ namespace Laura
 		
 			m_Launcher(m_EditorState, m_ProjectManager),
 
+			m_MainMenuPanel(std::make_unique<MainMenuPanel>(m_EditorState, m_ProjectManager)),
 			m_SceneHierarchyPanel(std::make_unique<SceneHierarchyPanel>(m_EditorState, m_ProjectManager)),
 			m_InspectorPanel(std::make_unique<InspectorPanel>(m_EditorState, m_ProjectManager)),
 			m_ViewportPanel(std::make_unique<ViewportPanel>(m_EditorState, m_ProjectManager)),
@@ -37,6 +39,7 @@ namespace Laura
 	void EditorLayer::onAttach() {
 		deserializeState(m_EditorState);
 
+		m_MainMenuPanel			->init();
 		m_InspectorPanel		->init();
 		m_SceneHierarchyPanel	->init();
 		m_ViewportPanel			->init();
@@ -52,6 +55,7 @@ namespace Laura
 
 	void EditorLayer::onEvent(std::shared_ptr<IEvent> event) {
 		// propagate events to individual panels
+		m_MainMenuPanel			->onEvent(event);
 		m_InspectorPanel		->onEvent(event);
 		m_SceneHierarchyPanel	->onEvent(event);
 		m_ViewportPanel			->onEvent(event);
@@ -72,10 +76,7 @@ namespace Laura
 		}
 
 		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-		DrawMainMenu();
-		bool showDemo = true;
-		ImGui::ShowDemoWindow(&showDemo);
-
+		m_MainMenuPanel			->OnImGuiRender();
 		m_SceneHierarchyPanel	->OnImGuiRender();
 		m_InspectorPanel		->OnImGuiRender();
 		m_ThemePanel			->OnImGuiRender();
@@ -84,51 +85,9 @@ namespace Laura
 		m_ViewportPanel			->OnImGuiRender();
 		m_ProfilerPanel			->OnImGuiRender();
 
+		bool showDemo = true;
+		ImGui::ShowDemoWindow(&showDemo);
+
 		m_ImGuiContext->EndFrame();
-	}
-
-
-	void EditorLayer::DrawMainMenu() {
-		static bool shouldCloseProject = false;
-
-		if (ImGui::BeginMainMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Project")) {
-				if (ImGui::MenuItem("Save")) { m_ProjectManager->SaveProject(); }
-				if (ImGui::MenuItem("Close")) { shouldCloseProject = true; }
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Window")) {
-				bool themePanelDisabled = m_EditorState->temp.isThemePanelOpen;
-				if (themePanelDisabled)			 { ImGui::BeginDisabled(); }
-				if (ImGui::MenuItem(ICON_FA_BRUSH " THEMES"  )) { m_EditorState->temp.isThemePanelOpen = true; }
-				if (themePanelDisabled)			 { ImGui::EndDisabled(); }
-				bool profilerPanelDisabled = m_EditorState->temp.isProfilerPanelOpen;
-				if (profilerPanelDisabled)		 { ImGui::BeginDisabled(); }
-				if (ImGui::MenuItem(ICON_FA_STOPWATCH " PROFILER")) { m_EditorState->temp.isProfilerPanelOpen = true; }
-				if (profilerPanelDisabled)		 { ImGui::EndDisabled(); }
-				ImGui::EndMenu();
-			}
-			ImGui::EndMainMenuBar();
-		}
-
-		ConfirmWithCancel (
-			shouldCloseProject,
-			ICON_FA_DIAGRAM_PROJECT " Close Project",
-			"Save before closing?",
-			ICON_FA_FLOPPY_DISK " Save & Close Project",
-			"Close Project",
-			"Cancel",
-			[&]() { 
-				m_ProjectManager->SaveProject();
-				m_ProjectManager->CloseProject();
-			},
-			[&]() { 
-				m_ProjectManager->CloseProject(); 
-			},
-			m_EditorState	
-		);
 	}
 }

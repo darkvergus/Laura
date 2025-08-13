@@ -23,8 +23,6 @@ namespace Laura
 		virtual void onEvent(std::shared_ptr<IEvent> event) override;
 
 	private:
-		void DrawMainMenu();
-
 		// Engine Systems
 		std::shared_ptr<Profiler> m_Profiler;
 		std::shared_ptr<IEventDispatcher> m_EventDispatcher; // layerstack  
@@ -37,6 +35,7 @@ namespace Laura
 		Launcher m_Launcher;
 
 		// Editor Panels
+		std::unique_ptr<IEditorPanel> m_MainMenuPanel;
 		std::unique_ptr<IEditorPanel> m_SceneHierarchyPanel;
 		std::unique_ptr<IEditorPanel> m_InspectorPanel;
 		std::unique_ptr<IEditorPanel> m_ViewportPanel;
