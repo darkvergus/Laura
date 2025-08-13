@@ -97,6 +97,20 @@ namespace Laura
 					<< YAML::Key << "MeshGuid"   << YAML::Value << static_cast<uint64_t>(mc.guid)
 				<< YAML::EndMap;
 			}
+			
+			// Material Component
+			if (entity.HasComponent<MaterialComponent>()) {
+				auto& mc = entity.GetComponent<MaterialComponent>();
+				out << YAML::Key << "MaterialComponent" << YAML::Value
+				<< YAML::BeginMap
+					<< YAML::Key << "Emission" << YAML::Value << YAML::Flow
+					<< YAML::BeginSeq << mc.emission.x << mc.emission.y << mc.emission.z << mc.emission.w << YAML::EndSeq
+
+					<< YAML::Key << "Color" << YAML::Value << YAML::Flow
+					<< YAML::BeginSeq << mc.color.x << mc.color.y << mc.color.z << mc.color.w << YAML::EndSeq
+				<< YAML::EndMap;
+			}
+
 			out << YAML::EndMap;
 		}
 		out << YAML::EndSeq;
@@ -117,6 +131,10 @@ namespace Laura
 	std::shared_ptr<Scene> LoadSceneFile(const std::filesystem::path& scenepath){
 		auto deserializeVec3 = [](const YAML::Node& node) -> glm::vec3 {
 			return { node[0].as<float>(), node[1].as<float>(), node[2].as<float>() };
+		};
+
+		auto deserializeVec4 = [](const YAML::Node& node) -> glm::vec4 {
+			return { node[0].as<float>(), node[1].as<float>(), node[2].as<float>(), node[3].as<float>() };
 		};
 
 		LOG_ENGINE_INFO("Deserializing: {0}", scenepath.string());
@@ -165,6 +183,13 @@ namespace Laura
 						auto mnode = entityNode["MeshComponent"];
 						mc.sourceName = mnode["SourceName"].as<std::string>();
 						mc.guid       = static_cast<LR_GUID>(mnode["MeshGuid"].as<uint64_t>());
+					}
+
+					if (entityNode["MaterialComponent"]) {
+						auto& mc = entity.GetOrAddComponent<MaterialComponent>();
+						auto mnode = entityNode["MaterialComponent"];
+						mc.emission = deserializeVec4(mnode["Emission"]);
+						mc.color = deserializeVec4(mnode["Color"]);
 					}
 				}
 			}
