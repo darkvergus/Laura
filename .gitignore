@@ -7,3 +7,4 @@ latex
 .idea/
 CMakeSettings.json
 imgui.ini
+EditorStatePersistent.yaml
