@@ -144,6 +144,7 @@ namespace Laura
         	: key(k), keyCtrl(ctrl), keyShift(shift), keyAlt(alt), keySuper(super) {}
 
     	inline EventType GetType() const override { return EventType::KEY_PRESS_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 
 	struct KeyReleaseEvent : public IEvent {
@@ -154,6 +155,7 @@ namespace Laura
         	: key(k), keyCtrl(ctrl), keyShift(shift), keyAlt(alt), keySuper(super) {}
 
     	inline EventType GetType() const override { return EventType::KEY_RELEASE_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 
 	struct KeyRepeatEvent : public IEvent {
@@ -164,5 +166,6 @@ namespace Laura
         	: key(k), keyCtrl(ctrl), keyShift(shift), keyAlt(alt), keySuper(super) {}
 
     	inline EventType GetType() const override { return EventType::KEY_REPEAT_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 }

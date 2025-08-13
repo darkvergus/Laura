@@ -42,6 +42,7 @@ namespace Laura
 	struct IEvent {
 		virtual ~IEvent() = default;
 		virtual EventType GetType() const = 0;
+		virtual inline bool IsInputEvent() const { return false; }
 
 		inline void Consume() { m_IsConsumed = true; }
 		inline bool IsConsumed() const { return m_IsConsumed; }
