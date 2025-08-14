@@ -12,6 +12,7 @@ namespace Laura
 			return;
 		}
 
+
 		static std::string errorMessage = "";
 		auto& theme = m_EditorState->temp.editorTheme;
 		ImGuiWindowFlags ThemePanelFlags = ImGuiWindowFlags_NoDocking;
@@ -20,6 +21,9 @@ namespace Laura
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
 		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
 		ImGui::Begin(ICON_FA_BRUSH " THEMES", &m_EditorState->temp.isThemePanelOpen, ThemePanelFlags);
+		if (m_EditorState->temp.isInRuntimeMode) {
+			ImGui::BeginDisabled();
+		}
 
 		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
@@ -160,6 +164,10 @@ namespace Laura
 			ImGui::EndTabBar();
 		}
 
+		if (m_EditorState->temp.isInRuntimeMode) {
+			ImGui::EndDisabled();
+		}
+		
 		ImGui::End();
 		theme.PopColor();
 		ImGui::PopStyleVar();

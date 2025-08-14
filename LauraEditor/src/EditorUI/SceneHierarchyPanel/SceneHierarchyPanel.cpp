@@ -11,9 +11,17 @@ namespace Laura
 
     void SceneHierarchyPanel::OnImGuiRender() {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
+        
+        
         ImGui::Begin(ICON_FA_FOLDER_TREE " SCENE HIERARCHY");
+        if (m_EditorState->temp.isInRuntimeMode) {
+            ImGui::BeginDisabled();
+        }
 
         if (!m_ProjectManager->ProjectIsOpen()) {
+            if (m_EditorState->temp.isInRuntimeMode) {
+                ImGui::EndDisabled();
+            }
             ImGui::End();
             return;
         }
@@ -94,6 +102,11 @@ namespace Laura
 		}
 
         ImGui::PopStyleVar();
+        
+        if (m_EditorState->temp.isInRuntimeMode) {
+            ImGui::EndDisabled();
+        }
+        
         ImGui::End();
     }
 }

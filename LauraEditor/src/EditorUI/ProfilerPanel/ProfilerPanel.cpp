@@ -1,6 +1,7 @@
 #include <IconsFontAwesome6.h>
 #include <implot.h>
 #include "ProfilerPanel.h"
+#include "EditorUI/UtilityUI.h"
 
 namespace Laura 
 {
@@ -12,8 +13,12 @@ namespace Laura
             return;
         }
 
+
         if (!m_Profiler->globalTimerSet) {
             LOG_ENGINE_WARN("Unable to render Profiler Panel - No Global Timer Set");
+            if (m_EditorState->temp.isInRuntimeMode) {
+                ImGui::EndDisabled();
+            }
             return;
         }
 
@@ -22,6 +27,9 @@ namespace Laura
         ImPlot::PushColormap(ImPlotColormap_Deep);
         theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
         ImGui::Begin(ICON_FA_STOPWATCH " PROFILER", &m_EditorState->temp.isProfilerPanelOpen);
+        if (m_EditorState->temp.isInRuntimeMode) {
+            ImGui::BeginDisabled();
+        }
 
         const char* playLabel = (m_Profiler->isPaused) ? ICON_FA_PLAY : ICON_FA_PAUSE;
         theme.PushColor(ImGuiCol_Button, EditorCol_Transparent);
@@ -99,6 +107,11 @@ namespace Laura
             ImPlot::EndSubplots();
         }
         theme.PopColor(); // frameBg
+        
+        if (m_EditorState->temp.isInRuntimeMode) {
+            ImGui::EndDisabled();
+        }
+        
         ImGui::End();
         ImPlot::PopColormap();
         theme.PopColor(); // windowBg

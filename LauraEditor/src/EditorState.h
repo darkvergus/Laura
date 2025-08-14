@@ -32,6 +32,7 @@ namespace Laura
 			bool isThemePanelOpen = false;
 			bool isProfilerPanelOpen = true;
 			EditorTheme editorTheme;
+			bool isInRuntimeMode = false;
 		} temp;
 
 		// TO ADD new persistent entries, add them here and update the SERIALIZE and DESERIALIZE functions 

@@ -1,5 +1,6 @@
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
 #include "EditorUI/InspectorPanel/TransformUI.h"
+#include "EditorUI/UtilityUI.h"
 
 namespace Laura
 {
@@ -12,11 +13,17 @@ namespace Laura
     void InspectorPanel::OnImGuiRender() {
 		EditorTheme& theme = m_EditorState->temp.editorTheme;
 		
+		
 		ImGui::SetNextWindowSizeConstraints({ 350, 50 }, {FLT_MAX, FLT_MAX});
 		ImGui::Begin(ICON_FA_CIRCLE_INFO " INSPECTOR");
-		
+		if (m_EditorState->temp.isInRuntimeMode) {
+			ImGui::BeginDisabled();
+		}
 
         if (!m_ProjectManager->ProjectIsOpen()) {
+			if (m_EditorState->temp.isInRuntimeMode) {
+				ImGui::EndDisabled();
+			}
             ImGui::End();
             return;
         }
@@ -24,6 +31,9 @@ namespace Laura
         std::shared_ptr<Scene> scene = m_ProjectManager->GetSceneManager()->GetOpenScene();
 
         if (scene == nullptr || m_EditorState->temp.selectedEntity == entt::null) {
+			if (m_EditorState->temp.isInRuntimeMode) {
+				ImGui::EndDisabled();
+			}
 			ImGui::End();
 			return;
 		}
@@ -174,6 +184,11 @@ namespace Laura
 		// ensure that there is always some space under the Add Component button when scrolling to display the popup
 		ImGui::Dummy(ImVec2(0.0f, 100.0f)); 
 		theme.PopColor();
+		
+		if (m_EditorState->temp.isInRuntimeMode) {
+			ImGui::EndDisabled();
+		}
+		
         ImGui::End();
     }
 }

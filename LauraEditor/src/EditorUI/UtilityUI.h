@@ -118,5 +118,4 @@ namespace Laura
 		theme.PopColor();
 		ImGui::PopStyleVar();
 	}
-
 }

@@ -8,10 +8,18 @@ namespace Laura
 
 	void AssetsPanel::OnImGuiRender() {
         EditorTheme& theme = m_EditorState->temp.editorTheme;
+        
+        
         theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background1);
         ImGui::Begin(ICON_FA_CUBE " ASSETS");
+        if (m_EditorState->temp.isInRuntimeMode) {
+            ImGui::BeginDisabled();
+        }
 
         if (!m_ProjectManager->ProjectIsOpen()) {
+            if (m_EditorState->temp.isInRuntimeMode) {
+                ImGui::EndDisabled();
+            }
             ImGui::End();
             theme.PopColor();
             return;
@@ -107,6 +115,10 @@ namespace Laura
             DrawTileInfo();
             ImGui::EndTable();
         }
+        if (m_EditorState->temp.isInRuntimeMode) {
+            ImGui::EndDisabled();
+        }
+        
         ImGui::End();
         theme.PopColor(); // WindowBg, Background3
     }

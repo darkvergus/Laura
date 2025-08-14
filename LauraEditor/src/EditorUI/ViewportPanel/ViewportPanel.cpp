@@ -2,6 +2,7 @@
 #include <IconsFontAwesome6.h>
 #include <imgui_internal.h>
 #include "EditorUI/DNDPayloads.h"
+#include "EditorUI/UtilityUI.h"
 
 namespace Laura
 {
@@ -30,12 +31,17 @@ namespace Laura
 		static ImGuiWindowFlags ViewportFlags = ImGuiWindowFlags_NoCollapse;
 		auto theme = m_EditorState->temp.editorTheme;
 
+
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImVec4 originalWindowBG = style.Colors[ImGuiCol_WindowBg];
 		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background2);
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 }); // remove the border padding
 		ImGui::Begin(ICON_FA_EYE " VIEWPORT", nullptr, ViewportFlags);
+		if (m_EditorState->temp.isInRuntimeMode) {
+			ImGui::BeginDisabled();
+		}
+
 		ImGui::BeginChild("DropArea");
 	
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -49,6 +55,11 @@ namespace Laura
 			ImGui::EndChild();
 			ImGui::PopStyleVar();
 			DrawDropTargetForScene();
+			
+			if (m_EditorState->temp.isInRuntimeMode) {
+				ImGui::EndDisabled();
+			}
+			
 			ImGui::End();
 			theme.PopColor();
 			return;
@@ -122,6 +133,10 @@ namespace Laura
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
 		DrawDropTargetForScene();
+
+		if (m_EditorState->temp.isInRuntimeMode) {
+			ImGui::EndDisabled();
+		}
 
 		ImGui::End();
 		theme.PopColor();

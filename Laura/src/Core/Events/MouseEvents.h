@@ -32,6 +32,7 @@ namespace Laura
 			: xpos(x), ypos(y) {}
 
 		inline EventType GetType() const override { return EventType::MOUSE_MOVE_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 
 	struct MouseButtonPressEvent : public IEvent {
@@ -41,6 +42,7 @@ namespace Laura
 			: button(btn) {}
 
 		inline EventType GetType() const override { return EventType::MOUSE_BUTTON_PRESS_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 
 	struct MouseButtonReleaseEvent : public IEvent {
@@ -50,6 +52,7 @@ namespace Laura
 			: button(btn) {}
 
 		inline EventType GetType() const override { return EventType::MOUSE_BUTTON_RELEASE_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 
 	struct MouseScrollEvent : public IEvent {
@@ -59,5 +62,6 @@ namespace Laura
 			: xoffset(xoff), yoffset(yoff) {}
 
 		inline EventType GetType() const override { return EventType::MOUSE_SCROLL_EVENT; }
+		inline bool IsInputEvent() const override { return true; }
 	};
 }

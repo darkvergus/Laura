@@ -2,6 +2,7 @@
 
 #include "lrpch.h"
 #include <filesystem>
+#include "Renderer/RenderSettings.h"
 #include "Project/Scene/SceneManager.h"
 #include "Project/Assets/AssetManager.h"
 
@@ -17,10 +18,12 @@ namespace Laura
 	#define PROJECT_FILE_EXTENSION ".lrproj"
 
 	struct ProjectFile {
-		ProjectFile(LR_GUID bootSceneGuid = LR_GUID::INVALID) : bootSceneGuid(bootSceneGuid) {}
 		LR_GUID bootSceneGuid = LR_GUID::INVALID;
-	};
+		RenderSettings runtimeRenderSettings{};
 
+		ProjectFile(LR_GUID bootSceneGuid = LR_GUID::INVALID) : bootSceneGuid(bootSceneGuid) {}
+	};
+	
 	/// Serialize the 'projectFile' as-is at the location 'projectFilepath'.
 	/// Returns true on success.
 	bool SaveProjectFile(const std::filesystem::path& projectFilepath, const ProjectFile& projectFile);
@@ -77,6 +80,7 @@ namespace Laura
 		inline LR_GUID GetBootSceneGuid() const { return m_ProjectFile.bootSceneGuid; }
 		inline bool IsBootScene(LR_GUID guid) { return m_ProjectFile.bootSceneGuid == guid; }
 
+		inline RenderSettings& GetMutableRuntimeRenderSettings() { return m_ProjectFile.runtimeRenderSettings; }
 	private:
 		/// Filesystem path to the current project folder (where .lrproj lives).
 		std::filesystem::path m_ProjectPath;

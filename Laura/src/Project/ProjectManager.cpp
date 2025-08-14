@@ -9,23 +9,22 @@ namespace Laura
 			LOG_ENGINE_WARN("SaveProjectFile: invalid file extension '{}'.", projectFilepath.string());
 			return false;
 		}
-
 		if (!std::filesystem::exists(projectFilepath.parent_path())) {
 			LOG_ENGINE_WARN("SaveProjectFile: parent directory '{}' does not exist.", projectFilepath.parent_path().string());
 			return false;
 		}
 
-		YAML::Emitter out;
-		out << YAML::BeginMap
-		<< YAML::Key << "bootSceneGuid" << YAML::Value << static_cast<uint64_t>(projectFile.bootSceneGuid)
-		<< YAML::EndMap;
+		YAML::Node node;
+		node["bootSceneGuid"] = (uint64_t)projectFile.bootSceneGuid;
+		YAML::Node rsNode = node["RuntimeRenderSettings"];
+		projectFile.runtimeRenderSettings.SerializeToYamlNode(rsNode);
 
 		std::ofstream fout(projectFilepath);
 		if (!fout.is_open()) {
 			LOG_ENGINE_ERROR("SaveProjectFile: could not open {0} for writing — permissions or path invalid", projectFilepath.string());
 			return false;
 		}
-		fout << out.c_str();
+		fout << node;
 		LOG_ENGINE_INFO("SaveProjectFile: wrote project data into {0}", projectFilepath.string());
 		return true;
 	}
@@ -39,11 +38,14 @@ namespace Laura
 			return std::nullopt;
 		}
 
-		YAML::Node root;
+		YAML::Node node;
 		try {
-			root = YAML::LoadFile(projectFilepath.string());
+			node = YAML::LoadFile(projectFilepath.string());
 			ProjectFile projectFile;
-			projectFile.bootSceneGuid = static_cast<LR_GUID>(root["bootSceneGuid"].as<uint64_t>());
+			projectFile.bootSceneGuid = static_cast<LR_GUID>(node["bootSceneGuid"].as<uint64_t>());
+			YAML::Node rsNode = node["RuntimeRenderSettings"];
+			projectFile.runtimeRenderSettings.DeserializeFromYamlNode(rsNode);
+
 			LOG_ENGINE_INFO("LoadProjectFile: successfully loaded project file from {0}", projectFilepath.string());
 			return std::make_optional(projectFile);
 		}
