@@ -11,7 +11,7 @@ namespace Laura
         
         
         theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background1);
-        ImGui::Begin(ICON_FA_CUBE " ASSETS");
+        ImGui::Begin(ICON_FA_CUBE " Assets");
         if (m_EditorState->temp.isInRuntimeSimulation) {
             ImGui::BeginDisabled();
         }

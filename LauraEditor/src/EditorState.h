@@ -31,6 +31,7 @@ namespace Laura
 			bool isViewportSettingsPanelOpen = false;
 			bool isThemePanelOpen = false;
 			bool isProfilerPanelOpen = true;
+			bool isExportPanelOpen = false;
 			EditorTheme editorTheme;
 			bool isInRuntimeSimulation = false;
 		} temp;

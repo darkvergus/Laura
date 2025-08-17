@@ -141,7 +141,7 @@ namespace Laura
 		style.Colors[ImGuiCol_ResizeGrip]                = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_ResizeGripHovered]         = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_ResizeGripActive]          = m_ColorPallete[EditorCol_Secondary2];
-		style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Primary2];
 		style.Colors[ImGuiCol_SeparatorHovered]          = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_SeparatorActive]           = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_Text]                      = m_ColorPallete[EditorCol_Text1];

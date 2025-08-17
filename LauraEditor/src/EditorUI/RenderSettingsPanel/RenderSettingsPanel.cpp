@@ -36,7 +36,7 @@ namespace Laura
 			ImGui::Text("%s", label);
 		};
 
-		ImGui::Begin(ICON_FA_WRENCH " RENDER SETTINGS");
+		ImGui::Begin(ICON_FA_WRENCH " Render Settings");
 
 		if (m_EditorState->temp.isInRuntimeSimulation) {
 			ImGui::BeginDisabled();

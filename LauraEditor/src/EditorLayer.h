@@ -35,6 +35,6 @@ namespace Laura
 		Launcher m_Launcher;
 
 		// Editor Panels
-		std::array<std::unique_ptr<IEditorPanel>, 8> m_EditorPanels;
+		std::array<std::unique_ptr<IEditorPanel>, 9> m_EditorPanels;
 	};
 }

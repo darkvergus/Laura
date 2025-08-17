@@ -26,7 +26,7 @@ namespace Laura
 
         ImPlot::PushColormap(ImPlotColormap_Deep);
         theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
-        ImGui::Begin(ICON_FA_STOPWATCH " PROFILER", &m_EditorState->temp.isProfilerPanelOpen);
+        ImGui::Begin(ICON_FA_STOPWATCH " Profiler", &m_EditorState->temp.isProfilerPanelOpen);
         if (m_EditorState->temp.isInRuntimeSimulation) {
             ImGui::BeginDisabled();
         }

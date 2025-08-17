@@ -20,7 +20,7 @@ namespace Laura
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
 		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background3);
-		ImGui::Begin(ICON_FA_BRUSH " THEMES", &m_EditorState->temp.isThemePanelOpen, ThemePanelFlags);
+		ImGui::Begin(ICON_FA_BRUSH " Themes", &m_EditorState->temp.isThemePanelOpen, ThemePanelFlags);
 		if (m_EditorState->temp.isInRuntimeSimulation) {
 			ImGui::BeginDisabled();
 		}

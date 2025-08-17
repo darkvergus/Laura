@@ -15,7 +15,7 @@ namespace Laura
 		
 		
 		ImGui::SetNextWindowSizeConstraints({ 350, 50 }, {FLT_MAX, FLT_MAX});
-		ImGui::Begin(ICON_FA_CIRCLE_INFO " INSPECTOR");
+		ImGui::Begin(ICON_FA_CIRCLE_INFO " Inspector");
 		if (m_EditorState->temp.isInRuntimeSimulation) {
 			ImGui::BeginDisabled();
 		}

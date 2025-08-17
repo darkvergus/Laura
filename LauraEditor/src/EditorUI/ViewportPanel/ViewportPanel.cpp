@@ -37,7 +37,7 @@ namespace Laura
 		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background2);
 		
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 }); // remove the border padding
-		ImGui::Begin(ICON_FA_EYE " VIEWPORT", nullptr, ViewportFlags);
+		ImGui::Begin(ICON_FA_EYE " Viewport", nullptr, ViewportFlags);
 		if (m_EditorState->temp.isInRuntimeSimulation) {
 			ImGui::BeginDisabled();
 		}

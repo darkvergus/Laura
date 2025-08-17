@@ -2,6 +2,7 @@
 #include "EditorLayer.h"
 #include "EditorUI/UtilityUI.h"
 #include "EditorUI/MainMenuPanel/MainMenuPanel.h"
+#include "EditorUI/MainMenuPanel/ExportPanel.h"
 #include "EditorUI/ViewportPanel/ViewportPanel.h"
 #include "EditorUI/SceneHierarchyPanel/SceneHierarchyPanel.h"
 #include "EditorUI/InspectorPanel/InspectorPanel.h"
@@ -25,6 +26,7 @@ namespace Laura
 		, m_Launcher(m_EditorState, m_ProjectManager)
 		, m_EditorPanels({
 			std::make_unique<MainMenuPanel>(m_EditorState, m_EventDispatcher, m_ProjectManager),
+			std::make_unique<ExportPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<InspectorPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<SceneHierarchyPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<ViewportPanel>(m_EditorState, m_ProjectManager),
