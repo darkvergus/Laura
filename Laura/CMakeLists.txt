@@ -44,15 +44,10 @@ target_link_libraries(LauraEngine PUBLIC glm spdlog::spdlog entt fontAwesome yam
 # these should be private but it does not work with private for some reason
 target_link_libraries(LauraEngine PUBLIC assimp glfw libglew_static stb_image stb_truetype) 
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/res/")
-    message(STATUS "LR_RESOURCES_PATH: ${CMAKE_CURRENT_SOURCE_DIR}/src/res/")
-elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="./res/")
-    message(STATUS "LR_RESOURCES_PATH: ./resources/ (put res folder next to the .exe file)")
-else()
-	message(!!!! ERROR "Unsupported build type: ${CMAKE_BUILD_TYPE}" !!!!)
-endif()
+target_compile_definitions(LauraEngine PUBLIC
+    $<$<CONFIG:Debug>:LR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/res/"> # use absolute path
+    $<$<CONFIG:RelWithDebInfo>:LR_RESOURCES_PATH="./res/"> # relative path
+)
 
 
 if(LR_PLATFORM_WINDOWS)
