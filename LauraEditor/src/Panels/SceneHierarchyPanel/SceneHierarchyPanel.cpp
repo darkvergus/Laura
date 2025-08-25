@@ -1,4 +1,5 @@
 #include "Panels/SceneHierarchyPanel/SceneHierarchyPanel.h"
+#include "Project/Scene/SceneManager.h"
 #include "Dialogs/ConfirmationDialog.h"
 #include <IconsFontAwesome6.h>
 

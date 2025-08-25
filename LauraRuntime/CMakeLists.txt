@@ -8,9 +8,9 @@ target_sources(LauraRuntime PRIVATE ${RUNTIME_SOURCES})
 target_include_directories(LauraRuntime PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(LauraRuntime PUBLIC LauraEngine)
 
-# compile into the resource folder of the editor
+# compile into the same config folder as the editor
 set_target_properties(LauraRuntime PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/runtime
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/runtime
 )
 
 install(TARGETS LauraRuntime # executable

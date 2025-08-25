@@ -1,18 +1,24 @@
 #pragma once
 
 #include "lrpch.h"
-#include "Project/Scene/Scene.h"
-#include "Project/Assets/AssetManager.h"
 #include "Renderer/RenderSettings.h"
 #include "Renderer/IRendererAPI.h"
-#include "Renderer/IComputeShader.h"
-#include "Renderer/ITexture2D.h"
-#include "Renderer/IImage2D.h"
-#include "Renderer/IUniformBuffer.h"
-#include "Renderer/IShaderStorageBuffer.h"
-#include "Core/Profiler.h"
-#include <filesystem>
+#include "Core/GUID.h"
 #include "EngineCfg.h"
+
+// Forward declarations to reduce compilation dependencies
+namespace Laura {
+    class Scene;
+    class AssetManager;
+    class IComputeShader;
+    class ITexture2D;
+    class IImage2D;
+    class IUniformBuffer;
+    class IShaderStorageBuffer;
+    class Profiler;
+    struct Material;
+    struct AssetPool;
+}
 
 namespace Laura 
 {

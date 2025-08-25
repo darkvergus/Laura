@@ -1,6 +1,5 @@
 #pragma once
 
-#include <filesystem>
 #include "lrpch.h"
 #include "Export/ExportSettings.h"
 

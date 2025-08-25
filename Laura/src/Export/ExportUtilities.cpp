@@ -1,5 +1,6 @@
 #include "Export/ExportUtilities.h"
 #include "Project/ProjectManager.h"
+#include "Project/Assets/AssetManager.h"
 #include "EngineCfg.h"
 
 namespace Laura

@@ -1,9 +1,7 @@
 #pragma once
 
+#include "lrpch.h"
 #include "Core/GUID.h"
-#include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 

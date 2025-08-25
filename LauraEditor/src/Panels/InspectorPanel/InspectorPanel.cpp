@@ -1,4 +1,5 @@
 #include "Panels/InspectorPanel/InspectorPanel.h"
+#include "Project/Scene/SceneManager.h"
 #include "Panels/InspectorPanel/TransformUI.h"
 
 namespace Laura

@@ -3,6 +3,7 @@
 
 #include "MainMenuPanel.h"
 #include "Dialogs/ConfirmationDialog.h"
+#include "Project/Scene/SceneManager.h"
 #include "Dialogs/ProjectDialogs/ProjectDialogs.h"
 
 namespace Laura

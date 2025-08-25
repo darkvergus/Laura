@@ -1,10 +1,14 @@
 #pragma once 
 
 #include "lrpch.h"
-#include <filesystem>
 #include "Renderer/RenderSettings.h"
-#include "Project/Scene/SceneManager.h"
-#include "Project/Assets/AssetManager.h"
+#include "Core/GUID.h"
+
+// Forward declarations
+namespace Laura {
+    class SceneManager;
+    class AssetManager;
+}
 
 namespace Laura 
 {

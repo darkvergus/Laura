@@ -1,5 +1,13 @@
 #include "renderer/Renderer.h"
 #include <glm/gtc/matrix_access.hpp>
+#include "Project/Scene/Scene.h"
+#include "Project/Assets/AssetManager.h"
+#include "Renderer/IComputeShader.h"
+#include "Renderer/ITexture2D.h"
+#include "Renderer/IImage2D.h"
+#include "Renderer/IUniformBuffer.h"
+#include "Renderer/IShaderStorageBuffer.h"
+#include "Core/Profiler.h"
 
 namespace Laura 
 {

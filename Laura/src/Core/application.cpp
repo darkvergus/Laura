@@ -1,4 +1,11 @@
 #include "Core/application.h"
+#include "Core/IWindow.h"
+#include "Core/Layers/LayerStack.h"
+#include "Core/Layers/RenderLayer.h"
+#include "Core/Profiler.h"
+#include "Project/ProjectManager.h"
+#include "Renderer/IRendererAPI.h"
+#include "Events/IEvent.h"
 
 namespace Laura 
 {

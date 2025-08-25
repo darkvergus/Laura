@@ -3,7 +3,6 @@
 #include <Laura.h>
 #include "EditorState.h"
 
-#include <shobjidl.h>  // IFileDialog
 #include <filesystem>
 #include <optional>
 
@@ -19,7 +18,6 @@ namespace Laura
 		}
 		~Launcher() = default;
 	
-		std::optional<std::filesystem::path> ShowFolderPickerDialog();
 		void OnImGuiRender();
 		void DrawCreateProjectWindow();
 

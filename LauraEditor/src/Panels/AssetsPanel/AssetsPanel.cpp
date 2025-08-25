@@ -1,6 +1,9 @@
 #include "Panels/AssetsPanel/AssetsPanel.h"
 #include "Dialogs/ConfirmationDialog.h"
 #include "ImGuiContext.h"
+#include "Project/Scene/SceneManager.h"
+#include "Project/Assets/AssetManager.h"
+#include "Platform/Windows/Dialogs/FilePickerDialog.h"
 #include <format>
 
 namespace Laura 
@@ -48,14 +51,9 @@ namespace Laura
                 m_ProjectManager->GetSceneManager()->CreateScene();
             }
             if (ImGui::MenuItem(ICON_FA_CUBE " Asset...")) {
-				OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
-				char buff[MAX_PATH] = {}; 
-				ofn.lpstrFilter = "All Files\0*.*\0";
-				ofn.lpstrTitle = "Select Asset:";
-				ofn.nMaxFile = sizeof(buff);
-				ofn.lpstrFile = buff;
-				if (GetOpenFileNameA(&ofn)) {
-					LR_GUID guid = assetManager->ImportAsset(buff);
+				auto assetPath = FilePickerDialog("*.*", "Select Asset:");
+				if (!assetPath.empty()) {
+					LR_GUID guid = assetManager->ImportAsset(assetPath.string());
 				}
             }
 			ImGui::EndPopup();

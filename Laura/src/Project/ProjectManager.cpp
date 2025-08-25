@@ -1,4 +1,6 @@
 #include "Project/ProjectManager.h"
+#include "Project/Scene/SceneManager.h"
+#include "Project/Assets/AssetManager.h"
 
 namespace Laura
 {
@@ -21,7 +23,7 @@ namespace Laura
 
 		std::ofstream fout(projectFilepath);
 		if (!fout.is_open()) {
-			LOG_ENGINE_ERROR("SaveProjectFile: could not open {0} for writing — permissions or path invalid", projectFilepath.string());
+			LOG_ENGINE_ERROR("SaveProjectFile: could not open {0} for writing ï¿½ permissions or path invalid", projectFilepath.string());
 			return false;
 		}
 		fout << node;

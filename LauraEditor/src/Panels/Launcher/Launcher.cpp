@@ -1,47 +1,12 @@
 #include <IconsFontAwesome6.h>
 #include "Launcher.h"
+#include "Platform/Windows/Dialogs/FolderPickerDialog.h"
+#include "Platform/Windows/Dialogs/FilePickerDialog.h"
+#include "Project/ProjectManager.h"  // For PROJECT_FILE_EXTENSION
 
 
 namespace Laura
 {
-
-	std::optional<std::filesystem::path> Launcher::ShowFolderPickerDialog() {
-		IFileDialog* pDialog = nullptr;
-		HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
-									  IID_IFileDialog, reinterpret_cast<void**>(&pDialog));
-		if (FAILED(hr) || !pDialog) {
-			return std::nullopt;
-		}
-		// Tell the dialog to pick folders
-		DWORD options;
-		pDialog->GetOptions(&options);
-		pDialog->SetOptions(options | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM);
-		pDialog->SetTitle(L"Select Project Folder");
-		// Show the dialog
-		hr = pDialog->Show(nullptr);
-		if (FAILED(hr)) {
-			pDialog->Release();
-			return std::nullopt;
-		}
-		// Get the result
-		IShellItem* pItem = nullptr;
-		hr = pDialog->GetResult(&pItem);
-		if (FAILED(hr) || !pItem) {
-			pDialog->Release();
-			return std::nullopt;
-		}
-		PWSTR pszPath = nullptr;
-		hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszPath);
-		std::optional<std::filesystem::path> result;
-
-		if (SUCCEEDED(hr)) {
-			result = std::filesystem::path(pszPath);
-			CoTaskMemFree(pszPath);
-		}
-		pItem->Release();
-		pDialog->Release();
-		return result;
-	}
 
 	void Launcher::OnImGuiRender() {
 		auto& theme = m_EditorState->temp.editorTheme;
@@ -88,14 +53,8 @@ namespace Laura
 		ImGui::Spacing();
 		ImGui::SetCursorPosX(centerX);
 		if (ImGui::Button("Open Project " ICON_FA_SHARE, ImVec2(buttonWidth, buttonHeight))) {
-			OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
-			char buff[MAX_PATH] = {};
-			ofn.lpstrFilter = PROJECT_FILE_EXTENSION "Files\0 * " PROJECT_FILE_EXTENSION "\0";
-			ofn.lpstrTitle = "Select Project File:";
-			ofn.nMaxFile = sizeof(buff);
-			ofn.lpstrFile = buff;
-			if (GetOpenFileNameA(&ofn)) {
-				std::filesystem::path projectfilePath = buff;
+			auto projectfilePath = FilePickerDialog(PROJECT_FILE_EXTENSION, "Select Project File:");
+			if (!projectfilePath.empty()) {
 				if (m_ProjectManager->OpenProject(projectfilePath)) {
 					m_CreateProjectWindowOpen = false;
 				}
@@ -140,8 +99,8 @@ namespace Laura
 		theme.PushColor(ImGuiCol_Text, textCol);
 		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2{ 0.0f, 0.5f });
 		if (ImGui::Button((buttonLabel + buttonId).c_str(), {ImGui::GetContentRegionAvail().x - margin, 0})) {
-			if (auto newPath = ShowFolderPickerDialog()) {
-				folderpath = *newPath;
+			if (auto path = FolderPickerDialog("Select Project Folder"); !path.empty()) {
+				folderpath = path;
 				folderpathSelected = true;
 			}
 		}

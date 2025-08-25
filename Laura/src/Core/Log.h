@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lrpch.h"
+#include <memory>
 #include "spdlog/spdlog.h"
 
 namespace Laura 

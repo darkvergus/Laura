@@ -3,6 +3,7 @@
 #include <filesystem>
 #include "ThemePanel.h"
 #include "Dialogs/ConfirmationDialog.h"
+#include "Platform/Windows/Dialogs/FilePickerDialog.h"
 
 namespace Laura
 {
@@ -36,18 +37,12 @@ namespace Laura
 				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 60 - 4 - lineHeight); // 4 pixels padding between buttons
 
 				if (ImGui::Button("Open..", ImVec2(60.0f, lineHeight))) {
-					OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
-					char buff[MAX_PATH] = {};
-					ofn.lpstrFilter = EDITOR_THEME_FILE_EXTENSION "Files\0 * " EDITOR_THEME_FILE_EXTENSION "\0";
-					ofn.lpstrTitle = "Select Theme:";
-					ofn.nMaxFile = sizeof(buff);
-					ofn.lpstrFile = buff;
-
-					if (GetOpenFileNameA(&ofn)) { // when the user selected a file
-						auto [success, errMsg] = theme.LoadFromFile(buff);
+					auto themePath = FilePickerDialog(EDITOR_THEME_FILE_EXTENSION, "Select Theme:");
+					if (!themePath.empty()) { // when the user selected a file
+						auto [success, errMsg] = theme.LoadFromFile(themePath.string());
 						if (success) {
 							errorMessage = ""; // on success reset error message
-							m_EditorState->persistent.editorThemeFilepath = buff;
+							m_EditorState->persistent.editorThemeFilepath = themePath.string();
 						}
 						else {
 							errorMessage = errMsg;
@@ -119,15 +114,9 @@ namespace Laura
 				ImGui::SameLine(ImGui::GetContentRegionAvail().x - 75.0f);
 				static std::string saveErrorMessage = "";
 				if (ImGui::Button("Export " ICON_FA_FILE_EXPORT,  ImVec2(75.0f, lineHeight))) {
-					OPENFILENAMEA ofn = { sizeof(OPENFILENAMEA) };
-					char buff[MAX_PATH] = "template" EDITOR_THEME_FILE_EXTENSION;
-					ofn.lpstrFilter = EDITOR_THEME_FILE_EXTENSION "Files\0 * " EDITOR_THEME_FILE_EXTENSION "\0";
-					ofn.lpstrTitle = "Save Theme File";
-					ofn.nMaxFile = sizeof(buff);
-					ofn.lpstrFile = buff;
-					ofn.Flags = OFN_OVERWRITEPROMPT;
-					if (GetSaveFileNameA(&ofn)) {
-						std::filesystem::path saveFilepath(buff);
+					auto savePath = SaveFileDialog(EDITOR_THEME_FILE_EXTENSION, "Save Theme File", "Theme");
+					if (!savePath.empty()) {
+						std::filesystem::path saveFilepath = savePath;
 						saveFilepath.replace_extension(EDITOR_THEME_FILE_EXTENSION);
 						auto [status, errMsg] = theme.SaveToFile(saveFilepath);
 						if (!status) {

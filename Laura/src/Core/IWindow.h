@@ -4,6 +4,11 @@
 #include "Events/KeyEvents.h"
 #include "Events/MouseEvents.h"
 
+// Forward declaration
+namespace Laura {
+    class IEvent;
+}
+
 namespace Laura
 {
 

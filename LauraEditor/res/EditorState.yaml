@@ -1,5 +1,5 @@
 ViewportMode: FitToViewport
-EditorThemeFilepath: ""
+EditorThemeFilepath: C:\Dev\template.lrtheme
 EditorRenderSettings:
   showBvhHeatmap: false
   bvhHeatmapColorCutoff: 308

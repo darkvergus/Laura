@@ -1,7 +1,5 @@
 project(LauraEditor VERSION 1.1.0 LANGUAGES CXX)
 
-option(ENABLE_CONSOLE "Enable console window for the editor" ON)
-
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/imgui-docking)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/implot)
 
@@ -21,7 +19,7 @@ target_compile_definitions(LauraEditor PUBLIC
 add_dependencies(LauraEditor LauraRuntime)
 
 set_target_properties(LauraEditor PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>
 )
 
 # Install Step

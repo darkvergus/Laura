@@ -2,6 +2,7 @@
 #include <IconsFontAwesome6.h>
 #include <imgui_internal.h>
 #include "Panels/DNDPayloads.h"
+#include "Project/Scene/SceneManager.h"
 
 namespace Laura
 {

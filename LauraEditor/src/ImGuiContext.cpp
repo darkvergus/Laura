@@ -8,6 +8,7 @@
 #include <implot.h>
 #include "ImGuiContext.h"
 #include "EditorCfg.h"
+#include "Core/IWindow.h"
 
 namespace Laura 
 {
