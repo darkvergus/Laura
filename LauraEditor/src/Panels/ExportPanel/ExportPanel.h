@@ -38,8 +38,6 @@ namespace Laura
 					m_BootSceneTitle = bootScene->name;
 				}
 			}
-			m_ExportSettings.bootSceneGuid = m_ProjectManager->GetBootSceneGuid();
-
 			// sync export settings with current viewport mode
 			m_ExportSettings.screenFitMode = m_EditorState->persistent.viewportMode;
 		}

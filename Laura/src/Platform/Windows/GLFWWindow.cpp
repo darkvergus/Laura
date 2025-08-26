@@ -3,6 +3,7 @@
 #include "GLFWWindow.h"
 #include "Core/Events/KeyEvents.h"
 #include "Core/Events/MouseEvents.h"
+#include "Core/Events/WindowEvents.h"
 #include "core/Log.h"
 
 namespace Laura 
@@ -32,10 +33,21 @@ namespace Laura
 		glfwSetMouseButtonCallback(m_NativeWindow, GLFWMouseButtonCallback);
 		glfwSetCursorPosCallback(m_NativeWindow, GLFWMousePositionCallback);
 		glfwSetScrollCallback(m_NativeWindow, GLFWScrollCallback);
+		glfwSetFramebufferSizeCallback(m_NativeWindow, GLFWWindowResizeCallback);
 	}
 
 	GLFWWindowIMPL::~GLFWWindowIMPL() {
 		glfwTerminate();
+	}
+
+	void GLFWWindowIMPL::onUpdate() {
+		glfwPollEvents();
+		m_Context->swapBuffers();
+	}
+
+	void GLFWWindowIMPL::setTitle(const std::string& title) {
+		m_WindowProps.title = title;
+		glfwSetWindowTitle(m_NativeWindow, title.c_str());
 	}
 
 	int GLFWWindowIMPL::getWidth() const {
@@ -55,13 +67,42 @@ namespace Laura
 		glfwSwapInterval(m_WindowProps.VSync);
 	}
 
-	void GLFWWindowIMPL::onUpdate() {
-		glfwPollEvents();
-		m_Context->swapBuffers();
-	}
-
 	void* GLFWWindowIMPL::getNativeWindow() const {
 		return m_NativeWindow;
+	}
+
+
+	void GLFWWindowIMPL::setFullscreen(bool enabled) {
+		if (enabled == m_Fullscreen) {
+			return; // already in desired state
+		}
+
+		m_Fullscreen = enabled;
+
+		if (enabled) {
+			// Save current windowed position and size
+			glfwGetWindowPos(m_NativeWindow, &m_WindowedPosX, &m_WindowedPosY);
+			glfwGetWindowSize(m_NativeWindow, &m_WindowedWidth, &m_WindowedHeight);
+
+			// Get primary monitor
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			// Switch to fullscreen
+			glfwSetWindowMonitor(m_NativeWindow, monitor,
+								 0, 0, mode->width, mode->height,
+								 mode->refreshRate);
+		} else {
+			// Switch back to windowed
+			glfwSetWindowMonitor(m_NativeWindow, nullptr,
+								 m_WindowedPosX, m_WindowedPosY,
+								 m_WindowedWidth, m_WindowedHeight,
+								 0);
+		}
+	}
+
+	bool GLFWWindowIMPL::isFullscreen() const {
+		return m_Fullscreen;
 	}
 
 	// takes a const reference to a function returning void and argument std::shared_ptr<IEvent>
@@ -112,6 +153,10 @@ namespace Laura
 		thisWindow->dispatchEvent(std::make_shared<MouseScrollEvent>(xoffset, yoffset));
 	}
 
+	void GLFWWindowIMPL::GLFWWindowResizeCallback(GLFWwindow* window, int width, int height) {
+		thisWindow->dispatchEvent(std::make_shared<WindowResizeEvent>(glm::vec2{ width, height }));
+	}
+
 	bool GLFWWindowIMPL::isKeyPressed(KeyCode key) {
 		auto state = glfwGetKey(m_NativeWindow, key);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
@@ -131,4 +176,5 @@ namespace Laura
 	bool GLFWWindowIMPL::shouldClose() {
 		return glfwWindowShouldClose(m_NativeWindow);
 	}
+
 }

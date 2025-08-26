@@ -28,11 +28,10 @@ namespace Laura
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background1);
+		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background2);
 		theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
 		ImGui::Begin("##Launcher", nullptr, flags);
 
-		ImGui::PushFont(Fonts()->notoSansBold);
 
 		ImVec2 windowSize = ImGui::GetContentRegionAvail();
 		float buttonWidth = windowSize.x / 8.0f;
@@ -45,9 +44,11 @@ namespace Laura
 		float centerX = (windowSize.x - buttonWidth) / 2.0f;
 		ImGui::SetCursorPosX(centerX);
 		theme.PushColor(ImGuiCol_Button, EditorCol_Accent1);
+		ImGui::PushFont(Fonts()->notoSansBold);
 		if (ImGui::Button("New Project " ICON_FA_DIAGRAM_PROJECT, ImVec2(buttonWidth, buttonHeight))) {
 			m_CreateProjectWindowOpen = true;
 		}
+		ImGui::PopFont();
 		theme.PopColor();
 		if (m_CreateProjectWindowOpen) {
 			DrawCreateProjectWindow(); // resets the flag on close 
@@ -64,7 +65,6 @@ namespace Laura
 			}
 		}
 
-		ImGui::PopFont();
 		ImGui::End();
 		theme.PopColor(2);
 		ImGui::PopStyleVar(2);

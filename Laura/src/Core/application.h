@@ -1,9 +1,9 @@
 #pragma once
 
 #include "lrpch.h"
+#include "Core/IWindow.h"
 // Forward declarations to reduce compilation dependencies
 namespace Laura {
-    class IWindow;
     class LayerStack;
     class RenderLayer;
     class Profiler;
@@ -16,8 +16,7 @@ namespace Laura
 
     class Application {
     public:
-        Application() = default;
-        //Application(WindowProps windowProps);
+        Application(WindowProps windowProps = WindowProps{});
         virtual ~Application() = default;
         void run();
         
@@ -32,8 +31,6 @@ namespace Laura
 
         std::shared_ptr<RenderLayer>    _RenderLayer;
 
-    protected:
-        virtual void init();
         virtual void shutdown();
     };
 

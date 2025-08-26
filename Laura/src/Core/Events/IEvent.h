@@ -20,6 +20,8 @@ namespace Laura
 		NEW_FRAME_RENDERED_EVENT,
 		UPDATE_RENDER_SETTINGS_EVENT,
 
+		WINDOW_RESIZE_EVENT,
+
 		EVENT_COUNT
 	};
 
@@ -34,6 +36,7 @@ namespace Laura
         	case EventType::MOUSE_SCROLL_EVENT:				return os << "MOUSE_SCROLL_EVENT";
         	case EventType::NEW_FRAME_RENDERED_EVENT:		return os << "NEW_FRAME_RENDERED_EVENT";
 			case EventType::UPDATE_RENDER_SETTINGS_EVENT:	return os << "UPDATE_RENDER_SETTINGS_EVENT";
+			case EventType::WINDOW_RESIZE_EVENT:			return os << "WINDOW_RESIZE_EVENT";
         	case EventType::EVENT_COUNT:                	return os << "EVENT_COUNT";
         	default:										return os << "UNKNOWN_EVENT_TYPE";
     	}

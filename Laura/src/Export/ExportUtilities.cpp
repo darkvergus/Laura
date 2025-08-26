@@ -12,12 +12,15 @@ namespace Laura
 			const std::filesystem::path projectFolderPath,
 			const ExportSettings& exportSettings) {
 
+		// Recursively copy all files and subdirectories from `src` into `dst`,
+		// preserving the directory structure. Overwrites files if they already exist.
+		//   src = "C:/data", dst = "D:/backup"
+		//   "C:/data/img/cat.png" -> "D:/backup/img/cat.png"
 		auto copyInto = [](const std::filesystem::path& dst, const std::filesystem::path& src) {
+			if (!std::filesystem::exists(src))			{ throw std::runtime_error("Source directory does not exist: " + src.string()); }
+			if (!std::filesystem::is_directory(src))	{ throw std::runtime_error("Source path is not a directory: " + src.string()); }
 			for (const auto& entry : std::filesystem::recursive_directory_iterator(src)) {
-				// e.g. if src = "C:/data" and entry = "C:/data/img/cat.png",
-				//      then relPath = "img/cat.png"
 				std::filesystem::path relPath = std::filesystem::relative(entry.path(), src);
-				// e.g. if dst = "D:/backup", then dest = "D:/backup/img/cat.png"
 				std::filesystem::path dest = dst / relPath;
 				if (entry.is_directory()) {
 					std::filesystem::create_directories(dest);
@@ -52,23 +55,45 @@ namespace Laura
 			for (const auto& entry : std::filesystem::recursive_directory_iterator(projectFolderPath)) {
 				if (entry.path().extension() == ASSET_META_FILE_EXTENSION) {
 					std::optional<AssetMetaFile> metaFileOpt = LoadMetaFile(entry.path());
-					if (!metaFileOpt.has_value())
+					if (!metaFileOpt.has_value()) {
+						LOG_ENGINE_WARN("ExportProject: failed to load meta file {0}, skipping", entry.path().string());
 						continue;
+					}
 
 					AssetMetaFile& metaFile = metaFileOpt.value();
+
+					// Check if the source asset file exists
+					if (!std::filesystem::exists(metaFile.sourcePath)) {
+						LOG_ENGINE_WARN("ExportProject: source asset file does not exist {0}, skipping meta file {1}",
+							metaFile.sourcePath.string(), entry.path().string());
+						continue;
+					}
+
 					// Destination path for the asset file
 					std::filesystem::path assetFilename = metaFile.sourcePath.filename();
 					std::filesystem::path exportAssetPath = exportProjectFolderPath / assetFilename;
+
 					// Copy the asset file
-					std::filesystem::copy_file(metaFile.sourcePath, exportAssetPath,
-											   std::filesystem::copy_options::overwrite_existing);
+					try {
+						std::filesystem::copy_file(metaFile.sourcePath, exportAssetPath,
+												   std::filesystem::copy_options::overwrite_existing);
+					} catch (const std::exception& e) {
+						LOG_ENGINE_ERROR("ExportProject: failed to copy asset file {0} to {1}: {2}",
+							metaFile.sourcePath.string(), exportAssetPath.string(), e.what());
+						continue;
+					}
+
 					// Update the meta file to point to the new asset path
 					metaFile.sourcePath = exportAssetPath;
+
 					// Save the updated meta file in the export folder
 					// Destination path for the metafile
 					std::filesystem::path metaFileFilename = entry.path().filename();
 					std::filesystem::path exportMetaFilePath = exportProjectFolderPath / metaFileFilename;
-					SaveMetaFile(exportMetaFilePath, metaFile);
+					if (!SaveMetaFile(exportMetaFilePath, metaFile)) {
+						LOG_ENGINE_ERROR("ExportProject: failed to save updated meta file {0}", exportMetaFilePath.string());
+						// Continue processing other files even if one fails
+					}
 				}
 			}
 
@@ -82,12 +107,27 @@ namespace Laura
 
             // Copy runtime from a known location
             std::filesystem::path runtimePath = EngineCfg::EXECUTABLE_DIR / "runtime";
+            if (!std::filesystem::exists(runtimePath)) {
+                LOG_ENGINE_ERROR("ExportProject: runtime directory not found at {0}", runtimePath.string());
+                throw std::runtime_error("Runtime directory not found");
+            }
             copyInto(exportProjectFolderPath, runtimePath);
 
             // Rename the runtime .exe file
             //std::filesystem::path runtimeExe = exportProjectFolderPath / "runtime.exe_test";
             //std::filesystem::path gameExe = exportProjectFolderPath / (projectName + ".exe_text");
             //std::filesystem::rename(runtimeExe, gameExe);
+
+			#ifdef BUILD_INSTALL
+			// Copy engine resources into export folder.
+			// Notes:
+			//  - In non-shipping builds, runtime uses the source tree resource path instead.
+			//  - For shipping, resources must be placed next to the runtime executable.
+			//  - Since editor and runtime share engine resource paths, both expect them
+			//    in the same relative location ("engine_res" beside the executable).
+			copyInto(exportProjectFolderPath / "engine_res", EngineCfg::RESOURCES_PATH); 
+			#endif
+			
             return true;
         }
         catch (const std::exception& e) {

@@ -11,18 +11,13 @@ namespace Laura
 	public:
 		LauraRuntime()
 			: Application() {
-		}
 
-		void init() override {
-			Application::init();
-
-			_LayerStack->PushLayer(std::make_shared<RuntimeLayer>(_Profiler, _LayerStack, _ProjectManager));
+			_LayerStack->PushLayer(std::make_shared<RuntimeLayer>(_Window, _Profiler, _LayerStack, _ProjectManager));
 		}
 
 		~LauraRuntime() {
 
 		}
-
 	};
 
 	Application* CreateApplication(const std::filesystem::path& exeDir) {

@@ -80,9 +80,11 @@ namespace Laura
 		for (auto& panel : m_EditorPanels) {
 			panel->OnImGuiRender();
 		}
-
+		
+		#ifndef BUILD_INSTALL // display demo when not shipping
 		bool showDemo = true;
 		ImGui::ShowDemoWindow(&showDemo);
+		#endif
 
 		m_ImGuiContext->EndFrame();
 	}

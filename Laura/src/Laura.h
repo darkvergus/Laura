@@ -28,6 +28,8 @@
 #include "Project/Scene/SceneManager.h"
 #include "Project/Assets/AssetManager.h"
 
+#include "Export/ExportSettings.h"
+
 #include "lrpch.h"
 
 

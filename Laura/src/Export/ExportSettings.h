@@ -25,10 +25,9 @@ namespace Laura
     std::optional<ScreenFitMode> ScreenFitModeFromString(const std::string& str);
 
     struct ExportSettings {
-        bool inFullscreen = false;
+        bool fullscreen = false;
         bool vSync = true;
         ScreenFitMode screenFitMode = ScreenFitMode::MaxAspectFit;
-        LR_GUID bootSceneGuid = LR_GUID::INVALID;
     };
 
     bool SerializeExportSettingsYaml(const std::filesystem::path& folderpath, const ExportSettings& settings);

@@ -10,10 +10,6 @@ namespace Laura
 	public:
 		LauraEditor()
 			: Application() {
-		}
-
-		void init() override {
-			Application::init();
 
 			m_ImGuiContext = std::make_shared<ImGuiContext>(_Window);
 			m_ImGuiContext->Init();

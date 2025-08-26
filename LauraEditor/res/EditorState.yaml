@@ -3,7 +3,7 @@ EditorThemeFilepath: ""
 EditorRenderSettings:
   showBvhHeatmap: false
   bvhHeatmapColorCutoff: 500
-  resolution: [320, 200]
+  resolution: [320, 180]
   raysPerPixel: 1
   bouncesPerRay: 5
   accumulate: false

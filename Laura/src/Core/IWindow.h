@@ -32,12 +32,17 @@ namespace Laura
 
 		virtual void onUpdate() = 0;
 
+		virtual void setTitle(const std::string& title) = 0;
+
 		virtual int getWidth() const = 0;
 		virtual int getHeight() const = 0;
 
 		virtual void* getNativeWindow() const = 0;
 		virtual void setVSync(bool enabled) = 0;
 		virtual bool isVSync() const = 0;
+
+		virtual void setFullscreen(bool enabled) = 0;
+		virtual bool isFullscreen() const = 0;
 
 		/// input polling
 		virtual bool isKeyPressed(KeyCode key) = 0;
@@ -50,7 +55,7 @@ namespace Laura
 
 		/// createWindow is a factory method that creates a window with the given properties.
 		/// reutrns a heap pointer
-		static std::shared_ptr<IWindow> createWindow(const WindowProps windowProps = WindowProps());
+		static std::shared_ptr<IWindow> createWindow(const WindowProps windowProps);
 	};
 
 }

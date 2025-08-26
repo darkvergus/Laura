@@ -52,7 +52,7 @@ namespace Laura
 		bool exportProjectNameHasInvalidChars = std::string(m_ExportProjectName).find_first_of(invalidChars) != std::string::npos;
 		bool nameSet  = (m_ExportProjectName[0] != '\0' && !exportProjectNameHasInvalidChars);
 		bool pathSet  = (!m_Folderpath.empty());
-		bool sceneSet = (m_ExportSettings.bootSceneGuid != LR_GUID::INVALID);
+		bool sceneSet = (m_ProjectManager->GetBootSceneGuid() != LR_GUID::INVALID);
 
 		// ----- Executable Name -----
 		drawLabel("Executable Name:", nameSet);
@@ -84,7 +84,7 @@ namespace Laura
 
 		// ----- Fullscreen checkbox -----
 		drawLabel("Fullscreen  " ICON_FA_EXPAND , true);
-		ImGui::Checkbox("##RuntimeFullscreen", &m_ExportSettings.inFullscreen);
+		ImGui::Checkbox("##RuntimeFullscreen", &m_ExportSettings.fullscreen);
 
 		// ----- Viewport Scaling combo -----
 		drawLabel("Viewport Scaling:", true);
@@ -116,11 +116,11 @@ namespace Laura
 			DNDPayloadTypes::SCENE,
 			displayName,
 			[&](const DNDPayload& payload) {
-				m_ExportSettings.bootSceneGuid = payload.guid;
+				m_ProjectManager->SetBootSceneGuid(payload.guid);
 				m_BootSceneTitle = payload.title;
 				m_ExportSuccessful = false;
 				m_ExportFailed = false;
-				sceneSet = (m_ExportSettings.bootSceneGuid != LR_GUID::INVALID);
+				sceneSet = (m_ProjectManager->GetBootSceneGuid() != LR_GUID::INVALID);
 			},
 			theme,
 			"Drag a scene asset here from the Assets panel",

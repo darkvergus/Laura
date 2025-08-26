@@ -28,10 +28,9 @@ namespace Laura
         }
 
         YAML::Node node;
-        node["fullscreen"] = settings.inFullscreen;
+        node["fullscreen"] = settings.fullscreen;
         node["vSync"] = settings.vSync;
         node["screenFitMode"] = ScreenFitModeToString(settings.screenFitMode);
-        node["bootSceneGuid"] = (uint64_t)settings.bootSceneGuid;
 
         std::filesystem::path filePath = folderpath / EXPORT_SETTINGS_FILENAME;
         std::ofstream fout(filePath);
@@ -56,13 +55,11 @@ namespace Laura
             YAML::Node node = YAML::LoadFile(filePath.string());
             ExportSettings settings;
 
-            settings.inFullscreen = node["fullscreen"] ? node["inFullscreen"].as<bool>() : false;
+            settings.fullscreen = node["fullscreen"] ? node["fullscreen"].as<bool>() : false;
             settings.vSync = node["vSync"] ? node["vSync"].as<bool>() : true;
             settings.screenFitMode = node["screenFitMode"] ? 
                 ScreenFitModeFromString(node["screenFitMode"].as<std::string>()).value_or(ScreenFitMode::MaxAspectFit) : 
                 ScreenFitMode::MaxAspectFit;
-
-            settings.bootSceneGuid = node["bootSceneGuid"] ? static_cast<LR_GUID>(node["bootSceneGuid"].as<uint64_t>()) : LR_GUID::INVALID;
 
             LOG_ENGINE_INFO("DeserializeExportSettingsYaml: successfully loaded export settings from {}", filePath.string());
             return settings;

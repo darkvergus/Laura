@@ -1,13 +1,15 @@
 #pragma once
 
 #include <Laura.h>
+#include <Export/ExportSettings.h>
 
 namespace Laura
 {
 
 	class RuntimeLayer : public ILayer {
 	public:
-		RuntimeLayer(std::shared_ptr<Profiler> profiler,
+		RuntimeLayer(std::shared_ptr<IWindow> window,
+					std::shared_ptr<Profiler> profiler,
 					std::shared_ptr<IEventDispatcher> eventDispatcher,
 					std::shared_ptr<ProjectManager> projectManager
 		);
@@ -18,14 +20,24 @@ namespace Laura
 		virtual void onEvent(std::shared_ptr<IEvent> event) override;
 
 	private:
+		void CalculateViewportCoordinates();
 		// Engine Systems
+		std::shared_ptr<IWindow> m_Window;
 		std::shared_ptr<Profiler> m_Profiler;
 		std::shared_ptr<IEventDispatcher> m_EventDispatcher; // layerstack  
 		std::shared_ptr<ProjectManager> m_ProjectManager;
 		
-		// Simple texture display
 		std::shared_ptr<IImage2D> m_CurrentFrame;
-		int m_WindowWidth = 1280, m_WindowHeight = 720;
 		unsigned int m_Framebuffer;
+
+		ExportSettings m_ExportSettings;
+
+		// Viewport scaling variables
+		glm::ivec4 m_ViewportCoords; // x, y, width, height for glBlitFramebuffer
+		glm::ivec2 m_CurrentWindowDimensions;
+		glm::ivec2 m_PrevWindowDimensions;
+		glm::ivec2 m_PrevImageDimensions;
+		bool m_ForceUpdate;
+		bool m_NeedsDimensionUpdate;
 	};
 }
