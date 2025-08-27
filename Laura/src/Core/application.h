@@ -31,7 +31,7 @@ namespace Laura
 
         std::shared_ptr<RenderLayer>    _RenderLayer;
 
-        virtual void shutdown();
+        virtual void Shutdown();
     };
 
     Application* CreateApplication(const std::filesystem::path& exeDir);

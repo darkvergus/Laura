@@ -26,7 +26,7 @@ namespace Laura
 				ImGui::BeginDisabled();
 			}
 			float playBtnPos = (ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(ICON_FA_PLAY).x) / 2.0f;
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 3)); // no side padding, slight vertical padding	
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(3, 3)); // slight vertical & horizontal padding
 			float orginalBorderSize = ImGui::GetStyle().PopupBorderSize;
 			ImGui::GetStyle().PopupBorderSize = 0.0f;
 			theme.PushColor(ImGuiCol_PopupBg, EditorCol_Background3);
@@ -49,10 +49,17 @@ namespace Laura
 			ImGui::SetNextWindowSizeConstraints(ImVec2(150, 0), ImVec2(FLT_MAX, FLT_MAX));
 			if (ImGui::BeginMenu("View")) {
 				theme.PushColor(ImGuiCol_HeaderHovered, EditorCol_Accent2);
+				if (ImGui::BeginMenu(ItemLabel(ICON_FA_TABLE_LIST, "Layouts").c_str())) {
+					if (ImGui::MenuItem(ItemLabel("", "Load Default Layout").c_str())) {
+						m_ImGuiContext->LoadDefaultLayout();
+					}
+					ImGui::EndMenu();
+				}
+
+				ImGui::Separator();
 				if (ImGui::MenuItem(ItemLabel(ICON_FA_STOPWATCH, "Profiler").c_str(), NULL, false, !m_EditorState->temp.isProfilerPanelOpen)) {
 					m_EditorState->temp.isProfilerPanelOpen = true; 
 				}
-				ImGui::Separator();
 				if (ImGui::MenuItem(ItemLabel("", "Themes").c_str(), NULL, false, !m_EditorState->temp.isThemePanelOpen)) {
 					m_EditorState->temp.isThemePanelOpen = true; 
 				}

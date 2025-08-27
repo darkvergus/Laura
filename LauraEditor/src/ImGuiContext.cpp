@@ -14,8 +14,12 @@ namespace Laura
 {
 
     ImGuiContext::ImGuiContext(std::shared_ptr<IWindow> window)
-        : m_Window(window), m_FontRegistry(std::make_shared<ImGuiContextFontRegistry>()) {
-    }
+        : m_Window(window)
+        , m_FontRegistry(std::make_shared<ImGuiContextFontRegistry>())
+        , m_ImGuiIniPath(EditorCfg::RESOURCES_PATH / "imgui.ini")
+        , m_DefaultImGuiIniPath(EditorCfg::RESOURCES_PATH / "default_imgui.ini")
+        , m_LoadDefaultLayoutBeforeNewFrame(false)
+    {}
 
     ImGuiContext::~ImGuiContext() {
         ImPlot::DestroyContext();
@@ -28,8 +32,25 @@ namespace Laura
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImPlot::CreateContext();
- 
         ImGuiIO& io = ImGui::GetIO();
+
+
+        // .INI FILE
+        io.IniFilename = NULL; // ensure custom management for .ini files
+		if (!std::filesystem::exists(m_ImGuiIniPath)) {
+			if (std::filesystem::exists(m_DefaultImGuiIniPath)) {
+				std::error_code ec;
+				std::filesystem::copy_file(m_DefaultImGuiIniPath, m_ImGuiIniPath, std::filesystem::copy_options::overwrite_existing, ec);
+                if (!ec)    { LOG_EDITOR_TRACE("ImGuiContext::Init(): Copied {0}", m_DefaultImGuiIniPath.string()); }
+                else        { LOG_EDITOR_CRITICAL("ImGuiContext::Init(): Failed to copy default_imgui.ini: {0}", ec.message()); }
+			} 
+            else { LOG_EDITOR_CRITICAL("ImGuiContext::Init(): default_imgui.ini missing {0}", m_DefaultImGuiIniPath.string()); }
+		}
+        ImGui::LoadIniSettingsFromDisk(m_ImGuiIniPath.string().c_str());
+        LOG_EDITOR_TRACE("ImGuiContext::Init(): Loaded .ini file {0}", m_ImGuiIniPath.string());
+
+
+        // FONTS
 		static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
 
 		// DEFAULT FONT
@@ -99,7 +120,19 @@ namespace Laura
         ImGui_ImplOpenGL3_Init("#version 460");
     }
 
+    void ImGuiContext::LoadDefaultLayout() {
+        m_LoadDefaultLayoutBeforeNewFrame = true;
+    }
+
     void ImGuiContext::BeginFrame() {
+        if (m_LoadDefaultLayoutBeforeNewFrame) {
+            m_LoadDefaultLayoutBeforeNewFrame = false;
+			if (std::filesystem::exists(m_DefaultImGuiIniPath)) {
+				ImGui::LoadIniSettingsFromDisk(m_DefaultImGuiIniPath.string().c_str());
+			}
+			else { LOG_EDITOR_CRITICAL("ImGuiContext::Init(): default_imgui.ini missing {0}", m_DefaultImGuiIniPath.string()); }
+        }
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -117,4 +150,11 @@ namespace Laura
             glfwMakeContextCurrent(backup_current_context);
         }
     }
+
+    void ImGuiContext::Shutdown() {
+        if (std::filesystem::exists(m_ImGuiIniPath)) {
+            ImGui::SaveIniSettingsToDisk(m_ImGuiIniPath.string().c_str());
+        }
+    }
+
 }

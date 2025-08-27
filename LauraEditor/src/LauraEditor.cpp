@@ -17,6 +17,11 @@ namespace Laura
 			_LayerStack->PushLayer(std::make_shared<EditorLayer>(_Profiler, _LayerStack, _ProjectManager, m_ImGuiContext));
 		}
 
+		virtual void Shutdown() override {
+			m_ImGuiContext->Shutdown();
+			Application::Shutdown();
+		}
+		
 		~LauraEditor() {
 		}
 

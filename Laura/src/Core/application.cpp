@@ -30,7 +30,7 @@ namespace Laura
 		_LayerStack->PushLayer(_RenderLayer);
 	}
 
-	void Application::shutdown(){
+	void Application::Shutdown(){
 		_LayerStack->onDetach();
 	}
 
@@ -53,6 +53,6 @@ namespace Laura
 			}
 		}
 
-		shutdown();
+		Shutdown();
 	}
 }

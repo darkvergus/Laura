@@ -24,7 +24,7 @@ namespace Laura
 		, m_ImGuiContext(imGuiContext)
 		, m_Launcher(m_EditorState, m_ProjectManager)
 		, m_EditorPanels({
-			std::make_unique<MainMenuPanel>(m_EditorState, m_EventDispatcher, m_ProjectManager),
+			std::make_unique<MainMenuPanel>(m_EditorState, m_EventDispatcher, m_ProjectManager, m_ImGuiContext),
 			std::make_unique<ExportPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<InspectorPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<SceneHierarchyPanel>(m_EditorState, m_ProjectManager),
