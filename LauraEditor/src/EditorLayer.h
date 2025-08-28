@@ -3,8 +3,8 @@
 #include <Laura.h>
 #include "EditorState.h"
 #include "ImGuiContext.h"
-#include "EditorUI/IEditorPanel.h"
-#include "EditorUI/Launcher/Launcher.h"
+#include "Panels/IEditorPanel.h"
+#include "Panels/Launcher/Launcher.h"
 
 namespace Laura
 {
@@ -35,6 +35,6 @@ namespace Laura
 		Launcher m_Launcher;
 
 		// Editor Panels
-		std::array<std::unique_ptr<IEditorPanel>, 8> m_EditorPanels;
+		std::array<std::unique_ptr<IEditorPanel>, 9> m_EditorPanels;
 	};
 }

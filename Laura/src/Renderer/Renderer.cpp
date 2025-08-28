@@ -1,5 +1,13 @@
 #include "renderer/Renderer.h"
 #include <glm/gtc/matrix_access.hpp>
+#include "Project/Scene/Scene.h"
+#include "Project/Assets/AssetManager.h"
+#include "Renderer/IComputeShader.h"
+#include "Renderer/ITexture2D.h"
+#include "Renderer/IImage2D.h"
+#include "Renderer/IUniformBuffer.h"
+#include "Renderer/IShaderStorageBuffer.h"
+#include "Core/Profiler.h"
 
 namespace Laura 
 {
@@ -138,6 +146,9 @@ namespace Laura
 				const uint32_t SKYBOX_TEXTURE_UNIT = 1;
 				const unsigned char* data = &assetPool->TextureBuffer[metadata->texStartIdx];
 				m_SkyboxTexture = ITexture2D::Create(data, metadata->width, metadata->height, SKYBOX_TEXTURE_UNIT);
+			}
+			else {
+				m_SkyboxTexture = nullptr;
 			}
 		}
 

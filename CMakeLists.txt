@@ -1,40 +1,41 @@
-cmake_minimum_required(VERSION 3.2...3.20)
+cmake_minimum_required(VERSION 3.26)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-project(LauraEditor VERSION 1.1.0)
-
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/LauraEditor/Thirdparty/imgui-docking")		# UI
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/LauraEditor/Thirdparty/implot")							# Graphs and plotting
-add_subdirectory(Laura)
-
-option(ENABLE_CONSOLE "Enable console" ON)
-
-set(EXECUTABLE_NAME "LauraEditor")
-add_executable(${EXECUTABLE_NAME})
-set_property(TARGET ${EXECUTABLE_NAME} PROPERTY CXX_STANDARD 20)
-
-file(GLOB_RECURSE EDITOR_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/LauraEditor/src/*.cpp")
-# in case visual studio again adds some files to the EDITOR_SOURCES dont remove the entire line, just the path to the file !!!
-target_sources(${EXECUTABLE_NAME} PRIVATE ${EDITOR_SOURCES})
-target_include_directories(${EXECUTABLE_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/LauraEditor/src/")
-
-target_link_libraries(${EXECUTABLE_NAME} PUBLIC imgui implot LauraEngine)
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(${EXECUTABLE_NAME} PUBLIC EDITOR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/LauraEditor/res/")
-    message(STATUS "EDITOR_RESOURCES_PATH: ${CMAKE_CURRENT_SOURCE_DIR}/LauraEditor/res/")
-elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    target_compile_definitions(${EXECUTABLE_NAME} PUBLIC EDITOR_RESOURCES_PATH="./res/")
-    message(STATUS "EDITOR_RESOURCES_PATH: ./resources/ (put res folder next to the .exe file)")
-else()
-	message(!!!! ERROR "Unsupported build type: ${CMAKE_BUILD_TYPE}" !!!!)
+# Platform check - only allow Windows for now
+if(NOT WIN32)
+    message(FATAL_ERROR "Laura engine currently only supports Windows platform")
 endif()
 
+# if BUILD_INSTALL = ON -> LauraEngine target defines #define BUILD_INSTALL
+# and propagates the macro to Runtime & Editor
+option(BUILD_INSTALL "Use installed paths instead of source-tree paths" ON)
 
+
+# Console option for applications
+option(ENABLE_CONSOLE "Enable console window for applications" ON)
+
+
+# decide where to ship if --target install
+if(NOT DEFINED CMAKE_INSTALL_PREFIX) # if install path not specified
+    # use build/install/<config>
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Install path")
+endif()
+message(WARNING "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+
+
+project(Laura VERSION 1.1.0 LANGUAGES CXX)
+
+# Global C++ settings
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Enable multithreaded compilation
 if(MSVC)
-	target_compile_definitions(${EXECUTABLE_NAME} PUBLIC _CRT_SECURE_NO_WARNINGS)
-	set_property(TARGET ${EXECUTABLE_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-	if (NOT ENABLE_CONSOLE)
-		set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-	endif()
+    # Enable parallel compilation in MSBuild
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
 endif()
+
+add_subdirectory(Laura)         # Engine library (LauraEngine)
+add_subdirectory(LauraRuntime)  # Runtime executable (LauraRuntime)
+add_subdirectory(LauraEditor)   # Editor executable (LauraEditor)

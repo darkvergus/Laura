@@ -1,10 +1,14 @@
 #pragma once 
 
 #include "lrpch.h"
-#include <filesystem>
 #include "Renderer/RenderSettings.h"
-#include "Project/Scene/SceneManager.h"
-#include "Project/Assets/AssetManager.h"
+#include "Core/GUID.h"
+
+// Forward declarations
+namespace Laura {
+    class SceneManager;
+    class AssetManager;
+}
 
 namespace Laura 
 {
@@ -35,7 +39,19 @@ namespace Laura
 	/// Computes the absolute path to the project file (.lrproj) given the project folder.
 	/// Example: Input folder `/MyProject/` -> Output `/MyProject/MyProject.lrproj`
 	inline std::filesystem::path ComposeProjectFilepath(const std::filesystem::path& folderpath) {
+		if (folderpath.empty()) {
+			LOG_ENGINE_ERROR("ComposeProjectFilepath: folderpath is empty");
+			return std::filesystem::path{};
+		}
+		if (!std::filesystem::exists(folderpath)) {
+			LOG_ENGINE_ERROR("ComposeProjectFilepath: folderpath does not exist: {}", folderpath.string());
+			return std::filesystem::path{};
+		}
 		std::string folderName = folderpath.filename().string();
+		if (folderName.empty()) {
+			LOG_ENGINE_ERROR("ComposeProjectFilepath: could not extract folder name from: {}", folderpath.string());
+			return std::filesystem::path{};
+		}
 		return folderpath / (folderName + PROJECT_FILE_EXTENSION);
 	}
 
@@ -72,7 +88,7 @@ namespace Laura
 		/// Shuts down managers and clears project data without saving.
 		void CloseProject();
 
-		inline bool ProjectIsOpen() const { return !m_ProjectPath.empty(); }
+		inline bool ProjectIsOpen() const { return !m_ProjectFolder.empty(); }
 		inline std::shared_ptr<SceneManager> GetSceneManager() const { return m_SceneManager; }
 		inline std::shared_ptr<AssetManager> GetAssetManager() const { return m_AssetManager; }
 
@@ -80,10 +96,13 @@ namespace Laura
 		inline LR_GUID GetBootSceneGuid() const { return m_ProjectFile.bootSceneGuid; }
 		inline bool IsBootScene(LR_GUID guid) { return m_ProjectFile.bootSceneGuid == guid; }
 
+		inline std::string GetProjectName() { return m_ProjectFolder.filename().string(); }
+		inline std::filesystem::path GetProjectFolder() { return m_ProjectFolder; }
+
 		inline RenderSettings& GetMutableRuntimeRenderSettings() { return m_ProjectFile.runtimeRenderSettings; }
 	private:
 		/// Filesystem path to the current project folder (where .lrproj lives).
-		std::filesystem::path m_ProjectPath;
+		std::filesystem::path m_ProjectFolder;
 		ProjectFile m_ProjectFile;
 
 		std::shared_ptr<SceneManager> m_SceneManager = nullptr;

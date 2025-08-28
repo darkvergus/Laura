@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include "core/IWindow.h"
 #include "platform/OpenGL/OpenGLContext.h"
+#include "Core/Events/KeyEvents.h"
+#include "Core/Events/MouseEvents.h"
 
 namespace Laura 
 {
@@ -14,27 +16,34 @@ namespace Laura
 
 		void onUpdate() override;
 
-		int getWidth() const override;
-		int getHeight() const override;
-		bool isVSync() const override;
+		void setTitle(const std::string& title) override;
 
+		glm::ivec2 getFrameBufferSize() const override;
+
+		bool isVSync() const override;
 		void setVSync(bool enabled) override;
+
 		void* getNativeWindow() const override;
 
+		bool isFullscreen() const override;
+		void setFullscreen(bool enabled) override;
 
 		///  input polling
 		bool isKeyPressed(KeyCode key) override;
 		bool isMouseButtonPressed(MouseCode) override;
 		std::pair<float, float> getMousePosition() override;
-		bool shouldClose() override;
-
 		void setEventCallback(const std::function<void(std::shared_ptr<IEvent>)>& callback) override;
+
+		bool shouldClose() override;
 
 	private:
 		GLFWwindow* m_NativeWindow;
 		OpenGLContext* m_Context;
-		WindowProps m_WindowProps;
+
 		std::function<void(std::shared_ptr<IEvent>)> dispatchEvent;
+
+		bool m_Fullscreen = false, m_VSync = false;
+		int m_WindowedPosX, m_WindowedPosY, m_WindowedWidth, m_WindowedHeight; // cache windowed position (during fullscreen)
 
 		/// These are callback methods called by GLFW when an event occurs.
 		/// They are static methods because GLFW requires them to be static. The method gets the EventDispatcher
@@ -43,5 +52,6 @@ namespace Laura
 		static void GLFWMousePositionCallback(GLFWwindow* window, double xpos, double ypos);
 		static void GLFWMouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 		static void GLFWScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+		static void GLFWWindowResizeCallback(GLFWwindow* window, int width, int height);
 	};
 }

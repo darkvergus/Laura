@@ -1,4 +1,6 @@
 #include "Project/ProjectManager.h"
+#include "Project/Scene/SceneManager.h"
+#include "Project/Assets/AssetManager.h"
 
 namespace Laura
 {
@@ -21,7 +23,7 @@ namespace Laura
 
 		std::ofstream fout(projectFilepath);
 		if (!fout.is_open()) {
-			LOG_ENGINE_ERROR("SaveProjectFile: could not open {0} for writing — permissions or path invalid", projectFilepath.string());
+			LOG_ENGINE_ERROR("SaveProjectFile: could not open {0} for writing ï¿½ permissions or path invalid", projectFilepath.string());
 			return false;
 		}
 		fout << node;
@@ -70,7 +72,7 @@ namespace Laura
 			return false;
 		}
 
-		m_ProjectPath = folderpath;
+		m_ProjectFolder = folderpath;
 		m_ProjectFile = ProjectFile{};
 
 		m_AssetManager = std::make_shared<AssetManager>();
@@ -96,7 +98,7 @@ namespace Laura
 		}
 
 		auto folderpath = projectfilePath.parent_path();
-		m_ProjectPath = folderpath;
+		m_ProjectFolder = folderpath;
 
 		std::filesystem::path projectFilepath = ComposeProjectFilepath(folderpath);
 		auto projectFile = LoadProjectFile(projectFilepath);
@@ -113,7 +115,7 @@ namespace Laura
 		m_SceneManager->LoadScenesFromFolder(folderpath);
 
 		if (m_ProjectFile.bootSceneGuid != LR_GUID::INVALID) {
-			m_SceneManager->SetOpenScene(m_ProjectFile.bootSceneGuid);
+			m_SceneManager->SetOpenSceneGuid(m_ProjectFile.bootSceneGuid);
 		}
 
 		LOG_ENGINE_INFO("OpenProject: successfully opened project at {0}", folderpath.string());
@@ -128,15 +130,15 @@ namespace Laura
 		}
 
 		bool success = true;
-		std::filesystem::path projectFilepath = ComposeProjectFilepath(m_ProjectPath);
+		std::filesystem::path projectFilepath = ComposeProjectFilepath(m_ProjectFolder);
 
 		if (!SaveProjectFile(projectFilepath, m_ProjectFile)) {
 			LOG_ENGINE_ERROR("SaveProject: failed to serialize project file at {0}", projectFilepath.string());
 			success = false;
 		} else { LOG_ENGINE_INFO("SaveProject: wrote project data into {0}", projectFilepath.string()); }
 
-		m_SceneManager->SaveScenesToFolder(m_ProjectPath);
-		m_AssetManager->SaveAssetPoolToFolder(m_ProjectPath);
+		m_SceneManager->SaveScenesToFolder(m_ProjectFolder);
+		m_AssetManager->SaveAssetPoolToFolder(m_ProjectFolder);
 		return success;
 	}
 
@@ -146,9 +148,9 @@ namespace Laura
 			return;
 		}
 
-		LOG_ENGINE_INFO("CloseProject: closing project at {0}", m_ProjectPath.string());
+		LOG_ENGINE_INFO("CloseProject: closing project at {0}", m_ProjectFolder.string());
 
-		m_ProjectPath.clear();
+		m_ProjectFolder.clear();
 		m_ProjectFile = ProjectFile{};
 		m_AssetManager = nullptr;
 		m_SceneManager = nullptr;

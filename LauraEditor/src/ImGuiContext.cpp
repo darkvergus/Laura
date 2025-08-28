@@ -7,13 +7,19 @@
 #include <GLFW\glfw3.h>
 #include <implot.h>
 #include "ImGuiContext.h"
+#include "EditorCfg.h"
+#include "Core/IWindow.h"
 
 namespace Laura 
 {
 
     ImGuiContext::ImGuiContext(std::shared_ptr<IWindow> window)
-        : m_Window(window), m_FontRegistry(std::make_shared<ImGuiContextFontRegistry>()) {
-    }
+        : m_Window(window)
+        , m_FontRegistry(std::make_shared<ImGuiContextFontRegistry>())
+        , m_ImGuiIniPath(EditorCfg::RESOURCES_PATH / "imgui.ini")
+        , m_DefaultImGuiIniPath(EditorCfg::RESOURCES_PATH / "default_imgui.ini")
+        , m_LoadDefaultLayoutBeforeNewFrame(false)
+    {}
 
     ImGuiContext::~ImGuiContext() {
         ImPlot::DestroyContext();
@@ -26,25 +32,61 @@ namespace Laura
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImPlot::CreateContext();
- 
         ImGuiIO& io = ImGui::GetIO();
-        io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/Roboto/Roboto-Regular.ttf", 15.0f);
-        io.FontDefault = io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/Noto_Sans/NotoSans-Regular.ttf", 16.0f);
 
-        ImFontConfig iconConfig;
-        iconConfig.MergeMode = true;  // Merge Font Awesome with the default font
-        static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-        io.Fonts->AddFontFromFileTTF(EDITOR_RESOURCES_PATH "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf", 13.0f, &iconConfig, iconRanges);
 
-        ImFontConfig highResIconConfig;
-		highResIconConfig.MergeMode = false; // dont merge to main font (separate)
-		highResIconConfig.PixelSnapH = true;
-		m_FontRegistry->HighResIcons = io.Fonts->AddFontFromFileTTF(
-			EDITOR_RESOURCES_PATH "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf",
-			40.0f,
-			&highResIconConfig,
-			iconRanges
+        // .INI FILE
+        io.IniFilename = NULL; // ensure custom management for .ini files
+		if (!std::filesystem::exists(m_ImGuiIniPath)) {
+			if (std::filesystem::exists(m_DefaultImGuiIniPath)) {
+				std::error_code ec;
+				std::filesystem::copy_file(m_DefaultImGuiIniPath, m_ImGuiIniPath, std::filesystem::copy_options::overwrite_existing, ec);
+                if (!ec)    { LOG_EDITOR_TRACE("ImGuiContext::Init(): Copied {0}", m_DefaultImGuiIniPath.string()); }
+                else        { LOG_EDITOR_CRITICAL("ImGuiContext::Init(): Failed to copy default_imgui.ini: {0}", ec.message()); }
+			} 
+            else { LOG_EDITOR_CRITICAL("ImGuiContext::Init(): default_imgui.ini missing {0}", m_DefaultImGuiIniPath.string()); }
+		}
+        ImGui::LoadIniSettingsFromDisk(m_ImGuiIniPath.string().c_str());
+        LOG_EDITOR_TRACE("ImGuiContext::Init(): Loaded .ini file {0}", m_ImGuiIniPath.string());
+
+
+        // FONTS
+		static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+
+		// DEFAULT FONT
+		ImFontConfig cfg;
+		cfg.PixelSnapH = true;
+		cfg.MergeMode = false;
+		m_FontRegistry->notoSansRegular = io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/Noto_Sans/NotoSans-Regular.ttf").string().c_str(),
+			16.0f, &cfg
 		);
+		cfg.MergeMode = true; // merge icons
+		io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf").string().c_str(),
+			13.0f, &cfg, iconRanges
+		);
+        io.FontDefault = m_FontRegistry->notoSansRegular;
+
+		// HIGH RES ICONS (standalone, not merged)
+		cfg.MergeMode = false;
+		m_FontRegistry->highResIcons = io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf").string().c_str(),
+			40.0f, &cfg, iconRanges
+		);
+
+		// NOTOSANS BOLD
+		cfg.MergeMode = false;
+		m_FontRegistry->notoSansBold = io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/Noto_Sans/NotoSans-SemiBold.ttf").string().c_str(),
+			16.0f, &cfg
+		);
+		cfg.MergeMode = true; // merge icons into bold
+		io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/fontawesome-free-6.6.0-desktop/Font Awesome 6 Free-Solid-900.otf").string().c_str(),
+			13.0f, &cfg, iconRanges
+		);
+
         ImGui::GetIO().UserData = m_FontRegistry.get();
 
         (void)io;
@@ -78,19 +120,29 @@ namespace Laura
         ImGui_ImplOpenGL3_Init("#version 460");
     }
 
+    void ImGuiContext::LoadDefaultLayout() {
+        m_LoadDefaultLayoutBeforeNewFrame = true;
+    }
+
     void ImGuiContext::BeginFrame() {
+        if (m_LoadDefaultLayoutBeforeNewFrame) {
+            m_LoadDefaultLayoutBeforeNewFrame = false;
+			if (std::filesystem::exists(m_DefaultImGuiIniPath)) {
+				ImGui::LoadIniSettingsFromDisk(m_DefaultImGuiIniPath.string().c_str());
+			}
+			else { LOG_EDITOR_CRITICAL("ImGuiContext::Init(): default_imgui.ini missing {0}", m_DefaultImGuiIniPath.string()); }
+        }
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
     }
 
     void ImGuiContext::EndFrame() {
-        ImGuiIO& io = ImGui::GetIO();
-        io.DisplaySize = ImVec2((float)m_Window->getWidth(), (float)m_Window->getHeight());
-
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+        ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
             GLFWwindow* backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
@@ -98,4 +150,11 @@ namespace Laura
             glfwMakeContextCurrent(backup_current_context);
         }
     }
+
+    void ImGuiContext::Shutdown() {
+        if (std::filesystem::exists(m_ImGuiIniPath)) {
+            ImGui::SaveIniSettingsToDisk(m_ImGuiIniPath.string().c_str());
+        }
+    }
+
 }

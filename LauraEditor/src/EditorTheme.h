@@ -82,8 +82,10 @@ namespace Laura
 			return SerializeToYAML(filepath);
 		}
 			
-		inline void PushColor(ImGuiCol_ widget, EditorCol_ col) {
-			ImGui::PushStyleColor(widget, m_ColorPallete[col]);
+		inline void PushColor(ImGuiCol_ widget, EditorCol_ col, float alpha = 1.0f) {
+			ImVec4 color = m_ColorPallete[col];
+			color.w = alpha;
+			ImGui::PushStyleColor(widget, color);
 		}
 
 		inline void PopColor(size_t count = 1) {

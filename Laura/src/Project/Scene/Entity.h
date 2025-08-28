@@ -48,7 +48,7 @@ namespace Laura
 			}
 		}
 
-		inline entt::entity GetID() const { return m_EntityID; }
+		inline entt::entity GetEnttID() const { return m_EntityID; }
 		inline bool IsValid() const { return m_EntityID != entt::null; }
 
 	private:

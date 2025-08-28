@@ -1,16 +1,18 @@
 #pragma once
 
+#include "lrpch.h"
 #include "Core/GUID.h"
-#include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
 namespace Laura
 {
 
-	struct GUIDComponent {
+	struct IDComponent {
+		IDComponent() = default;
+		IDComponent(LR_GUID guid)
+			: guid(guid) {};
+
 		LR_GUID guid;
 	};
 
@@ -57,8 +59,8 @@ namespace Laura
 	};
 
 	struct MaterialComponent {
-		glm::vec4 emission; // xyz: color, w: strength
-		glm::vec4 color; // w: padding
+		glm::vec4 emission = {0.0f, 0.0f, 0.0f, 0.0f}; // xyz: color, w: strength
+		glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f}; // w: padding
 	};
 
 	struct CameraComponent {
@@ -71,6 +73,6 @@ namespace Laura
 		float fov{ 90.0f };
 		// since we transform the size of the screen in the compute shader to "normalized device coordinates" or NDC for short (-1, 1) 
 		// half of the screen width is 1. Therefore (screen width / 2) / tan(FOV in radians / 2) can be simplified to 1 / tan(FOV_rad / 2)
-		inline const float& GetFocalLength() const { return 1.0f/tan(glm::radians(fov)/2.0f); };
+		inline const float GetFocalLength() const { return 1.0f/tan(glm::radians(fov)/2.0f); };
 	};
 }

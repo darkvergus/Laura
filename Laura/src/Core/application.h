@@ -2,20 +2,21 @@
 
 #include "lrpch.h"
 #include "Core/IWindow.h"
-#include "Core/Layers/LayerStack.h"
-#include "Core/Layers/RenderLayer.h"
-#include "Core/Profiler.h"
-#include "Project/ProjectManager.h"
-#include "Renderer/IRendererAPI.h"
-#include "Events/IEvent.h"
+// Forward declarations to reduce compilation dependencies
+namespace Laura {
+    class LayerStack;
+    class RenderLayer;
+    class Profiler;
+    class ProjectManager;
+    class IRendererAPI;
+}
 
 namespace Laura 
 {
 
     class Application {
     public:
-        Application() = default;
-        //Application(WindowProps windowProps);
+        Application(WindowProps windowProps = WindowProps{});
         virtual ~Application() = default;
         void run();
         
@@ -30,11 +31,9 @@ namespace Laura
 
         std::shared_ptr<RenderLayer>    _RenderLayer;
 
-    protected:
-        virtual void init();
-        virtual void shutdown();
+        virtual void Shutdown();
     };
 
-    Application* CreateApplication();
+    Application* CreateApplication(const std::filesystem::path& exeDir);
 }
 

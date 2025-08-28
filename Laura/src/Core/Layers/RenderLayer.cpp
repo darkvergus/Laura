@@ -1,5 +1,7 @@
 #include "Core/Layers/RenderLayer.h"
 #include "Core/Events/RenderEvents.h"
+#include "Project/Scene/SceneManager.h"
+#include "Project/Assets/AssetManager.h"
 
 namespace Laura
 {

@@ -1,65 +1,53 @@
-cmake_minimum_required(VERSION 3.16)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-project(LauraEngine VERSION 1.1.0)
+project(LauraEngine VERSION 1.1.0 LANGUAGES CXX)
 
-### BUILD OPTIONS ###
-
-########################################
-### SELECT A PLATFORM TO COMPILE FOR ###
-########################################
-
-option(LR_PLATFORM_WINDOWS "Enable Windows platform support" ON)
-option(LR_PLATFORM_LINUX "Enable Linux platform support (currently unsupported)" OFF)
-
-# CMake compatible thirdparty libs: Thanks to https://github.com/meemknight/cmakeSetup
+# ---- Third-party libraries ----
+# Disable unnecessary GLFW components and add libraries
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
-set(ONLY_LIBS ON)								# GLEW wont generate executable targets
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glfw-3.3.2")			# Window creation
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glew-cmake")			# OpenGL loader
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/stb_image")			# Loading textures/images
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/stb_truetype")		    # Loading ttf fonts
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glm")				    # Math
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/assimp")				# Model loading
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/spdlog")				# Logging/Debugging
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/entt")				    # ECS
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/font-awesome-headers") # Icons
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/yaml-cpp")             # YAML Serialization
+set(ONLY_LIBS ON)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glfw-3.3.2)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glew-cmake)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/stb_image)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/stb_truetype)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/glm)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/assimp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/spdlog)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/entt)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/font-awesome-headers)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/yaml-cpp)
+
+# ---- Engine library target ----
 add_library(LauraEngine STATIC)
-set_property(TARGET LauraEngine PROPERTY CXX_STANDARD 20)
-file(GLOB_RECURSE LAURA_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+set_target_properties(LauraEngine PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+)
+target_compile_features(LauraEngine PUBLIC cxx_std_20)  # Require C++20:contentReference[oaicite:8]{index=8}
+target_include_directories(LauraEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src )
+file(GLOB_RECURSE LAURA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 target_sources(LauraEngine PRIVATE ${LAURA_SOURCES})
-target_include_directories(LauraEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
-# Setting up the Precompiled Header
-add_library(lrpchLib STATIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.cpp")
-target_precompile_headers(lrpchLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.h")
-target_link_libraries(lrpchLib PUBLIC glm spdlog::spdlog)
+# Optionally, set up precompiled header directly on the target (CMake ≥3.16)
+target_precompile_headers(LauraEngine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/lrpch.h")  # see CMake docs:contentReference[oaicite:9]{index=9}
 
-# only these should be public
 target_link_libraries(LauraEngine PUBLIC glm spdlog::spdlog entt fontAwesome yaml-cpp) 
-# these should be private but it does not work with private for some reason
 target_link_libraries(LauraEngine PUBLIC assimp glfw libglew_static stb_image stb_truetype) 
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/src/res/")
-    message(STATUS "LR_RESOURCES_PATH: ${CMAKE_CURRENT_SOURCE_DIR}/src/res/")
-elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    target_compile_definitions(LauraEngine PUBLIC LR_RESOURCES_PATH="./res/")
-    message(STATUS "LR_RESOURCES_PATH: ./resources/ (put res folder next to the .exe file)")
-else()
-	message(!!!! ERROR "Unsupported build type: ${CMAKE_BUILD_TYPE}" !!!!)
-endif()
 
-
-if(LR_PLATFORM_WINDOWS)
+# DEFINES 
+target_compile_definitions(LauraEngine PUBLIC
+    $<$<BOOL:${BUILD_INSTALL}>:BUILD_INSTALL> # if ON -> #define BUILD_INSTALL
+)
+target_compile_definitions(LauraEngine PUBLIC
+    $<$<BOOL:${BUILD_INSTALL}>:CMAKE_ENGINE_RESOURCES_PATH="./engine_res/">
+    $<$<NOT:$<BOOL:${BUILD_INSTALL}>>:CMAKE_ENGINE_RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/res/">
+)
+if(WIN32)
     target_compile_definitions(LauraEngine PUBLIC LR_PLATFORM_WINDOWS)
 endif()
-if(LR_PLATFORM_LINUX)
-    message(WARNING "LR_PLATFORM_LINUX is currently unsupported.")
-    # target_compile_definitions(LauraEngine PUBLIC LR_PLATFORM_LINUX)
-endif()
 
+# --target install (copy res near the executable)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/res/
+        DESTINATION engine_res)

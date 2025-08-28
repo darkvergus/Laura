@@ -3,21 +3,20 @@
 #include "GLFWWindow.h"
 #include "Core/Events/KeyEvents.h"
 #include "Core/Events/MouseEvents.h"
+#include "Core/Events/WindowEvents.h"
 #include "core/Log.h"
 
 namespace Laura 
 {
 
-	GLFWWindowIMPL::GLFWWindowIMPL(const WindowProps& windowProps)
-		: m_WindowProps(windowProps) {
-
+	GLFWWindowIMPL::GLFWWindowIMPL(const WindowProps& windowProps) {
 		if (!glfwInit()){
 			LOG_ENGINE_CRITICAL("Failed to initialize GLFW!");
 		}
 
 		OpenGLContext::setWindowHints();
 
-		m_NativeWindow = glfwCreateWindow(m_WindowProps.width, m_WindowProps.height, (m_WindowProps.title).c_str(), NULL, NULL);
+		m_NativeWindow = glfwCreateWindow(windowProps.width, windowProps.height, (windowProps.title).c_str(), NULL, NULL);
 		if (!m_NativeWindow) {
 			LOG_ENGINE_CRITICAL("Failed to generate GLFW window!");
 		}
@@ -25,34 +24,18 @@ namespace Laura
 		m_Context = new OpenGLContext(m_NativeWindow);
 		m_Context->init();
 
-		glfwSwapInterval(m_WindowProps.VSync);
+		setVSync(windowProps.VSync);
 
 		glfwSetWindowUserPointer(m_NativeWindow, this);
 		glfwSetKeyCallback(m_NativeWindow, GLFWKeyCallback);
 		glfwSetMouseButtonCallback(m_NativeWindow, GLFWMouseButtonCallback);
 		glfwSetCursorPosCallback(m_NativeWindow, GLFWMousePositionCallback);
 		glfwSetScrollCallback(m_NativeWindow, GLFWScrollCallback);
+		glfwSetFramebufferSizeCallback(m_NativeWindow, GLFWWindowResizeCallback);
 	}
 
 	GLFWWindowIMPL::~GLFWWindowIMPL() {
 		glfwTerminate();
-	}
-
-	int GLFWWindowIMPL::getWidth() const {
-		return m_WindowProps.width;
-	}
-
-	int GLFWWindowIMPL::getHeight() const {
-		return m_WindowProps.height;
-	}
-
-	bool GLFWWindowIMPL::isVSync() const {
-		return m_WindowProps.VSync;
-	}
-
-	void GLFWWindowIMPL::setVSync(bool enabled) {
-		m_WindowProps.VSync = enabled;
-		glfwSwapInterval(m_WindowProps.VSync);
 	}
 
 	void GLFWWindowIMPL::onUpdate() {
@@ -60,8 +43,60 @@ namespace Laura
 		m_Context->swapBuffers();
 	}
 
+	void GLFWWindowIMPL::setTitle(const std::string& title) {
+		glfwSetWindowTitle(m_NativeWindow, title.c_str());
+	}
+
+	glm::ivec2 GLFWWindowIMPL::getFrameBufferSize() const {
+	    int width, height;
+		glfwGetFramebufferSize(m_NativeWindow, &width, &height);
+		return glm::ivec2(width, height);	
+	}
+
+	bool GLFWWindowIMPL::isVSync() const {
+		return m_VSync;
+	}
+
+	void GLFWWindowIMPL::setVSync(bool enabled) {
+		m_VSync = enabled;
+		glfwSwapInterval(enabled);
+	}
+
 	void* GLFWWindowIMPL::getNativeWindow() const {
 		return m_NativeWindow;
+	}
+
+	void GLFWWindowIMPL::setFullscreen(bool enabled) {
+		if (enabled == m_Fullscreen) {
+			return; // already in desired state
+		}
+
+		m_Fullscreen = enabled;
+
+		if (enabled) {
+			// Save current windowed position and size
+			glfwGetWindowPos(m_NativeWindow, &m_WindowedPosX, &m_WindowedPosY);
+			glfwGetWindowSize(m_NativeWindow, &m_WindowedWidth, &m_WindowedHeight);
+
+			// Get primary monitor
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			// Switch to fullscreen
+			glfwSetWindowMonitor(m_NativeWindow, monitor,
+								 0, 0, mode->width, mode->height,
+								 mode->refreshRate);
+		} else {
+			// Switch back to windowed
+			glfwSetWindowMonitor(m_NativeWindow, nullptr,
+								 m_WindowedPosX, m_WindowedPosY,
+								 m_WindowedWidth, m_WindowedHeight,
+								 0);
+		}
+	}
+
+	bool GLFWWindowIMPL::isFullscreen() const {
+		return m_Fullscreen;
 	}
 
 	// takes a const reference to a function returning void and argument std::shared_ptr<IEvent>
@@ -112,6 +147,10 @@ namespace Laura
 		thisWindow->dispatchEvent(std::make_shared<MouseScrollEvent>(xoffset, yoffset));
 	}
 
+	void GLFWWindowIMPL::GLFWWindowResizeCallback(GLFWwindow* window, int width, int height) {
+		thisWindow->dispatchEvent(std::make_shared<WindowResizeEvent>(width, height));
+	}
+
 	bool GLFWWindowIMPL::isKeyPressed(KeyCode key) {
 		auto state = glfwGetKey(m_NativeWindow, key);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
@@ -131,4 +170,5 @@ namespace Laura
 	bool GLFWWindowIMPL::shouldClose() {
 		return glfwWindowShouldClose(m_NativeWindow);
 	}
+
 }

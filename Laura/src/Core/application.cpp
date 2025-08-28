@@ -1,15 +1,21 @@
 #include "Core/application.h"
+#include "Core/IWindow.h"
+#include "Core/Layers/LayerStack.h"
+#include "Core/Layers/RenderLayer.h"
+#include "Core/Profiler.h"
+#include "Project/ProjectManager.h"
+#include "Renderer/IRendererAPI.h"
+#include "Events/IEvent.h"
 
 namespace Laura 
 {
-
-	void Application::init() {
+	Application::Application(WindowProps windowProps) {
 		Log::Init();
 		LOG_ENGINE_INFO("C++ version: {0}", __cplusplus);
 		
 		_Profiler = std::make_shared<Profiler>(500);
 
-		_Window = IWindow::createWindow();
+		_Window = IWindow::createWindow(windowProps);
 		_LayerStack = std::make_shared<LayerStack>();
 		// make window forward events to the layerStack
 		_Window->setEventCallback([this](std::shared_ptr<IEvent> event) { _LayerStack->dispatchEvent(event); });
@@ -24,12 +30,11 @@ namespace Laura
 		_LayerStack->PushLayer(_RenderLayer);
 	}
 
-	void Application::shutdown(){
+	void Application::Shutdown(){
 		_LayerStack->onDetach();
 	}
 
 	void Application::run() {
-		init();
 		// mainloop
 		while (!_Window->shouldClose()) {
 			auto t = _Profiler->globalTimer("GLOBAL");
@@ -37,13 +42,17 @@ namespace Laura
 				auto t = _Profiler->timer("Window::OnUpdate()");
 				_Window->onUpdate();
 			}
-			_RendererAPI->Clear({ 0.98f, 0.24f, 0.97f, 1.0f }); // fill the screen with a color (pink)
+			#ifdef BUILD_INSTALL
+			_RendererAPI->Clear({ 0.0f, 0.0f, 0.0f, 1.0f }); // black when shipped 
+			#else
+			_RendererAPI->Clear({ 0.98f, 0.24f, 0.97f, 1.0f }); // bright pink (for debugging)
+			#endif
 			{
 				auto t = _Profiler->timer("LayerStack::onUpdate()");
 				_LayerStack->onUpdate();
 			}
 		}
 
-		shutdown();
+		Shutdown();
 	}
 }

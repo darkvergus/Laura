@@ -72,19 +72,19 @@ namespace Laura
 		m_ColorPallete[EditorCol_Secondary1]  = RGBA(20, 20, 20);
 		m_ColorPallete[EditorCol_Secondary2]  = RGBA(55, 55, 61);
 		m_ColorPallete[EditorCol_Accent1]     = RGBA(66, 150, 250);
-		m_ColorPallete[EditorCol_Accent2]     = RGBA(83, 82, 91);
+		m_ColorPallete[EditorCol_Accent2]     = RGBA(96, 115, 181);
 		m_ColorPallete[EditorCol_Text1]       = RGBA(255, 255, 255);
 		m_ColorPallete[EditorCol_Text2]       = RGBA(128, 128, 128);
 		m_ColorPallete[EditorCol_Background1] = RGBA(37, 37, 38);
 		m_ColorPallete[EditorCol_Background2] = RGBA(30, 30, 30);
 		m_ColorPallete[EditorCol_Background3] = RGBA(51, 51, 51);
 		m_ColorPallete[EditorCol_Transparent] = RGBA(0, 0, 0, 0);
-		m_ColorPallete[EditorCol_Error]       = RGBA(155, 28, 28);
-		m_ColorPallete[EditorCol_Warning]     = RGBA(255, 128, 0);
-		m_ColorPallete[EditorCol_Success]     = RGBA(28, 155, 28);
-		m_ColorPallete[EditorCol_X]           = RGBA(104, 28, 28);
-		m_ColorPallete[EditorCol_Y]           = RGBA(28, 104, 28);
-		m_ColorPallete[EditorCol_Z]           = RGBA(28, 28, 104);
+		m_ColorPallete[EditorCol_Error]       = RGBA(219, 72, 115);     // Errors
+		m_ColorPallete[EditorCol_Warning]     = RGBA(213, 152, 87);     // Warnings
+		m_ColorPallete[EditorCol_Success]     = RGBA(174, 243, 87);     // Success
+		m_ColorPallete[EditorCol_X]           = RGBA(219, 72, 115);     // Transform axis X
+		m_ColorPallete[EditorCol_Y]           = RGBA(174, 243, 87);     // Transform axis Y
+		m_ColorPallete[EditorCol_Z]           = RGBA(118, 162, 250);     // Transform axis Z
 		ApplyAllToImgui();
 	}
 
@@ -102,12 +102,12 @@ namespace Laura
 	m_ColorPallete[EditorCol_Background2] = RGBA(225, 225, 225);   // Group panels
 	m_ColorPallete[EditorCol_Background3] = RGBA(200, 200, 200);   // Inner panels
 	m_ColorPallete[EditorCol_Transparent] = RGBA(0, 0, 0, 0);      // Transparent
-	m_ColorPallete[EditorCol_Error]       = RGBA(170, 50, 50);     // Errors
-	m_ColorPallete[EditorCol_Warning]     = RGBA(220, 140, 0);     // Warnings
-	m_ColorPallete[EditorCol_Success]     = RGBA(50, 170, 50);     // Success
-	m_ColorPallete[EditorCol_X]           = RGBA(140, 50, 50);     // Transform axis X
-	m_ColorPallete[EditorCol_Y]           = RGBA(50, 140, 50);     // Transform axis Y
-	m_ColorPallete[EditorCol_Z]           = RGBA(50, 50, 140);     // Transform axis Z
+	m_ColorPallete[EditorCol_Error]       = RGBA(219, 72, 115);     // Errors
+	m_ColorPallete[EditorCol_Warning]     = RGBA(213, 152, 87);     // Warnings
+	m_ColorPallete[EditorCol_Success]     = RGBA(174, 243, 87);     // Success
+	m_ColorPallete[EditorCol_X]           = RGBA(219, 72, 115);     // Transform axis X
+	m_ColorPallete[EditorCol_Y]           = RGBA(174, 243, 87);     // Transform axis Y
+	m_ColorPallete[EditorCol_Z]           = RGBA(118, 162, 250);     // Transform axis Z
 	ApplyAllToImgui();
 } 
     void EditorTheme::ApplyAllToImgui() {
@@ -131,9 +131,11 @@ namespace Laura
 		style.Colors[ImGuiCol_TabHovered]                = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_TabActive]                 = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_TabSelectedOverline]       = m_ColorPallete[EditorCol_Accent1];
-		style.Colors[ImGuiCol_TabDimmedSelectedOverline] = m_ColorPallete[EditorCol_Accent2];
+		style.Colors[ImGuiCol_TabDimmedSelectedOverline] = m_ColorPallete[EditorCol_Primary1];
 		style.Colors[ImGuiCol_TabUnfocused]              = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_TabUnfocusedActive]        = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_TableRowBg]				 = m_ColorPallete[EditorCol_Background2];
+		style.Colors[ImGuiCol_TableRowBgAlt]			 = m_ColorPallete[EditorCol_Background1];
 		style.Colors[ImGuiCol_TitleBg]                   = m_ColorPallete[EditorCol_Background2];
 		style.Colors[ImGuiCol_TitleBgActive]             = m_ColorPallete[EditorCol_Background2];
 		style.Colors[ImGuiCol_TitleBgCollapsed]          = m_ColorPallete[EditorCol_Background2];
@@ -141,7 +143,7 @@ namespace Laura
 		style.Colors[ImGuiCol_ResizeGrip]                = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_ResizeGripHovered]         = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_ResizeGripActive]          = m_ColorPallete[EditorCol_Secondary2];
-		style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Secondary2];
+		style.Colors[ImGuiCol_Separator]                 = m_ColorPallete[EditorCol_Primary2];
 		style.Colors[ImGuiCol_SeparatorHovered]          = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_SeparatorActive]           = m_ColorPallete[EditorCol_Secondary2];
 		style.Colors[ImGuiCol_Text]                      = m_ColorPallete[EditorCol_Text1];

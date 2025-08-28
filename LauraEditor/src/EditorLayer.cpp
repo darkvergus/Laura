@@ -1,14 +1,14 @@
 #include <imgui.h>
 #include "EditorLayer.h"
-#include "EditorUI/UtilityUI.h"
-#include "EditorUI/MainMenuPanel/MainMenuPanel.h"
-#include "EditorUI/ViewportPanel/ViewportPanel.h"
-#include "EditorUI/SceneHierarchyPanel/SceneHierarchyPanel.h"
-#include "EditorUI/InspectorPanel/InspectorPanel.h"
-#include "EditorUI/ProfilerPanel/ProfilerPanel.h"
-#include "EditorUI/RenderSettingsPanel/RenderSettingsPanel.h"
-#include "EditorUI/ThemePanel/ThemePanel.h"
-#include "EditorUI/AssetsPanel/AssetsPanel.h"
+#include "Panels/MainMenuPanel/MainMenuPanel.h"
+#include "Panels/ExportPanel/ExportPanel.h"
+#include "Panels/ViewportPanel/ViewportPanel.h"
+#include "Panels/SceneHierarchyPanel/SceneHierarchyPanel.h"
+#include "Panels/InspectorPanel/InspectorPanel.h"
+#include "Panels/ProfilerPanel/ProfilerPanel.h"
+#include "Panels/RenderSettingsPanel/RenderSettingsPanel.h"
+#include "Panels/ThemePanel/ThemePanel.h"
+#include "Panels/AssetsPanel/AssetsPanel.h"
 
 namespace Laura
 {
@@ -24,7 +24,8 @@ namespace Laura
 		, m_ImGuiContext(imGuiContext)
 		, m_Launcher(m_EditorState, m_ProjectManager)
 		, m_EditorPanels({
-			std::make_unique<MainMenuPanel>(m_EditorState, m_EventDispatcher, m_ProjectManager),
+			std::make_unique<MainMenuPanel>(m_EditorState, m_EventDispatcher, m_ProjectManager, m_ImGuiContext),
+			std::make_unique<ExportPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<InspectorPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<SceneHierarchyPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<ViewportPanel>(m_EditorState, m_ProjectManager),
@@ -49,7 +50,7 @@ namespace Laura
 
 	void EditorLayer::onEvent(std::shared_ptr<IEvent> event) { 
 		// while in editor mode - consume input events
-		if (!m_EditorState->temp.isInRuntimeMode && event->IsInputEvent()) {
+		if (!m_EditorState->temp.isInRuntimeSimulation && event->IsInputEvent()) {
 			event->Consume();
 			return; // don't propagate further
 		}
@@ -79,9 +80,11 @@ namespace Laura
 		for (auto& panel : m_EditorPanels) {
 			panel->OnImGuiRender();
 		}
-
+		
+		#ifndef BUILD_INSTALL // display demo when not shipping
 		bool showDemo = true;
 		ImGui::ShowDemoWindow(&showDemo);
+		#endif
 
 		m_ImGuiContext->EndFrame();
 	}

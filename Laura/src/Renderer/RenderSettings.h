@@ -9,7 +9,7 @@ namespace Laura
 	struct RenderSettings {
         // Development-only (NOT meant to be other than default during runtime)
         bool showBvhHeatmap = false;
-        uint32_t bvhHeatmapColorCutoff = 500; // maximum number of intersections captured in the heatmap color spectrum before clipped
+        int bvhHeatmapColorCutoff = 500; // maximum number of intersections captured in the heatmap color spectrum before clipped
 
         glm::uvec2 resolution{ 400, 300 };
         int raysPerPixel = 1;
