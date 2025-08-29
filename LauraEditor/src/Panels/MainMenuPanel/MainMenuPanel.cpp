@@ -21,6 +21,7 @@ namespace Laura
 		auto& theme = m_EditorState->temp.editorTheme;
 		if (ImGui::BeginMainMenuBar()) {
 			float menuWidth = ImGui::GetContentRegionAvail().x;
+			const float menuBarWidth = ImGui::GetWindowSize().x - ImGui::GetStyle().WindowPadding.x * 2.0f;
 
 			if (m_EditorState->temp.isInRuntimeSimulation) {
 				ImGui::BeginDisabled();
@@ -112,7 +113,10 @@ namespace Laura
 				float sceneWidth = hasScene ? ImGui::CalcTextSize(scene.c_str()).x : 0;
 				float totalWidth = projectWidth + iconWidth + sceneWidth + (hasScene ? 4.0f : 0);
 
-				ImGui::SetCursorPosX(menuWidth - totalWidth);
+				// Reserve some space on right for window buttons (fork path can do native hit-test there)
+				const float frameH = ImGui::GetFrameHeight();
+				const float buttonsWidth = frameH * 3.0f + ImGui::GetStyle().ItemSpacing.x * 2.0f;
+				ImGui::SetCursorPosX(menuBarWidth - buttonsWidth - totalWidth - 4.0f);
 
 				theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
 				ImGui::TextUnformatted(project.c_str());
@@ -132,6 +136,19 @@ namespace Laura
 
 				theme.PopColor();
 				ImGui::PopFont();
+			}
+
+			// Provide hit-test region to backend (Walnut fork)
+			{
+				auto window = m_ImGuiContext->GetWindow();
+				const float frameH = ImGui::GetFrameHeight();
+				const float buttonsWidth = frameH * 3.0f + ImGui::GetStyle().ItemSpacing.x * 2.0f;
+				window->setTitlebarHitTestCallback([buttonsWidth, window](int x, int y){
+					auto winPos = window->getPosition();
+					auto fbSize = window->getFrameBufferSize();
+					// Treat top frameH area as titlebar except right-side buttons
+					return y >= 0 && y < (int)ImGui::GetFrameHeight() && x >= 0 && x < (fbSize.x - (int)buttonsWidth);
+				});
 			}
 
 			ImGui::EndMainMenuBar();

@@ -17,12 +17,14 @@ namespace Laura
 		int width;
 		int height;
 		bool VSync;
+        bool CustomTitlebar;
 
 		WindowProps(const std::string& title = std::string("LauraEngine"),
 			int width = 1280,
 			int height = 720,
-			bool VSync = true)
-			: width(width), height(height), title(title), VSync(VSync) {
+			bool VSync = true,
+			bool CustomTitlebar = true)
+			: width(width), height(height), title(title), VSync(VSync), CustomTitlebar(CustomTitlebar) {
 		}
 	};
 
@@ -43,6 +45,16 @@ namespace Laura
 
 		virtual bool isFullscreen() const = 0;
 		virtual void setFullscreen(bool enabled) = 0;
+
+		// Window control & custom titlebar support
+		virtual void minimize() = 0;
+		virtual void maximize() = 0;
+		virtual void restore() = 0;
+		virtual bool isMaximized() const = 0;
+		virtual void close() = 0;
+		virtual void setPosition(int x, int y) = 0;
+		virtual glm::ivec2 getPosition() const = 0;
+		virtual void setTitlebarHitTestCallback(const std::function<bool(int, int)>& callback) = 0;
 
 		/// input polling
 		virtual bool isKeyPressed(KeyCode key) = 0;

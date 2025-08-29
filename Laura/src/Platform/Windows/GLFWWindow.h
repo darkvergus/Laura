@@ -28,6 +28,16 @@ namespace Laura
 		bool isFullscreen() const override;
 		void setFullscreen(bool enabled) override;
 
+		// Custom titlebar/window control (Walnut fork)
+		void minimize() override;
+		void maximize() override;
+		void restore() override;
+		bool isMaximized() const override;
+		void close() override;
+		void setPosition(int x, int y) override;
+		glm::ivec2 getPosition() const override;
+		void setTitlebarHitTestCallback(const std::function<bool(int, int)>& callback) override;
+
 		///  input polling
 		bool isKeyPressed(KeyCode key) override;
 		bool isMouseButtonPressed(MouseCode) override;
@@ -41,6 +51,7 @@ namespace Laura
 		OpenGLContext* m_Context;
 
 		std::function<void(std::shared_ptr<IEvent>)> dispatchEvent;
+        std::function<bool(int, int)> m_TitlebarHitTest;
 
 		bool m_Fullscreen = false, m_VSync = false;
 		int m_WindowedPosX, m_WindowedPosY, m_WindowedWidth, m_WindowedHeight; // cache windowed position (during fullscreen)
