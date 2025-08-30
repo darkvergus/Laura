@@ -87,6 +87,17 @@ namespace Laura
 			13.0f, &cfg, iconRanges
 		);
 
+
+
+		// CODICON 
+        cfg.MergeMode = false;
+        cfg.GlyphOffset = ImVec2(0.0f, -25.0f);
+        static const ImWchar codicon_ranges[] = { 0xF135, 0xF138, 0 };
+		m_FontRegistry->codicon = io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/vscode-codicon/vscode-codicon.ttf").string().c_str(),
+			40.0f, &cfg, codicon_ranges
+		);
+
         ImGui::GetIO().UserData = m_FontRegistry.get();
 
         (void)io;

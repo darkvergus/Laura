@@ -8,6 +8,7 @@ namespace Laura
 		ImFont* highResIcons = nullptr;
 		ImFont* notoSansRegular = nullptr;
 		ImFont* notoSansBold = nullptr;
+		ImFont* codicon = nullptr;
 	};
 
 	inline ImGuiContextFontRegistry* Fonts() {

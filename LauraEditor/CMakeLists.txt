@@ -2,12 +2,13 @@ project(LauraEditor VERSION 1.1.0 LANGUAGES CXX)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/imgui-docking)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/implot)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/icon-fonts-headers)
 
 add_executable(LauraEditor)
 file(GLOB_RECURSE EDITOR_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 target_sources(LauraEditor PRIVATE ${EDITOR_SOURCES})
 target_include_directories(LauraEditor PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(LauraEditor PUBLIC imgui implot LauraEngine)
+target_link_libraries(LauraEditor PUBLIC imgui implot iconFontsHeaders LauraEngine)
 
 # Define paths to editor resources
 target_compile_definitions(LauraEditor PUBLIC
