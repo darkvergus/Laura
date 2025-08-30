@@ -2,6 +2,7 @@
 #include "Project/Scene/SceneManager.h"
 #include "Panels/InspectorPanel/TransformUI.h"
 #include "Panels/DNDPayloads.h"
+#include "LauraBrandIcons.h"
 
 namespace Laura
 {

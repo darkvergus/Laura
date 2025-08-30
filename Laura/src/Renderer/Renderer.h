@@ -92,6 +92,6 @@ namespace Laura
 		
 		Cache m_Cache;
 		RenderSettings m_RenderSettings;
-		std::filesystem::path m_ComputeShaderPath = EngineCfg::RESOURCES_PATH / "Shaders/PathTracing.comp";
+		std::filesystem::path m_ComputeShaderPath = EngineCfg::RESOURCES_PATH / "Shaders" / "PathTracing.comp";
 	};
 }

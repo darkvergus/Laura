@@ -9,8 +9,8 @@ namespace Laura
 
 	class LauraRuntime : public Application {
 	public:
-		LauraRuntime()
-			: Application() {
+		LauraRuntime(WindowProps windowProps)
+			: Application(windowProps) {
 
 			_LayerStack->PushLayer(std::make_shared<RuntimeLayer>(_Window, _Profiler, _LayerStack, _ProjectManager));
 		}
@@ -22,6 +22,8 @@ namespace Laura
 
 	Application* CreateApplication(const std::filesystem::path& exeDir) {
 		RuntimeCfg::Init(exeDir); // init EXECUTABLE_DIR
-		return new LauraRuntime();
+		WindowProps spec;
+		spec.CustomTitlebar = false;
+		return new LauraRuntime(spec);
 	}
 }

@@ -52,7 +52,6 @@ namespace Laura
 
         // FONTS
 		static const ImWchar iconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-
 		// DEFAULT FONT
 		ImFontConfig cfg;
 		cfg.PixelSnapH = true;
@@ -87,15 +86,22 @@ namespace Laura
 			13.0f, &cfg, iconRanges
 		);
 
-
-
 		// CODICON 
         cfg.MergeMode = false;
         cfg.GlyphOffset = ImVec2(0.0f, -25.0f);
-        static const ImWchar codicon_ranges[] = { 0xF135, 0xF138, 0 };
+        static const ImWchar codicon_ranges[] = { 0xF101, 0xF2FF, 0 };
 		m_FontRegistry->codicon = io.Fonts->AddFontFromFileTTF(
 			(EditorCfg::RESOURCES_PATH / "Fonts/vscode-codicon/vscode-codicon.ttf").string().c_str(),
 			40.0f, &cfg, codicon_ranges
+		);
+
+		// LAURA BRAND ICONS 
+        cfg.MergeMode = false;
+        cfg.GlyphOffset = ImVec2(0.0f, -2.0f);
+        static const ImWchar lauraBrandIcons_ranges[] = { 0xF101, 0xF103, 0 };
+		m_FontRegistry->lauraBrandIcons = io.Fonts->AddFontFromFileTTF(
+			(EditorCfg::RESOURCES_PATH / "Fonts/laura-brand-icons/laura-brand-icons.ttf").string().c_str(),
+			22.0f, &cfg, lauraBrandIcons_ranges 
 		);
 
         ImGui::GetIO().UserData = m_FontRegistry.get();

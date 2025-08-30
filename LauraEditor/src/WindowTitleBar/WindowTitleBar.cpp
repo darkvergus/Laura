@@ -1,6 +1,9 @@
 #include <imgui.h>
+
 #include <IconsFontAwesome6.h>
 #include <Codicons.h>
+#include "LauraBrandIcons.h"
+
 #include "WindowTitleBar.h"
 #include "Dialogs/ConfirmationDialog.h"
 #include "Project/Scene/SceneManager.h"
@@ -9,53 +12,48 @@
 
 namespace Laura
 {
-	void WindowTitleBar::OnImGuiRender() {
+	void WindowTitleBar::OnImGuiRender(float yOffset) {
 		auto& theme = m_EditorState->temp.editorTheme;
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 6.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 8.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 10.0f));
 
 		m_TitleBarHeight = ImGui::GetFrameHeight();
 		const float titlebarWidth = ImGui::GetContentRegionAvail().x;
-		float titleBarOffset = 0.0f;
 		
-		if (m_Window->isMaximized()) {
-			titleBarOffset = 6.0f;
-		}
-
 		ImGuiViewport* vp = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(vp->Pos.x, vp->Pos.y + titleBarOffset));
+		ImVec2 titleBarPos = ImVec2(vp->Pos.x, vp->Pos.y + yOffset);
+		ImGui::SetNextWindowPos(titleBarPos);
 		ImGui::SetNextWindowSize(ImVec2(vp->Size.x, m_TitleBarHeight));
 		ImGui::SetNextWindowViewport(vp->ID);
 		ImGuiWindowFlags flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
 			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_MenuBar;
+			ImGuiWindowFlags_MenuBar;
 		ImGui::Begin("##Titlebar", nullptr, flags);
+		bool titleBarWindowHovered = ImGui::IsWindowHovered();
 
-		// Background
-		{
-			ImDrawList* dl = ImGui::GetWindowDrawList();
-			ImVec2 p0 = ImGui::GetWindowPos();
-			ImVec2 p1 = ImVec2(p0.x + ImGui::GetWindowSize().x, p0.y + ImGui::GetWindowSize().y);
-			dl->AddRectFilled(p0, p1, ImGui::GetColorU32(ImVec4(0.10f, 0.10f, 0.11f, 1.0f)));
-		}
+		// screen space titlebar hitbox
+		ImVec2 p0 = ImGui::GetWindowPos();
+		ImVec2 p1 = ImVec2(p0.x + ImGui::GetWindowSize().x, p0.y + ImGui::GetWindowSize().y);
+		ImVec2 p0Screen = ImVec2(p0.x - vp->Pos.x, p0.y - vp->Pos.y);
+		ImVec2 p1Screen = ImVec2(p1.x - vp->Pos.x, p1.y - vp->Pos.y);
+
+		// debug titlebar hitbox
+		//ImDrawList* dl = ImGui::GetForegroundDrawList();
+		//dl->AddRectFilled(p0, p1, ImGui::GetColorU32(ImVec4(1.10f, 0.10f, 0.11f, 1.0f)));
 
 		const float frameH = ImGui::GetFrameHeight();
-		const float btnH = frameH - 2.0f;
+		const float iconWidth = frameH - 2.0f;
 		const ImVec2 winSize = ImGui::GetWindowSize();
-		const float rightButtonsWidth = btnH * 3.0f + ImGui::GetStyle().ItemSpacing.x * 2.0f;
+		const float rightButtonsWidth = iconWidth * 3.0f + ImGui::GetStyle().ItemSpacing.x * 2.0f;
 	
 		// Begin single-row menu bar container
 		if (ImGui::BeginMenuBar()) {
-			// 1) App icon placeholder
-			ImVec2 iconSize(btnH, btnH);
-			ImGui::InvisibleButton("##AppIcon", iconSize);
-			{
-				ImVec2 min = ImGui::GetItemRectMin();
-				ImVec2 max = ImGui::GetItemRectMax();
-				ImGui::GetWindowDrawList()->AddRectFilled(min, max, ImGui::GetColorU32(ImVec4(0.25f, 0.25f, 0.27f, 0.0f)), 4.0f);
-			}
-			ImGui::SameLine();
+			ImVec2 pos = ImGui::GetCursorScreenPos();
+			ImGui::PushFont(Fonts()->lauraBrandIcons);
+			ImGui::Text(ICON_LR_MARK);
+			ImGui::PopFont();
+			ImGui::SameLine(iconWidth);
 
 			// 2) Menus (File, View, ...)
 			auto ItemLabel = [](const std::string& icon, const std::string& label) -> std::string {
@@ -68,40 +66,42 @@ namespace Laura
 			theme.PushColor(ImGuiCol_PopupBg, EditorCol_Background3);
 			ImGui::SetNextWindowSizeConstraints(ImVec2(150, 0), ImVec2(FLT_MAX, FLT_MAX));
 			theme.PushColor(ImGuiCol_Text, EditorCol_Text2);
-			if (ImGui::BeginMenu("File")) {
-				theme.PushColor(ImGuiCol_HeaderHovered, EditorCol_Accent2);
-				theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
-				if (ImGui::MenuItem(ItemLabel(ICON_FA_FILE_CIRCLE_PLUS, "New").c_str(), "Ctrl+N")) { m_EditorState->temp.isCreateProjectDialogOpen = true; }
-				if (ImGui::MenuItem(ItemLabel(ICON_FA_FOLDER_CLOSED, "Open...").c_str(), "Ctrl+O")) { m_ShouldOpenProject = true; }
-				ImGui::Separator();
-				if (ImGui::MenuItem(ItemLabel(ICON_FA_FLOPPY_DISK, "Save").c_str(), "Ctrl+S")) { m_ProjectManager->SaveProject(); }
-				ImGui::MenuItem(ItemLabel("", "Save As...").c_str());
-				ImGui::Separator();
-				if (ImGui::MenuItem(ItemLabel(ICON_FA_ARROW_UP_FROM_BRACKET, "Export...").c_str())) { m_EditorState->temp.shouldOpenExportPanel = true; }
-				ImGui::Separator();
-				if (ImGui::MenuItem(ItemLabel("", "Close").c_str())) { m_ShouldCloseProject = true; }
-				theme.PopColor(2); // text, headerHovered
-				ImGui::EndMenu();
-			}
-			ImGui::SetNextWindowSizeConstraints(ImVec2(150, 0), ImVec2(FLT_MAX, FLT_MAX));
-			if (ImGui::BeginMenu("View")) {
-				theme.PushColor(ImGuiCol_HeaderHovered, EditorCol_Accent2);
-				theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
-				if (ImGui::BeginMenu(ItemLabel(ICON_FA_TABLE_LIST, "Layouts").c_str())) {
-					if (ImGui::MenuItem(ItemLabel("", "Load Default Layout").c_str())) {
-						m_ImGuiContext->LoadDefaultLayout();
-					}
+			if (m_ProjectManager->ProjectIsOpen()) {
+				if (ImGui::BeginMenu("File")) {
+					theme.PushColor(ImGuiCol_HeaderHovered, EditorCol_Accent2);
+					theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
+					if (ImGui::MenuItem(ItemLabel(ICON_FA_FILE_CIRCLE_PLUS, "New").c_str(), "Ctrl+N")) { m_EditorState->temp.isCreateProjectDialogOpen = true; }
+					if (ImGui::MenuItem(ItemLabel(ICON_FA_FOLDER_CLOSED, "Open...").c_str(), "Ctrl+O")) { m_ShouldOpenProject = true; }
+					ImGui::Separator();
+					if (ImGui::MenuItem(ItemLabel(ICON_FA_FLOPPY_DISK, "Save").c_str(), "Ctrl+S")) { m_ProjectManager->SaveProject(); }
+					ImGui::MenuItem(ItemLabel("", "Save As...").c_str());
+					ImGui::Separator();
+					if (ImGui::MenuItem(ItemLabel(ICON_FA_ARROW_UP_FROM_BRACKET, "Export...").c_str())) { m_EditorState->temp.shouldOpenExportPanel = true; }
+					ImGui::Separator();
+					if (ImGui::MenuItem(ItemLabel("", "Close").c_str())) { m_ShouldCloseProject = true; }
+					theme.PopColor(2); // text, headerHovered
 					ImGui::EndMenu();
 				}
-				ImGui::Separator();
-				if (ImGui::MenuItem(ItemLabel(ICON_FA_STOPWATCH, "Profiler").c_str(), NULL, false, !m_EditorState->temp.isProfilerPanelOpen)) {
-					m_EditorState->temp.isProfilerPanelOpen = true;
+				ImGui::SetNextWindowSizeConstraints(ImVec2(150, 0), ImVec2(FLT_MAX, FLT_MAX));
+				if (ImGui::BeginMenu("View")) {
+					theme.PushColor(ImGuiCol_HeaderHovered, EditorCol_Accent2);
+					theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
+					if (ImGui::BeginMenu(ItemLabel(ICON_FA_TABLE_LIST, "Layouts").c_str())) {
+						if (ImGui::MenuItem(ItemLabel("", "Load Default Layout").c_str())) {
+							m_ImGuiContext->LoadDefaultLayout();
+						}
+						ImGui::EndMenu();
+					}
+					ImGui::Separator();
+					if (ImGui::MenuItem(ItemLabel(ICON_FA_STOPWATCH, "Profiler").c_str(), NULL, false, !m_EditorState->temp.isProfilerPanelOpen)) {
+						m_EditorState->temp.isProfilerPanelOpen = true;
+					}
+					if (ImGui::MenuItem(ItemLabel("", "Themes").c_str(), NULL, false, !m_EditorState->temp.isThemePanelOpen)) {
+						m_EditorState->temp.isThemePanelOpen = true;
+					}
+					theme.PopColor(2); // text, headerHovered
+					ImGui::EndMenu();
 				}
-				if (ImGui::MenuItem(ItemLabel("", "Themes").c_str(), NULL, false, !m_EditorState->temp.isThemePanelOpen)) {
-					m_EditorState->temp.isThemePanelOpen = true;
-				}
-				theme.PopColor(2); // text, headerHovered
-				ImGui::EndMenu();
 			}
 			ImGui::GetStyle().PopupBorderSize = originalBorder;
 			ImGui::PopStyleVar();
@@ -160,16 +160,17 @@ namespace Laura
 			}
 			ImGui::SetCursorPosX(winSize.x - rightButtonsWidth);
 			theme.PushColor(ImGuiCol_Button, EditorCol_Transparent, 0.0f);
+			ImVec2 buttonSize = ImVec2(frameH * 1.1f, frameH - 2.0f);
 			// Minimize
 			ImGui::PushFont(Fonts()->codicon);
-			if (ImGui::Button(CODICON_CHROME_MINIMIZE, ImVec2(btnH, btnH))) { 
+			if (ImGui::Button(CODICON_CHROME_MINIMIZE, buttonSize)) { 
 				m_Window->minimize();
 			}
 			ImGui::SameLine(0,0);
 
 			// Maximize / Restore
 			const char* icon = m_Window->isMaximized() ? CODICON_CHROME_RESTORE : CODICON_CHROME_MAXIMIZE;
-			if (ImGui::Button(icon, ImVec2(btnH, btnH))) {
+			if (ImGui::Button(icon, buttonSize)) {
 				if (m_Window->isMaximized()) {
 					m_Window->restore();
 				}
@@ -179,7 +180,7 @@ namespace Laura
 
 			// Close
 			theme.PushColor(ImGuiCol_ButtonHovered, EditorCol_Error);
-			if (ImGui::Button(CODICON_CHROME_CLOSE, ImVec2(btnH, btnH))) { 
+			if (ImGui::Button(CODICON_CHROME_CLOSE, buttonSize)) { 
 				m_Window->close(); 
 			}
 			theme.PopColor();
@@ -190,15 +191,13 @@ namespace Laura
 		}
 		ImGui::End();
 		ImGui::PopStyleVar(2);
-
-		float titlebarHeight = m_TitleBarHeight;
-		m_Window->setTitlebarHitTestCallback([titlebarHeight, titlebarWidth](int width, int height) -> bool {
-				if (ImGui::IsAnyItemHovered()) { return false; }
-				if ((width >= 0 && width <= titlebarWidth) && (height >= 0 && height <= titlebarHeight)){
-					return true;
-				}
+		bool hoveringDragArea = titleBarWindowHovered && !ImGui::IsAnyItemHovered();
+		m_Window->setTitlebarHitTestCallback([hoveringDragArea, p0Screen, p1Screen](int hitx, int hity) -> bool {
+			if (hoveringDragArea && (p0Screen.x <= hitx && hitx <= p1Screen.x) && (p0Screen.y <= hity && hity <= p1Screen.y)) {
+				return true;
 			}
-		);
+			return false;
+		});
 
 		// dialogs
 		CreateProjectDialog(m_ProjectManager, m_EditorState);

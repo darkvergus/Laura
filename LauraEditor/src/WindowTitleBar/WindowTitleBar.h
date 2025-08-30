@@ -24,8 +24,8 @@ namespace Laura
 
 		~WindowTitleBar() = default;
 
-		void init();
-		void OnImGuiRender();
+		inline void init(){};
+		void OnImGuiRender(float yOffset);
 		void onEvent(std::shared_ptr<IEvent> event){}
 		inline float height() {
 			return m_TitleBarHeight;

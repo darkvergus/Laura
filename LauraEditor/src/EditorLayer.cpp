@@ -72,39 +72,45 @@ namespace Laura
 		m_ImGuiContext->BeginFrame();
 		m_EditorState->temp.editorTheme.ApplyAllToImgui(); // apply theme every frame
 
-		if (!m_ProjectManager->ProjectIsOpen()) {
-			m_Launcher.OnImGuiRender();
-			m_ImGuiContext->EndFrame();
-			return;
+
+		float yOffset = 0.0f;
+		if (m_Window->isMaximized()) {
+			yOffset = 6.0f;
 		}
 
+		m_WindowTitleBar->OnImGuiRender(yOffset);
 
-		// 1) TITLEBAR WINDOW FIRST
-		m_WindowTitleBar->OnImGuiRender();
-
-		// 2) DOCKSPACE HOST WINDOW BELOW TITLEBAR
+		// next window setup (to align with the titlebar)
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + m_WindowTitleBar->height()));
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + m_WindowTitleBar->height() + yOffset));
 		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - m_WindowTitleBar->height()));
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGuiWindowFlags host_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::Begin("##DockSpaceHost", nullptr, host_flags);
-		ImGui::PopStyleVar(2);
+			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
+		// LAUNCHER
+		if (!m_ProjectManager->ProjectIsOpen()) {
+			m_Launcher.OnImGuiRender(host_flags);
+		} 
 		// DOCKSPACE
-		ImGuiStyle& style = ImGui::GetStyle();
-		float minWinSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 300.0f;
-		ImGui::DockSpace(ImGui::GetID("MyDockspace"));
-		style.WindowMinSize.x = minWinSizeX;
-		for (auto& panel : m_EditorPanels) {
-			panel->OnImGuiRender();
+		else {
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			ImGui::Begin("##DockSpaceHost", nullptr, host_flags);
+			ImGui::PopStyleVar(2);
+			ImGuiStyle& style = ImGui::GetStyle();
+			float minWinSizeX = style.WindowMinSize.x;
+			style.WindowMinSize.x = 300.0f;
+			ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+			style.WindowMinSize.x = minWinSizeX;
+
+			for (auto& panel : m_EditorPanels) {
+				panel->OnImGuiRender(); // RENDERING ALL PANELS
+			}
+
+			ImGui::End();
 		}
-		ImGui::End();
 
 		#ifndef BUILD_INSTALL // display demo when not shipping
 		bool showDemo = false;

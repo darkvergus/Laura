@@ -9,29 +9,16 @@
 namespace Laura
 {
 
-	void Launcher::OnImGuiRender() {
+	void Launcher::OnImGuiRender(ImGuiWindowFlags window_flags) {
 		auto& theme = m_EditorState->temp.editorTheme;
-		ImGuiViewport* viewport = ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
-
-		ImGuiWindowFlags flags =
-			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoDocking |
-			ImGuiWindowFlags_NoBringToFrontOnFocus |
-			ImGuiWindowFlags_NoNavFocus;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
 		theme.PushColor(ImGuiCol_WindowBg, EditorCol_Background2);
 		theme.PushColor(ImGuiCol_Button, EditorCol_Secondary2);
-		ImGui::Begin("##Launcher", nullptr, flags);
 
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::Begin("##Launcher", nullptr, window_flags);
+		ImGui::PopStyleVar(2);
 
 		ImVec2 windowSize = ImGui::GetContentRegionAvail();
 		float buttonWidth = windowSize.x / 8.0f;
@@ -67,7 +54,6 @@ namespace Laura
 
 		ImGui::End();
 		theme.PopColor(2);
-		ImGui::PopStyleVar(2);
 	}
 
 	void Launcher::DrawCreateProjectWindow(){

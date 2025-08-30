@@ -14,7 +14,7 @@ namespace Laura
         EditorTheme& theme = m_EditorState->temp.editorTheme;
         
         
-        ImGui::Begin(ICON_FA_SITEMAP " Scene Hierarchy");
+        ImGui::Begin(ICON_FA_CHART_BAR " Scene Hierarchy");
         if (m_EditorState->temp.isInRuntimeSimulation) {
             ImGui::BeginDisabled();
         }
