@@ -9,3 +9,4 @@ latex
 CMakeSettings.json
 imgui.ini
 EditorState.yaml
+enc_temp_folder/

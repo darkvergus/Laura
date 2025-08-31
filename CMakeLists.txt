@@ -7,7 +7,7 @@ endif()
 
 # if BUILD_INSTALL = ON -> LauraEngine target defines #define BUILD_INSTALL
 # and propagates the macro to Runtime & Editor
-option(BUILD_INSTALL "Use installed paths instead of source-tree paths" OFF)
+option(BUILD_INSTALL "Use installed paths instead of source-tree paths" ON)
 
 
 # Console option for applications

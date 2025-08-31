@@ -1,28 +1,143 @@
-# Ray Tracing from scratch in C++
+<div align="center">
 
-![image](https://raw.githubusercontent.com/jakubg05/images/main/RayTracing.png)
+![Hero Section](./.github/assets/laura-readme-panel.png)
+    <a href="https://www.youtube.com/@JacobGordiak" target="_blank" rel="noopener">
+    <img src="https://img.shields.io/badge/youtube-d95652.svg?style=flat-square&logo=youtube&logoColor=white"
+            alt="YouTube" style="height:20px;">
+    </a>
 
-## Building The Project
-### Windows (Visual Studio)
+</div>
 
-1. Clone this repository:
+# 3D Path Tracing Game Engine
+
+**Laura** is a lightweight, Windows-only **3D path tracing** engine. It focuses on rendering 3D scenes using path tracing, enabling developers to experiment with 3D light transport simulation in virtual environments. While not as feature-packed as larger engines, Laura provides a simple and approachable platform to learn and experiment with 3D rendering concepts. 
+
+### Free, open source, and MIT licensed
+
+Laura is completely free and open source under the permissive **MIT license**. Users are free to use, modify, and distribute their projects without royalties or restrictions. The engine is designed to be lightweight, accessible, and extendable, empowering developers to experiment with path tracing and 3D rendering techniques.
+
+
+> [!NOTE]
+> **Laura – Light-Aura** takes its name from its focus on light and realism: *“Laura”* evokes a personal, approachable engine, while *“Light Aura”* reflects its core strength in tracing realistic light paths and producing natural illumination in 3D scenes.
+
+
+<p align="center">
+  <strong>Editor</strong><br>
+  <img src="./.github/assets/editor.png">
+</p>
+
+After designing and configuring your scene in the editor, you can export it via **File > Export** and run the generated application to see your work in action.
+
+<p align="center">
+  <strong>Exported Application</strong><br>
+  <img src="./.github/assets/runtime.png">
+</p>
+
+<p align="center">
+  <strong>Launcher</strong><br>
+  <img src="./.github/assets/launcher.png">
+</p>
+
+The project is structured into three CMake targets:
+
+- **LauraEngine**: The core engine as a static library. It implements the renderer, scene and asset systems, platform abstraction, and utility subsystems. Third-party dependencies (GLFW, GLEW, GLM, Assimp, spdlog, EnTT, yaml-cpp, stb) are vendored and built via CMake.  
+- **LauraEditor**: A fully-featured editor application (ImGui-based) for authoring projects, scenes, materials, and settings, backed by `LauraEngine`.  
+- **LauraRuntime**: A lean runtime player that loads and runs exported projects using `LauraEngine`.
+
+## Highlights
+- **C++20** across all targets
+- **Path tracing pipeline** using **OpenGL** compute shaders and a clean renderer abstraction
+- **Editor tooling** built with ImGui/ImPlot
+- **Scene/entity system** with EnTT
+- **Asset loading** (Assimp, stb-image)
+- **Structured logging** via spdlog
+
+## Supported Platforms
+Laura currently targets **Windows (x64)** and builds with the MSVC toolchain.
+
+> [!IMPORTANT]
+> Note: The root `CMakeLists.txt` enforces Windows-only for now and enables multi-threaded compilation under MSVC.
+
+## Getting Started
+
+
+### Prerequisites
+- Windows 10/11 (x64)
+- Visual Studio 2022 with C++ toolset (or MSVC via Build Tools)
+- CMake 3.26+
+
+### Clone Repository
+```bash
+git clone --recursive <this-repo-url> Laura
+cd Laura
+git submodule update --init --recursive
 ```
-git clone --recursive https://github.com/jakubg05/ray-tracing.git your-project-name
-cd your-project-name
-git submodule update --init --recursive 
+
+### How to Build with Visual Studio (recommended)
+>[!IMPORTANT]
+> There is no solution file; Open Visual Studio → Continue without code.
+
+1. File → Open → CMake… → select the root `CMakeLists.txt`.
+<p align="center">
+  <img src="./.github/assets/vs-open-cmake.png" width="600" alt="Editor">
+</p>
+
+#### Dev build 
+
+- Configuration: `x64-Debug`
+- CMake variable: `BUILD_INSTALL = OFF` (default)
+- Target (dropdown): `LauraEditor.exe (Debug/LauraEditor.exe)`
+<p align="center">
+  <img src="./.github/assets/vs-example-debug-setup.png" width="600" alt="Editor">
+</p>
+
+- Run: Start debugging to launch the editor in Debug.
+- Note: `LauraEngine` builds automatically when required.
+
+#### Release / Shipping build
+
+- Configuration: `x64-Release` (RelWithDebInfo)
+> [!IMPORTANT]
+> Set CMake variable `BUILD_INSTALL = ON` (root CMakeLists.txt).
+- Target (dropdown): `LauraEditor.exe (Install)`
+<p align="center">
+  <img src="./.github/assets/vs-example-install-setup.png" width="600" alt="Editor">
+</p>
+
+- Build: This performs the install step and stages a self‑contained layout under `out/build/x64-Release/install/`.
+- Run: Launch the installed `LauraEditor.exe` from the install directory.
+
+> [!TIP]
+> - BUILD_INSTALL = OFF: executables load resources directly from the source tree. Great for fast dev iteration, but unsuitable for shipping because end users will not have your source-tree layout.
+> - BUILD_INSTALL = ON: the install step copies required assets next to the executable (`engine_res/`, `editor_res/`) and paths are resolved relative to the executable. Use this for self‑contained, distributable builds.
+> Dev builds: keep `BUILD_INSTALL=OFF` for fast iteration. Shipping builds: use `BUILD_INSTALL=ON` for a portable layout.
+>
+> Console window: to hide it in applications, set `ENABLE_CONSOLE=OFF` in the root CMakeLists.txt or pass `-DENABLE_CONSOLE=OFF` when configuring.
+
+### Console window
+> [!TIP]
+> To hide the console window for applications, set `ENABLE_CONSOLE=OFF` in the root CMakeLists.txt or pass `-DENABLE_CONSOLE=OFF` when configuring.
+
+
+
+## Project Structure
 ```
-2. Right-click the cloned folder and select "Open with Visual Studio," or open Visual Studio and navigate to File -> Open -> CMake... and choose the root CMakeLists.txt.
-3. Run the Debug build.
-4. Create a Release configuration by clicking the x64-Debug dropdown and adding x64-Release.
-5. Choose raytracing.exe from the box on the right and hit the run button.
+Laura/           # Engine library (source & resources)
+LauraEditor/     # Editor application (ImGui-based)
+LauraRuntime/    # Runtime player
+Thirdparty/      # Vendored dependencies
+SampleModels/    # Example assets
+SampleSkyboxes/  # Example HDRs
+```
+## Troubleshooting
+- Ensure you cloned submodules: `git submodule update --init --recursive`.
+- If resources are missing at runtime, re-follow the steps in [How to Build with Visual Studio](#how-to-build-with-visual-studio-recommended), then in Visual Studio choose `Project → Delete Cache and Reconfigure`.
+<p align="center">
+  <img src="./.github/assets/vs-delete-cache-and-reconfigure.png" width="600" alt="Editor">
+</p>
 
-## Project Structure and CMake
+- When switching between [Dev build](#dev-build) and [Release / Shipping build](#release--shipping-build), delete cache and reconfigure.
+- Always delete cache and reconfigure when changing [BUILD_INSTALL](#build_install---switching-resource-lookup-between-source-and-install-trees), [ENABLE_CONSOLE](#console-window), or the CMake generator.
 
-* **Core as a Static Library:** The `core` directory contains its own CMakeLists.txt file and is configured to be built as a static library. This means the compiled code from the `core` directory is packaged into a single `.lib` (Windows) or `.a` (Linux) file.
-
-* **Application Linking:** The `app` directory doesn't have its own CMakeLists.txt. Instead, the root CMakeLists.txt handles:
-* Building the executable for the application
-* Linking the application's executable against the `core` static library
-* Linking the application's executable against the third-party libraries (GLFW, GLEW, etc.)
-
-![alt text](https://raw.githubusercontent.com/jakubg05/images/main/RayTracingDepGraph.png)
+## Contributions
+Contributions are welcome. If extending Laura to additional platforms sounds interesting, a natural next step could be Linux and macOS support.
