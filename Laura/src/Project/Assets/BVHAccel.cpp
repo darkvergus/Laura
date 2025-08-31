@@ -4,7 +4,7 @@ namespace Laura
 {
 
 	BVHAccel::BVHAccel(const std::vector<Triangle>& meshBuffer, const uint32_t firstTriIdx, const uint32_t triCount) 
-	: m_MeshBuff(meshBuffer), m_FirstTriIdx(firstTriIdx), m_TriCount(triCount) {
+	: m_TriBuff(meshBuffer), m_FirstTriIdx(firstTriIdx), m_TriCount(triCount) {
 		m_Centroids = PrecomputeCentroids();
 	}
 
@@ -39,41 +39,65 @@ namespace Laura
 	}
 
 	void BVHAccel::UpdateAABB(Node& node) {
-		node.min = glm::vec3( FLT_MAX );
-		node.max = glm::vec3( -FLT_MAX );
-
+		Aabb aabb;
 		// iterate over primitives contained by the Node
 		for (size_t i = 0; i < node.triCount; i++) { // every 3rd vertex is new triangle
-			const Triangle& t = m_MeshBuff[m_FirstTriIdx + m_IdxBuff[node.leftChild_Or_FirstTri + i]];
-			// find minimum & maximum coordinates
-			node.min = glm::min(node.min, glm::vec3(t.v0));
-			node.min = glm::min(node.min, glm::vec3(t.v1));
-			node.min = glm::min(node.min, glm::vec3(t.v2));
-			node.max = glm::max(node.max, glm::vec3(t.v0));
-			node.max = glm::max(node.max, glm::vec3(t.v1));
-			node.max = glm::max(node.max, glm::vec3(t.v2));
+			const Triangle& t = m_TriBuff[m_FirstTriIdx + m_IdxBuff[node.leftChild_Or_FirstTri + i]];
+			aabb.grow(glm::vec3(t.v0));
+			aabb.grow(glm::vec3(t.v1));
+			aabb.grow(glm::vec3(t.v2));
 		}
+		node.min = aabb.boxMin;
+		node.max = aabb.boxMax;
+	}
+
+	float BVHAccel::EvaluateSAH(Node& node, int axis, float candidatePos) {
+		Aabb leftBox, rightBox;
+		int leftCount = 0, rightCount = 0;
+		for(uint32_t i = 0; i < node.triCount; i++ ) {
+			uint32_t triIdx = m_IdxBuff[node.leftChild_Or_FirstTri + i]; // relative index [0..m_TriCount)
+			const Triangle& tri = m_TriBuff[m_FirstTriIdx + triIdx];
+			if (m_Centroids[triIdx][axis] < candidatePos) {
+				leftCount++;
+				leftBox.grow( tri.v0 );
+				leftBox.grow( tri.v1 );
+				leftBox.grow( tri.v2 );
+			}
+			else {
+				rightCount++;
+				rightBox.grow( tri.v0 );
+				rightBox.grow( tri.v1 );
+				rightBox.grow( tri.v2 );
+			}
+		}
+		float cost = leftCount * leftBox.area() + rightCount * rightBox.area();
+		return (cost > 0) ? cost : FLT_MAX;
 	}
 
 	void BVHAccel::SubDivide(Node& node) {
-		// Found Leaf Node
-		if (node.triCount <= 2) {
+		int bestAxis = -1;
+		float bestPos = 0, bestCost = FLT_MAX;
+		for (int axis = 0; axis < 3; axis++) for (int i = 0; i < node.triCount; i++) {
+			float candidatePos = m_Centroids[m_IdxBuff[node.leftChild_Or_FirstTri + i]][axis];
+			float cost = EvaluateSAH(node, axis, candidatePos);
+			if (cost < bestCost) {
+				bestAxis = axis;
+				bestPos	 = candidatePos;
+				bestCost = cost;
+			}
+		}
+		Aabb parentAabb{ node.min, node.max };
+		float parentCost = node.triCount * parentAabb.area();
+		if (bestCost >= parentCost) {
 			return;
 		}
-
-		// naive splitting
-		glm::vec3 AABB = node.max - node.min;
-		int splitAxis = 0;
-		if (AABB.y > AABB.x) { splitAxis = 1; }
-		if (AABB.z > AABB.y) { splitAxis = 2; }
-		double splitPoint = node.min[splitAxis] + AABB[splitAxis] * 0.5;
 
 		uint32_t leftPtr = node.leftChild_Or_FirstTri; // points to the firstTri in node's triangles
 		uint32_t rightPtr = node.leftChild_Or_FirstTri + node.triCount - 1; // points to the lastTri
 
 		// partition/sort the triangles (quicksort partition)
 		while (leftPtr <= rightPtr) {
-			if (m_Centroids[m_IdxBuff[leftPtr]][splitAxis] < splitPoint) {
+			if (m_Centroids[m_IdxBuff[leftPtr]][bestAxis] < bestPos) {
 				leftPtr++;
 			}
 			else {
@@ -97,12 +121,10 @@ namespace Laura
 		m_NodeBuff[leftChildIdx].triCount = leftTriCount;
 		m_NodeBuff[rightChildIdx].leftChild_Or_FirstTri = node.leftChild_Or_FirstTri + leftTriCount;
 		m_NodeBuff[rightChildIdx].triCount = node.triCount - leftTriCount;
-		
-		// update current node
 		node.triCount = 0; // ! mark the node as non-leaf node
 		node.leftChild_Or_FirstTri = leftChildIdx; // now points to the leftChild node
 
-		UpdateAABB(m_NodeBuff[leftChildIdx]);
+		UpdateAABB(m_NodeBuff[leftChildIdx]); // figure out bounds based on the recently added triangle indices and counts
 		UpdateAABB(m_NodeBuff[rightChildIdx]);
 		
 		SubDivide(m_NodeBuff[leftChildIdx]);
