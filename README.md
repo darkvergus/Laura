@@ -26,16 +26,19 @@ Laura is completely free and open source under the permissive **[MIT license](./
   <img src="./.github/assets/editor.png">
 </p>
 
-After designing and configuring your scene in the editor, you can export it via **File > Export** and run the generated application to see your work in action.
+After designing and configuring your scene in the editor, export it via **File → Export** and run the generated application to see your work in action.
+
 
 <p align="center">
-  <strong>Exported Application</strong><br>
-  <img src="./.github/assets/runtime.png">
-</p>
-
-<p align="center">
-  <strong>Launcher</strong><br>
-  <img src="./.github/assets/launcher.png">
+  <a href="./.github/assets/runtime.png" title="Exported runtime (click to enlarge)">
+    <img src="./.github/assets/runtime.png" alt="Exported runtime" width="360">
+  </a>
+  &nbsp;&nbsp;
+  <a href="./.github/assets/launcher.png" title="Launcher (click to enlarge)">
+    <img src="./.github/assets/launcher.png" alt="Launcher" width="360">
+  </a>
+  <br>
+  <small><em>Left: exported runtime — Right: opening launch window of the editor.</em></small>
 </p>
 
 The project is structured into three CMake targets:
@@ -110,9 +113,9 @@ git submodule update --init --recursive
 > [!TIP]
 > - BUILD_INSTALL = OFF: executables load resources directly from the source tree. Great for fast dev iteration, but unsuitable for shipping because end users will not have your source-tree layout.
 > - BUILD_INSTALL = ON: the install step copies required assets next to the executable (`engine_res/`, `editor_res/`) and paths are resolved relative to the executable. Use this for self‑contained, distributable builds.
+>
 > Dev builds: keep `BUILD_INSTALL=OFF` for fast iteration. Shipping builds: use `BUILD_INSTALL=ON` for a portable layout.
 >
-> Console window: to hide it in applications, set `ENABLE_CONSOLE=OFF` in the root CMakeLists.txt or pass `-DENABLE_CONSOLE=OFF` when configuring.
 
 ### Console window
 > [!TIP]
@@ -125,7 +128,7 @@ git submodule update --init --recursive
 Laura/           # Engine library (source & resources)
 LauraEditor/     # Editor application (ImGui-based)
 LauraRuntime/    # Runtime player
-Thirdparty/      # Vendored dependencies
+<target>/Thirdparty/  # Target specific dependencies
 SampleModels/    # Example assets
 SampleSkyboxes/  # Example HDRs
 ```
@@ -140,4 +143,4 @@ SampleSkyboxes/  # Example HDRs
 - Always delete cache and reconfigure when changing [BUILD_INSTALL](#build_install---switching-resource-lookup-between-source-and-install-trees), [ENABLE_CONSOLE](#console-window), or the CMake generator.
 
 ## Contributions
-Contributions are welcome. If extending Laura to additional platforms sounds interesting, a natural next step could be Linux and macOS support.
+Contributions are welcome. If extending Laura to additional platforms sounds interesting, a natural next step could be **Linux and macOS support**.
