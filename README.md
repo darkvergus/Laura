@@ -14,7 +14,7 @@
 
 ### Free, open source, and MIT licensed
 
-Laura is completely free and open source under the permissive **MIT license**. Users are free to use, modify, and distribute their projects without royalties or restrictions. The engine is designed to be lightweight, accessible, and extendable, empowering developers to experiment with path tracing and 3D rendering techniques.
+Laura is completely free and open source under the permissive **[MIT license](./LICENSE)**. Users are free to use, modify, and distribute their projects without royalties or restrictions. The engine is designed to be lightweight, accessible, and extendable, empowering developers to experiment with path tracing and 3D rendering techniques.
 
 
 > [!NOTE]
