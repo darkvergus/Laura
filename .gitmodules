@@ -10,3 +10,7 @@
 [submodule "Laura/Thirdparty/yaml-cpp"]
 	path = Laura/Thirdparty/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Laura/Thirdparty/glfw"]
+	path = Laura/Thirdparty/glfw
+	url = https://github.com/TheCherno/glfw.git
+	branch = master

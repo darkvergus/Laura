@@ -15,6 +15,10 @@ namespace Laura
 		}
 
 		OpenGLContext::setWindowHints();
+		// Enable custom titlebar when requested GLFW_TITLEBAR, is specific to Cherno's fork of GLFW
+		if (windowProps.CustomTitlebar) {
+			glfwWindowHint(GLFW_TITLEBAR, GLFW_FALSE);
+		}
 
 		m_NativeWindow = glfwCreateWindow(windowProps.width, windowProps.height, (windowProps.title).c_str(), NULL, NULL);
 		if (!m_NativeWindow) {
@@ -32,6 +36,16 @@ namespace Laura
 		glfwSetCursorPosCallback(m_NativeWindow, GLFWMousePositionCallback);
 		glfwSetScrollCallback(m_NativeWindow, GLFWScrollCallback);
 		glfwSetFramebufferSizeCallback(m_NativeWindow, GLFWWindowResizeCallback);
+
+		// Hook Cherno's fork titlebar hit-test
+		glfwSetTitlebarHitTestCallback(m_NativeWindow, [](GLFWwindow* window, int x, int y, int* hit){
+			auto self = static_cast<GLFWWindowIMPL*>(glfwGetWindowUserPointer(window));
+			if (self && self->m_TitlebarHitTest) {
+				*hit = self->m_TitlebarHitTest(x, y) ? 1 : 0;
+			} else {
+				*hit = 0;
+			}
+		});
 	}
 
 	GLFWWindowIMPL::~GLFWWindowIMPL() {
@@ -64,6 +78,41 @@ namespace Laura
 
 	void* GLFWWindowIMPL::getNativeWindow() const {
 		return m_NativeWindow;
+	}
+
+	void GLFWWindowIMPL::minimize() {
+		glfwIconifyWindow(m_NativeWindow);
+	}
+
+	void GLFWWindowIMPL::maximize() {
+		glfwMaximizeWindow(m_NativeWindow);
+	}
+
+	void GLFWWindowIMPL::restore() {
+		glfwRestoreWindow(m_NativeWindow);
+	}
+
+	bool GLFWWindowIMPL::isMaximized() const {
+		return glfwGetWindowAttrib(m_NativeWindow, GLFW_MAXIMIZED) == GLFW_TRUE;
+	}
+
+	void GLFWWindowIMPL::close() {
+		glfwSetWindowShouldClose(m_NativeWindow, GLFW_TRUE);
+	}
+
+	void GLFWWindowIMPL::setPosition(int x, int y) {
+		glfwSetWindowPos(m_NativeWindow, x, y);
+	}
+
+	glm::ivec2 GLFWWindowIMPL::getPosition() const {
+		int x, y;
+		glfwGetWindowPos(m_NativeWindow, &x, &y);
+		return glm::ivec2(x, y);
+	}
+
+	// Binds a callback to the titlebar hit-test (bridge between the UI and the glfw window)
+	void GLFWWindowIMPL::setTitlebarHitTestCallback(const std::function<bool(int, int)>& callback) {
+		m_TitlebarHitTest = callback;
 	}
 
 	void GLFWWindowIMPL::setFullscreen(bool enabled) {

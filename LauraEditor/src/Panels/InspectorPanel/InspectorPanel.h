@@ -32,7 +32,8 @@ namespace Laura
 				std::string idStr = std::to_string((uint64_t)entity.GetEnttID()) + TreenodeTitle;
 				ImGui::PushID(idStr.c_str());
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
-				theme.PushColor(ImGuiCol_FrameBg, EditorCol_Primary3);
+				theme.PushColor(ImGuiCol_FrameBg, EditorCol_Secondary1);
+				theme.PushColor(ImGuiCol_Header, EditorCol_Secondary1);
 				ImGui::BeginChild((idStr + "ChildWindow").c_str(), ImVec2(-FLT_MIN, 0.0f), ImGuiChildFlags_AutoResizeY | ImGuiChildFlags_FrameStyle);
 
 				ImVec2 windowWidth = ImGui::GetContentRegionAvail();
@@ -81,7 +82,7 @@ namespace Laura
 					ImGui::Spacing();
 				}
 				ImGui::EndChild();
-				theme.PopColor();
+				theme.PopColor(2); // headerBg, frameBg
 				ImGui::PopID();
 			}
 		}

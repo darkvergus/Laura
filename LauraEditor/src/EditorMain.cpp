@@ -14,7 +14,7 @@ namespace Laura
 			m_ImGuiContext = std::make_shared<ImGuiContext>(_Window);
 			m_ImGuiContext->Init();
 
-			_LayerStack->PushLayer(std::make_shared<EditorLayer>(_Profiler, _LayerStack, _ProjectManager, m_ImGuiContext));
+			_LayerStack->PushLayer(std::make_shared<EditorLayer>(_Window, _Profiler, _LayerStack, _ProjectManager, m_ImGuiContext));
 		}
 
 		virtual void Shutdown() override {

@@ -2,6 +2,8 @@
 
 #include <Laura.h>
 #include <Export/ExportSettings.h>
+#include <GL/glew.h>
+#include <chrono>
 
 namespace Laura
 {
@@ -19,8 +21,13 @@ namespace Laura
 		virtual void onUpdate() override;
 		virtual void onEvent(std::shared_ptr<IEvent> event) override;
 
+		bool LoadLogoFromDisk(GLuint* out_texture, int* out_width, int* out_height);
+
 	private:
 		void CalculateViewportCoordinates();
+		bool InitLogoResources();
+		void DestroyLogoResources();
+		void RenderLogo(float alpha);
 		// Engine Systems
 		std::shared_ptr<IWindow> m_Window;
 		std::shared_ptr<Profiler> m_Profiler;
@@ -36,5 +43,13 @@ namespace Laura
 		glm::ivec4 m_ViewportCoords; // x, y, width, height for glBlitFramebuffer
 		glm::ivec2 m_WindowSize;
 		bool m_UpdateViewportCoordinates;
+
+		// splash screen
+		bool m_ShowLogoScreen;
+		int m_LogoWidth, m_LogoHeight;
+		GLuint m_LogoTexHandle;
+		GLuint m_LogoVAO = 0, m_LogoVBO = 0, m_LogoProgram = 0;
+		int m_LogoUniformLocationAlpha = -1, m_LogoUniformLocationSampler = -1;
+		std::chrono::steady_clock::time_point m_SplashStartTime;
 	};
 }

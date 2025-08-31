@@ -1,6 +1,5 @@
 #include <imgui.h>
 #include "EditorLayer.h"
-#include "Panels/MainMenuPanel/MainMenuPanel.h"
 #include "Panels/ExportPanel/ExportPanel.h"
 #include "Panels/ViewportPanel/ViewportPanel.h"
 #include "Panels/SceneHierarchyPanel/SceneHierarchyPanel.h"
@@ -13,18 +12,21 @@
 namespace Laura
 {
 
-	EditorLayer::EditorLayer(std::shared_ptr<Profiler> profiler,
+	EditorLayer::EditorLayer(std::shared_ptr<IWindow> window,
+							 std::shared_ptr<Profiler> profiler,
 							 std::shared_ptr<IEventDispatcher> eventDispatcher,
 							 std::shared_ptr<ProjectManager> projectManager,
 							 std::shared_ptr<ImGuiContext> imGuiContext)
-		: m_Profiler(profiler)
+		: m_Window(window)
+		, m_Profiler(profiler)
 		, m_EventDispatcher(eventDispatcher)
 		, m_ProjectManager(projectManager)
 		, m_EditorState(std::make_shared<EditorState>())
 		, m_ImGuiContext(imGuiContext)
 		, m_Launcher(m_EditorState, m_ProjectManager)
+
+		, m_WindowTitleBar(std::make_unique<WindowTitleBar>(m_EditorState, m_EventDispatcher, m_Window, m_ProjectManager, m_ImGuiContext))
 		, m_EditorPanels({
-			std::make_unique<MainMenuPanel>(m_EditorState, m_EventDispatcher, m_ProjectManager, m_ImGuiContext),
 			std::make_unique<ExportPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<InspectorPanel>(m_EditorState, m_ProjectManager),
 			std::make_unique<SceneHierarchyPanel>(m_EditorState, m_ProjectManager),
@@ -70,19 +72,48 @@ namespace Laura
 		m_ImGuiContext->BeginFrame();
 		m_EditorState->temp.editorTheme.ApplyAllToImgui(); // apply theme every frame
 
-		if (!m_ProjectManager->ProjectIsOpen()) {
-			m_Launcher.OnImGuiRender();
-			m_ImGuiContext->EndFrame();
-			return;
+
+		float yOffset = 0.0f;
+		if (m_Window->isMaximized()) {
+			yOffset = 6.0f;
 		}
 
-		ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-		for (auto& panel : m_EditorPanels) {
-			panel->OnImGuiRender();
+		m_WindowTitleBar->OnImGuiRender(yOffset);
+
+		// next window setup (to align with the titlebar)
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(ImVec2(viewport->Pos.x, viewport->Pos.y + m_WindowTitleBar->height() + yOffset));
+		ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, viewport->Size.y - m_WindowTitleBar->height()));
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGuiWindowFlags host_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+		// LAUNCHER
+		if (!m_ProjectManager->ProjectIsOpen()) {
+			m_Launcher.OnImGuiRender(host_flags);
+		} 
+		// DOCKSPACE
+		else {
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			ImGui::Begin("##DockSpaceHost", nullptr, host_flags);
+			ImGui::PopStyleVar(2);
+			ImGuiStyle& style = ImGui::GetStyle();
+			float minWinSizeX = style.WindowMinSize.x;
+			style.WindowMinSize.x = 300.0f;
+			ImGui::DockSpace(ImGui::GetID("MyDockspace"));
+			style.WindowMinSize.x = minWinSizeX;
+
+			for (auto& panel : m_EditorPanels) {
+				panel->OnImGuiRender(); // RENDERING ALL PANELS
+			}
+
+			ImGui::End();
 		}
-		
+
 		#ifndef BUILD_INSTALL // display demo when not shipping
-		bool showDemo = true;
+		bool showDemo = false;
 		ImGui::ShowDemoWindow(&showDemo);
 		#endif
 

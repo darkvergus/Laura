@@ -17,7 +17,7 @@ namespace Laura
 		}
 		~Launcher() = default;
 	
-		void OnImGuiRender();
+		void OnImGuiRender(ImGuiWindowFlags window_flags);
 		void DrawCreateProjectWindow();
 
 	private:
