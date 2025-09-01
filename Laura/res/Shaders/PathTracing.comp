@@ -1,20 +1,13 @@
 // Thanks to Sebastian Lague: https://www.youtube.com/watch?v=Qz0KTGYJtUk
-
 #version 460 core
 
-#define AABB_primitives_limit 2
-#define MAX_STACK_SIZE 30 // (BVH tree depth)
-
-#define heatmap_cold vec3(0.0, 0.0, 0.0)
+#define heatmap_cold vec3(0.0, 0.0, 2.0)
 #define heatmap_warm vec3(0.9, 1.0, 0.9)
-
-#define NUM_SPHERES 4
 
 #define PI 3.1415926
 #define EPSILON 1.0e-10 // Small value to avoid division by zero
 #define GAMMA 0.8
 #define INF 1.0 / 0.0;
-#define wantPixelInfo true
 
 #define LOCAL_GROUP_X 8
 #define LOCAL_GROUP_Y 4
@@ -24,7 +17,7 @@ layout (local_size_x = LOCAL_GROUP_X, local_size_y = LOCAL_GROUP_Y, local_size_z
 
 /* The following structs MUST be defined exactly as they are on the CPU. */
 // std430 - 32 bytes (CPU side defined in Assets/BVHAccel.h)
-struct Node {
+struct BVHNode {
 	vec3 min;
     uint leftChild_Or_FirstTri;
 	vec3 max;
@@ -39,13 +32,14 @@ struct Triangle {
 };
 
 // std430 - 24 bytes (CPU side defined in Renderer/Renderer.h
-struct MeshEntityHandle {
-	uint FirstTriIdx;
-	uint TriCount;
-	uint FirstNodeIdx;
-	uint NodeCount;
-    uint TransformIdx;
-    uint MaterialIdx;
+struct EntityHandle {
+	uint rootTriIdx;
+	uint triCount;
+	uint rootNodeIdx;
+	uint nodeCount;
+
+    uint transformIdx;
+    uint materialIdx;
 };
 
 // std430 - 32 bytes (CPU side defined in Assets/AssetTypes.h)
@@ -84,12 +78,12 @@ layout (std140, binding = 1) uniform SettingsUBO {
     uint u_BouncesPerRay;
     uint u_heatmap_color_limit;
     uint u_numAccumulatedFrames;
-    uint u_MeshEntityCount;
+    uint u_EntityCount;
     uint u_displayBVH;
 };
 
-layout (std430, binding = 0) buffer MeshEntityLookupSSBO {
-    MeshEntityHandle MeshEntityLookupTable[];
+layout (std430, binding = 0) buffer EntityLookupSSBO {
+    EntityHandle EntityLookupTable[];
 };
 
 layout (std430, binding = 1) buffer TransformSSBO {
@@ -105,7 +99,7 @@ layout (std430, binding = 3) buffer MeshBufferSSBO {
 };
 
 layout (std430, binding = 4) buffer NodeBufferSSBO {
-    Node NodeBuffer[];
+    BVHNode NodeBuffer[];
 };
 
 layout (std430, binding = 5) buffer IndexBufferSSBO {
@@ -249,9 +243,9 @@ bool RayAABBIntersection(Ray ray, const vec3 minVec, const vec3 maxVec, inout fl
     return smallest_tMax >= largest_tMin && smallest_tMax >= 0.0;
 }
 
-// Möller–Trumbore Ray-Triangle intersection algorithm
+// Moller Trumbore Ray-Triangle intersection algorithm
 // Thanks to: https://stackoverflow.com/questions/42740765/intersection-between-line-and-triangle-in-3d/42752998#42752998
-HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri){
+HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri) {
     // E1, E2 are triangle edge direction vectors
     const vec3 E1 = tri.v1.xyz - tri.v0.xyz;
     const vec3 E2 = tri.v2.xyz - tri.v0.xyz;
@@ -284,69 +278,77 @@ HitInfo RayTriangleIntersection(const Ray ray, const Triangle tri){
     return hitInfo;
 }
 
-void BVH_traverse(Ray ray, inout MeshEntityHandle meshEntity, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count)
-{
-    int stack[MAX_STACK_SIZE];
-    int stackTop = 0; // -1 when empty
-    stack[stackTop] = 0; // stack_init(0 = root)
+// NOTE(Jacob): Update ray aabb intersection to return distance, 1e30f meaning miss
+// NOTE(Jacob): potentially storing ray and hitinfo together and avoid copy using inout
+void BVH_traverse(Ray ray, inout EntityHandle entityHandle, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count) {
+    uint nodeOffset = entityHandle.rootNodeIdx; // caused by consecutive BVHs in one buffer
+    uint nodeIdx = 0;
+    uint stack[64]; // Array of indices pointing to BVHNodes
+    uint stackPtr = 0;
 
-    int nodeIdx;
-    float AABB_tMin; // intersection dst with AABB
-    while (stackTop >= 0) { // Inlined !stack_empty(stack)
-        // Inlined stack_pop
-        nodeIdx = stack[stackTop];
-        stackTop--;
-
-        const Node node = NodeBuffer[meshEntity.FirstNodeIdx + nodeIdx];
-
-        if (!RayAABBIntersection(ray, node.min, node.max, AABB_tMin))
-            continue;
-
-        if (AABB_tMin > closestHit.dst) 
-            continue;
-
-        // If the current node is a leaf node (has triangle indices),
-        // check triangle intersections
-        if (node.triCount > 0) {
-            for (uint i = 0; i < node.triCount; i++) {
-                // since triCount != 0, leftChild_Or_FirstTri = FirstTri
-                const HitInfo triHitInfo = RayTriangleIntersection(ray, MeshBuffer[meshEntity.FirstTriIdx + IndexBuffer[meshEntity.FirstTriIdx + node.leftChild_Or_FirstTri + i]]);
-                    
+    while (true) {
+        if (NodeBuffer[nodeOffset + nodeIdx].triCount != 0) { // is leaf
+            for (uint i = 0; i < NodeBuffer[nodeOffset + nodeIdx].triCount; i++) {
+                const HitInfo triHitInfo = RayTriangleIntersection(ray, 
+                    MeshBuffer[entityHandle.rootTriIdx + IndexBuffer[entityHandle.rootTriIdx + NodeBuffer[nodeOffset + nodeIdx].leftChild_Or_FirstTri + i]]
+                );
                 if (triHitInfo.didCollide) {
                     TRI_intersect_count += 1;
                     if (triHitInfo.dst < closestHit.dst) {
                         closestHit = triHitInfo;
-                        closestHit.material = MaterialBuffer[meshEntity.MaterialIdx];
-                        break;
+                        closestHit.material = MaterialBuffer[entityHandle.materialIdx];
                     }
                 }
             }
+            if (stackPtr == 0) { break; }
+            else { nodeIdx = stack[--stackPtr]; }
+            continue;
         }
-        else {
-            AABB_intersect_count += 1;
-            // Inlined stack_push children
-            if (stackTop < MAX_STACK_SIZE - 1) {
-                stackTop++;
-                stack[stackTop] = int(node.leftChild_Or_FirstTri+1);
-            }
-            if (stackTop < MAX_STACK_SIZE - 1) {
-                stackTop++;
-                stack[stackTop] = int(node.leftChild_Or_FirstTri);
-            }
+
+        float dist1 = 1e30f;
+        float dist2 = 1e30f;
+        uint child1Idx = NodeBuffer[nodeOffset + nodeIdx].leftChild_Or_FirstTri;
+        uint child2Idx = NodeBuffer[nodeOffset + nodeIdx].leftChild_Or_FirstTri + 1;
+
+        bool hit1 = RayAABBIntersection(ray, 
+            NodeBuffer[nodeOffset + child1Idx].min, 
+            NodeBuffer[nodeOffset + child1Idx].max, 
+            dist1);
+
+        bool hit2 = RayAABBIntersection(ray, 
+            NodeBuffer[nodeOffset + child2Idx].min, 
+            NodeBuffer[nodeOffset + child2Idx].max, 
+            dist2);
+
+        AABB_intersect_count += uint(hit1) + uint(hit2);
+
+        if (!hit1) dist1 = 1e30f;
+        if (!hit2) dist2 = 1e30f;
+
+        if (dist1 > dist2) {
+            float tmpDist = dist1; dist1 = dist2; dist2 = tmpDist;              // swap(dist1, dist2)
+            uint tmpIdx = child1Idx; child1Idx = child2Idx; child2Idx = tmpIdx;  // swap(child1Idx, child2Idx)
+        }
+
+        if (dist1 == 1e30f) {
+            if (stackPtr == 0) { break; }
+            else { nodeIdx = stack[--stackPtr]; }
+        } else {
+            nodeIdx = child1Idx;
+            if (dist2 != 1e30f) { stack[stackPtr++] = child2Idx; }
         }
     }
 }
-
 
 HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_intersect_count, inout uint TRI_intersect_count) {
     closestHit.didCollide = false;
     closestHit.dst = INF;
 
-    mat4 closestHitTransform;
-    for (int i = 0; i < u_MeshEntityCount; i++) {
-        // Transform ray to the local space of the tested MeshEntity
-        MeshEntityHandle meshEntity = MeshEntityLookupTable[i];
-        mat4 invTransform = inverse(TransformBuffer[meshEntity.TransformIdx]);
+    mat4 closestHitTransform = mat4(1.0);
+    for (int i = 0; i < u_EntityCount; i++) {
+        // Transform ray to the local space of the tested entity 
+        EntityHandle entityHandle = EntityLookupTable[i];
+        mat4 invTransform = inverse(TransformBuffer[entityHandle.transformIdx]);
 
         Ray rayLocal;
         rayLocal.origin = (invTransform * vec4(ray.origin, 1.0)).xyz;
@@ -356,15 +358,17 @@ HitInfo CheckRayCollision(Ray ray, inout HitInfo closestHit, inout uint AABB_int
         hitInfo.didCollide = false;
         hitInfo.dst = INF;
 
-        BVH_traverse(rayLocal, meshEntity, hitInfo, AABB_intersect_count, TRI_intersect_count);
+        BVH_traverse(rayLocal, entityHandle, hitInfo, AABB_intersect_count, TRI_intersect_count);
        
         if (hitInfo.didCollide && hitInfo.dst < closestHit.dst){
             closestHit = hitInfo;
-            closestHitTransform = TransformBuffer[meshEntity.TransformIdx];
+            closestHitTransform = TransformBuffer[entityHandle.transformIdx];
         }
     }
-    closestHit.hitPoint = (closestHitTransform * vec4(closestHit.hitPoint, 1.0)).xyz;
-    closestHit.normal = normalize((closestHitTransform * vec4(closestHit.normal, 0.0)).xyz);
+    if (closestHit.didCollide) {
+        closestHit.hitPoint = (closestHitTransform * vec4(closestHit.hitPoint, 1.0)).xyz;
+        closestHit.normal = normalize((closestHitTransform * vec4(closestHit.normal, 0.0)).xyz);
+    }
     return closestHit;
 }
 
@@ -396,6 +400,7 @@ void main() {
     // Find texel (texture pixel coordinates)
     ivec2 texelCoords = ivec2(gl_GlobalInvocationID.xy);
     ivec2 dims = imageSize(rayTracingTexture);
+    if (texelCoords.x >= dims.x || texelCoords.y >= dims.y) { return; }
     float x = (float(texelCoords.x * 2 - dims.x) / dims.x); // map to <-1.0; 1.0>
     float y = (float(texelCoords.y * 2 - dims.y) / dims.x); // divide by x to keep ratio
     
