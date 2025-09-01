@@ -70,7 +70,7 @@ namespace Laura
             if (entityID == m_EditorState->temp.selectedEntity) {
                 theme.PushColor(ImGuiCol_Text, EditorCol_Text1);
                 theme.PushColor(ImGuiCol_Header, EditorCol_Secondary1);
-                theme.PushColor(ImGuiCol_Button, EditorCol_Transparent, 0.0f);
+                theme.PushColor(ImGuiCol_Button, EditorCol_Primary1, 0.0f);
 
                 entityChildrenOpen = ImGui::TreeNodeEx((void*)(uint64_t)entityID, flags, tag.c_str());
                 ImGui::SameLine(panelDims.x - lineHeight * 0.5);

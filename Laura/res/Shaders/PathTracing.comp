@@ -5,14 +5,19 @@
 #version 460 core
 
 #define PI 3.1415926
-#define INV_TWOPI 0.15915494309189535; // 1/(2π)
-#define INV_PI    0.3183098861837907;  // 1/π
+#define INV_TWOPI 0.15915494309189535 // 1/(2π)
+#define INV_PI    0.3183098861837907  // 1/π
+
+#define GAMMA 0.8
 
 #define LOCAL_GROUP_X 8
 #define LOCAL_GROUP_Y 4
 #define LOCAL_GROUP_Z 1
 
 layout (local_size_x = LOCAL_GROUP_X, local_size_y = LOCAL_GROUP_Y, local_size_z = LOCAL_GROUP_Z) in;
+
+uint g_AabbIntersectionCount = 0;
+uint g_TriIntersectionCount = 0;
 
 /* The following structs MUST be defined exactly as they are on the CPU. */
 // std430 - 32 bytes (CPU side defined in Assets/BVHAccel.h)
@@ -69,9 +74,11 @@ layout (std140, binding = 0) uniform CameraUBO {
 layout (std140, binding = 1) uniform SettingsUBO {
     uint u_RaysPerPixel;
     uint u_BouncesPerRay;
-    uint _Padding_Heatmap_uniform;
     uint u_numAccumulatedFrames;
     uint u_EntityCount;
+    uint u_DebugMode;
+    uint u_AabbHeatmapCutoff;
+    uint u_TriHeatmapCutoff;
 };
 
 layout (std430, binding = 0) buffer EntityLookupSSBO {
@@ -97,6 +104,54 @@ layout (std430, binding = 4) buffer NodeBufferSSBO {
 layout (std430, binding = 5) buffer IndexBufferSSBO {
     uint IndexBuffer[];
 };
+
+
+vec3 IntersectionsToRgb(in uint intersections, in uint cutoff) {
+	float t = clamp(float(intersections) / max(1.0, float(cutoff)), 0.0, 1.0);
+	float w = 380.0 + 370.0 * t;
+	vec3 color;
+	if (w <= 380.0) {
+		color = vec3(0.0);
+	}
+	else if (w > 380.0 && w <= 440.0) {
+		color = vec3((440.0 - w) / (440.0 - 380.0) / 3.0, 0.0, 0.8);
+	}
+	else if (w <= 490.0) { // 440..490
+		color = vec3(0.0, (w - 440.0) / (490.0 - 440.0), 1.0);
+	}
+	else if (w <= 510.0) { // 490..510
+		color = vec3(0.0, 1.0, (510.0 - w) / (510.0 - 490.0));
+	}
+	else if (w <= 580.0) { // 510..580
+		color = vec3((w - 510.0) / (580.0 - 510.0), 1.0, 0.0);
+	}
+	else if (w <= 645.0) { // 580..645
+		color = vec3(1.0, (645.0 - w) / (645.0 - 580.0), 0.0);
+	}
+	else if (w <= 780.0) { // 645..780
+		color = vec3(1.0, 0.0, 0.0);
+	}
+	else {
+		color = vec3(1.0);
+	}
+
+	float factor;
+	if (w >= 380.0 && w < 420.0) {
+		factor = 0.3 + 0.7 * (w - 380.0) / (420.0 - 380.0);
+	}
+	else if (w >= 420.0 && w < 701.0) {
+		factor = 1.0;
+	}
+	else if (w >= 701.0 && w < 781.0) {
+		factor = 0.3 + 0.7 * (780.0 - w) / (780.0 - 700.0);
+		return pow(color + factor * vec3(1.0), vec3(GAMMA));
+	}
+	else {
+		factor = 1.0;
+	}
+
+	return pow(factor * color, vec3(GAMMA));
+}
 
 
  uint pcg_hash(in uint v) {
@@ -196,18 +251,23 @@ void TraverseBVH(inout Ray ray, inout EntityHandle entityHandle) {
 
     while (true) {
         if (NodeBuffer[nodeOffset + nodeIdx].triCount != 0) { // is leaf
-        for (uint i = 0; i < NodeBuffer[nodeOffset + nodeIdx].triCount; i++) {
-            const Triangle tri = MeshBuffer[
-                entityHandle.rootTriIdx +
-                IndexBuffer[entityHandle.rootTriIdx + NodeBuffer[nodeOffset + nodeIdx].leftChild_Or_FirstTri + i]
-            ];
-            if (IntersectTri(ray, tri)) {
-                ray.materialIdx = entityHandle.materialIdx;
+            for (uint i = 0; i < NodeBuffer[nodeOffset + nodeIdx].triCount; i++) {
+                const Triangle tri = MeshBuffer[
+                    entityHandle.rootTriIdx +
+                    IndexBuffer[entityHandle.rootTriIdx + NodeBuffer[nodeOffset + nodeIdx].leftChild_Or_FirstTri + i]
+                ];
+                if (IntersectTri(ray, tri)) {
+                    g_TriIntersectionCount++;
+                    ray.materialIdx = entityHandle.materialIdx;
+                }
             }
-        }
 
-            if (stackPtr == 0) { break; }
-            else { nodeIdx = stack[--stackPtr]; }
+            if (stackPtr == 0) { 
+                break; 
+            }
+            else { 
+                nodeIdx = stack[--stackPtr]; 
+            }
             continue;
         }
 
@@ -227,11 +287,19 @@ void TraverseBVH(inout Ray ray, inout EntityHandle entityHandle) {
         }
 
         if (dist1 >= 1e30f) {
-            if (stackPtr == 0) { break; }
-            else { nodeIdx = stack[--stackPtr]; }
+            if (stackPtr == 0) { 
+                break; 
+            }
+            else {
+                nodeIdx = stack[--stackPtr]; 
+            }
         } else {
+            g_AabbIntersectionCount++;
             nodeIdx = child1Idx;
-            if (dist2 < 1e30f) { stack[stackPtr++] = child2Idx; }
+            if (dist2 < 1e30f) { 
+                g_AabbIntersectionCount++;
+                stack[stackPtr++] = child2Idx; 
+            }
         }
     }
 }
@@ -319,9 +387,11 @@ void main() {
         pixelColor += TraceRay(ray, state);
     }
 
-    pixelColor = pixelColor / u_RaysPerPixel;
+    if (u_DebugMode == 0)       { pixelColor = pixelColor / u_RaysPerPixel; }
+    else if (u_DebugMode == 1)  { pixelColor = IntersectionsToRgb(g_AabbIntersectionCount, u_AabbHeatmapCutoff); }
+    else                        { pixelColor = IntersectionsToRgb(g_TriIntersectionCount, u_TriHeatmapCutoff); }
     
-    // combine accumulated & current pixelColor
+    // accumulate over multiple frames 
     float weight = 1.0f / (u_numAccumulatedFrames + 1);
     vec3 outputColor = imageLoad(rayTracingTexture, texelCoords).rgb * (1 - weight) + pixelColor * weight;
     imageStore(rayTracingTexture, texelCoords, vec4(outputColor, 1.0f));

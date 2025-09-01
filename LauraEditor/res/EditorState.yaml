@@ -1,10 +1,11 @@
 ViewportMode: MaxAspectFit
 EditorThemeFilepath: ""
 EditorRenderSettings:
-  showBvhHeatmap: false
-  bvhHeatmapColorCutoff: 500
-  resolution: [320, 180]
-  raysPerPixel: 1
-  bouncesPerRay: 5
+  debugMode: 0
+  aabbHeatmapCutoff: 5000
+  triangleHeatmapCutoff: 100
+  resolution: [1920, 1200]
+  raysPerPixel: 20
+  bouncesPerRay: 100
   accumulate: false
   vSync: true

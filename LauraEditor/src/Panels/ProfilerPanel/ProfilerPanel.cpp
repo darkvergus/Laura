@@ -31,7 +31,7 @@ namespace Laura
         }
 
         const char* playLabel = (m_Profiler->isPaused) ? ICON_FA_PLAY : ICON_FA_PAUSE;
-        theme.PushColor(ImGuiCol_Button, EditorCol_Transparent, 0.0f);
+        theme.PushColor(ImGuiCol_Button, EditorCol_Primary1, 0.0f);
         if (ImGui::Button(playLabel)) {
             m_Profiler->isPaused = !m_Profiler->isPaused;
         }
