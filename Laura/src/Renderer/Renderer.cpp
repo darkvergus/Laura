@@ -120,15 +120,15 @@ namespace Laura
 		// UBOs
 
 		// SETTINGS
-		uint32_t meshEntityCount = pScene->MeshEntityLookupTable.size();
-		uint32_t showBvhHeatmap = static_cast<uint32_t>(m_RenderSettings.showBvhHeatmap);
+		uint32_t entityCount = pScene->MeshEntityLookupTable.size();
 		m_SettingsUBO->Bind();
 		m_SettingsUBO->AddData(0, sizeof(uint32_t), &m_RenderSettings.raysPerPixel);
 		m_SettingsUBO->AddData(4, sizeof(uint32_t), &m_RenderSettings.bouncesPerRay);
-		m_SettingsUBO->AddData(8, sizeof(uint32_t), &m_RenderSettings.bvhHeatmapColorCutoff);
-		m_SettingsUBO->AddData(12, sizeof(uint32_t), &m_Cache.AccumulatedFrames);
-		m_SettingsUBO->AddData(16, sizeof(uint32_t), &meshEntityCount);
-		m_SettingsUBO->AddData(20, sizeof(uint32_t), &showBvhHeatmap);
+		m_SettingsUBO->AddData(8, sizeof(uint32_t), &m_Cache.AccumulatedFrames);
+		m_SettingsUBO->AddData(12, sizeof(uint32_t), &entityCount);
+		m_SettingsUBO->AddData(16, sizeof(uint32_t), &m_RenderSettings.debugMode);
+		m_SettingsUBO->AddData(20, sizeof(uint32_t), &m_RenderSettings.aabbHeatmapCutoff);
+		m_SettingsUBO->AddData(24, sizeof(uint32_t), &m_RenderSettings.triangleHeatmapCutoff);
 		m_SettingsUBO->Unbind();
 
 		// CAMERA

@@ -115,7 +115,7 @@ namespace Laura
 				float centerX = (winSize.x * 0.5f) - (textSize.x * 0.5f);
 				if (centerX > currentX) ImGui::SetCursorPosX(centerX);
 				auto btnIconCol = m_EditorState->temp.isInRuntimeSimulation ? EditorCol_Warning : EditorCol_Text1;
-				theme.PushColor(ImGuiCol_Button, EditorCol_Transparent, 0.0f);
+				theme.PushColor(ImGuiCol_Button, EditorCol_Primary1, 0.0f);
 				theme.PushColor(ImGuiCol_Text, btnIconCol);
 				if (ImGui::Button(icon)) {
 					m_EditorState->temp.isInRuntimeSimulation = !m_EditorState->temp.isInRuntimeSimulation;
@@ -159,7 +159,7 @@ namespace Laura
 				ImGui::PopFont();
 			}
 			ImGui::SetCursorPosX(winSize.x - rightButtonsWidth);
-			theme.PushColor(ImGuiCol_Button, EditorCol_Transparent, 0.0f);
+			theme.PushColor(ImGuiCol_Button, EditorCol_Primary1, 0.0f);
 			ImVec2 buttonSize = ImVec2(frameH * 1.1f, frameH - 2.0f);
 			// Minimize
 			ImGui::PushFont(Fonts()->codicon);

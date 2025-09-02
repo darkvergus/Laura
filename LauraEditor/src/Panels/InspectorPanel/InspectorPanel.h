@@ -42,7 +42,7 @@ namespace Laura
 
 				bool componentTreeNodeOpen = ImGui::TreeNodeEx(TreenodeTitle.c_str(), treenodeFlags);
 				ImGui::SameLine(windowWidth.x - delBtnWidth - optionsBtnWidth);
-				theme.PushColor(ImGuiCol_Button, EditorCol_Transparent, 0.0f);
+				theme.PushColor(ImGuiCol_Button, EditorCol_Primary1, 0.0f);
 				if (removable) {
 					if (ImGui::Button(ICON_FA_TRASH)) {
 						deleteComponent = true;

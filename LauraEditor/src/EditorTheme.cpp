@@ -78,7 +78,7 @@ namespace Laura
 		m_ColorPallete[EditorCol_Background1] = RGBA(37, 37, 38);
 		m_ColorPallete[EditorCol_Background2] = RGBA(30, 30, 30);
 		m_ColorPallete[EditorCol_Background3] = RGBA(51, 51, 51);
-		m_ColorPallete[EditorCol_Transparent] = RGBA(0, 0, 0, 0);
+		m_ColorPallete[EditorCol_Background4] = RGBA(0, 0, 0);
 		m_ColorPallete[EditorCol_Error]       = RGBA(219, 72, 115);     // Errors
 		m_ColorPallete[EditorCol_Warning]     = RGBA(213, 152, 87);     // Warnings
 		m_ColorPallete[EditorCol_Success]     = RGBA(174, 243, 87);     // Success
@@ -101,7 +101,7 @@ namespace Laura
 	m_ColorPallete[EditorCol_Background1] = RGBA(240, 240, 240);   // Window background
 	m_ColorPallete[EditorCol_Background2] = RGBA(225, 225, 225);   // Group panels
 	m_ColorPallete[EditorCol_Background3] = RGBA(200, 200, 200);   // Inner panels
-	m_ColorPallete[EditorCol_Transparent] = RGBA(0, 0, 0, 0);      // Transparent
+	m_ColorPallete[EditorCol_Background4] = RGBA(255, 255, 255);      // Transparent
 	m_ColorPallete[EditorCol_Error]       = RGBA(219, 72, 115);     // Errors
 	m_ColorPallete[EditorCol_Warning]     = RGBA(213, 152, 87);     // Warnings
 	m_ColorPallete[EditorCol_Success]     = RGBA(174, 243, 87);     // Success
