@@ -1,7 +1,7 @@
 #include <IconsFontAwesome6.h>
 #include "Launcher.h"
-#include "Platform/Windows/Dialogs/FolderPickerDialog.h"
-#include "Platform/Windows/Dialogs/FilePickerDialog.h"
+#include "Dialogs/FolderPickerDialog.h"
+#include "Dialogs/FilePickerDialog.h"
 #include "Project/ProjectManager.h"  // For PROJECT_FILE_EXTENSION
 #include "ImGuiContextFontRegistry.h"
 

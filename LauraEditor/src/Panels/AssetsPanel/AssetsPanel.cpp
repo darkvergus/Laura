@@ -2,7 +2,7 @@
 #include "Dialogs/ConfirmationDialog.h"
 #include "Project/Scene/SceneManager.h"
 #include "Project/Assets/AssetManager.h"
-#include "Platform/Windows/Dialogs/FilePickerDialog.h"
+#include "Dialogs/FilePickerDialog.h"
 #include "Panels/DNDPayloads.h"
 #include "ImGuiContextFontRegistry.h"
 #include <format>
