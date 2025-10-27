@@ -1,6 +1,6 @@
-#include "platform/OpenGL/OpenGLRendererAPI.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 #include <GL/glew.h>
-#include "renderer/IComputeShader.h"
+#include "Renderer/IComputeShader.h"
 
 namespace Laura 
 {

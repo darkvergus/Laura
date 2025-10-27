@@ -4,7 +4,7 @@
 #include "Panels/IEditorPanel.h"
 #include "EditorState.h"
 #include "IconsFontAwesome6.h"
-#include "Panels\DNDPayloads.h"
+#include "Panels/DNDPayloads.h"
 
 namespace Laura 
 {

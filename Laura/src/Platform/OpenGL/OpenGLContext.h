@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderer/IRenderingContext.h"
-#include "core/IWindow.h"
+#include "Renderer/IRenderingContext.h"
+#include "Core/IWindow.h"
 
 namespace Laura 
 {

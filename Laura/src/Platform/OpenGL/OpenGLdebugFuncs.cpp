@@ -1,4 +1,4 @@
-#include "platform/OpenGL/OpenGLdebugFuncs.h"
+#include "Platform/OpenGL/OpenGLdebugFuncs.h"
 #include <iostream>
 
 namespace Laura 

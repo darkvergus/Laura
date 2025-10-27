@@ -3,8 +3,8 @@
 #include <filesystem>
 #include "Laura.h"
 #include "EditorState.h"
-#include "Platform/Windows/Dialogs/FolderPickerDialog.h"
-#include "Platform/Windows/Dialogs/FilePickerDialog.h"
+#include "Dialogs/FolderPickerDialog.h"
+#include "Dialogs/FilePickerDialog.h"
 
 namespace Laura
 {

@@ -4,7 +4,7 @@
 #include "Core/Events/KeyEvents.h"
 #include "Core/Events/MouseEvents.h"
 #include "Core/Events/WindowEvents.h"
-#include "core/Log.h"
+#include "Core/Log.h"
 
 namespace Laura 
 {

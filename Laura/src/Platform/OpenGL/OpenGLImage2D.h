@@ -1,8 +1,8 @@
 #pragma once
 
 #include "lrpch.h"
-#include <gl/glew.h>
-#include "renderer/IImage2D.h"
+#include <GL/glew.h>
+#include "Renderer/IImage2D.h"
 #include "glm/glm.hpp"
 
 namespace Laura 

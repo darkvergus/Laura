@@ -1,6 +1,6 @@
 #include "OpenGLShaderStorageBuffer.h"
 #include <GL/glew.h>
-#include "platform/OpenGL/OpenGLdebugFuncs.h"
+#include "Platform/OpenGL/OpenGLdebugFuncs.h"
 
 namespace Laura
 {

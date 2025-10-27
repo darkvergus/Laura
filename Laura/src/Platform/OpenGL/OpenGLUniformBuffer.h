@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lrpch.h"
-#include "renderer/IUniformBuffer.h"
+#include "Renderer/IUniformBuffer.h"
 
 namespace Laura 
 {

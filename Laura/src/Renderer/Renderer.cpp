@@ -1,4 +1,4 @@
-#include "renderer/Renderer.h"
+#include "Renderer/Renderer.h"
 #include <glm/gtc/matrix_access.hpp>
 #include "Project/Scene/Scene.h"
 #include "Project/Assets/AssetManager.h"

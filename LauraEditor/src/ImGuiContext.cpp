@@ -3,8 +3,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <IconsFontAwesome6.h>
-#include <iconsFontAwesome6Brands.h>
-#include <GLFW\glfw3.h>
+#include <IconsFontAwesome6Brands.h>
+#include <GLFW/glfw3.h>
 #include <implot.h>
 #include "ImGuiContext.h"
 #include "EditorCfg.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lrpch.h"
-#include "renderer/IComputeShader.h"
+#include "Renderer/IComputeShader.h"
 
 namespace Laura 
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include "core/IWindow.h"
-#include "platform/OpenGL/OpenGLContext.h"
+#include "Core/IWindow.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 #include "Core/Events/KeyEvents.h"
 #include "Core/Events/MouseEvents.h"
 

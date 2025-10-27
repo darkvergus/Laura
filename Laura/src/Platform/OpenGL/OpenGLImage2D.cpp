@@ -1,5 +1,5 @@
-#include "platform/OpenGL/OpenGLImage2D.h"
-#include "platform/OpenGL/OpenGLdebugFuncs.h"
+#include "Platform/OpenGL/OpenGLImage2D.h"
+#include "Platform/OpenGL/OpenGLdebugFuncs.h"
 
 namespace Laura 
 {

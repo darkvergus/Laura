@@ -1,5 +1,5 @@
-#include "core/IWindow.h"
-#include "platform/windows/GLFWWindow.h"
+#include "Core/IWindow.h"
+#include "Platform/Windows/GLFWWindow.h"
 
 namespace Laura
 {

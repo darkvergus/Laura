@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lrpch.h"
-#include "renderer/IRendererAPI.h"
+#include "Renderer/IRendererAPI.h"
 
 namespace Laura 
 {

@@ -1,6 +1,6 @@
 #include "ExportPanel.h"
 #include <IconsFontAwesome6.h>
-#include "Platform/Windows/Dialogs/FolderPickerDialog.h"
+#include "Dialogs/FolderPickerDialog.h"
 #include "Export/ExportSettings.h"
 #include "Export/ProjectExporter.h"
 #include "Panels/DNDPayloads.h"

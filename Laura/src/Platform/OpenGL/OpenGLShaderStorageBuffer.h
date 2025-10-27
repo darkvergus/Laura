@@ -1,7 +1,7 @@
 #pragma once
 
 #include "lrpch.h"
-#include "renderer/IShaderStorageBuffer.h"
+#include "Renderer/IShaderStorageBuffer.h"
 
 namespace Laura
 {

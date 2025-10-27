@@ -1,6 +1,6 @@
-#include "platform/OpenGL/OpenGLTexture2D.h"
-#include <gl/glew.h>
-#include "platform/OpenGL/OpenGLdebugFuncs.h"
+#include "Platform/OpenGL/OpenGLTexture2D.h"
+#include <GL/glew.h>
+#include "Platform/OpenGL/OpenGLdebugFuncs.h"
 
 namespace Laura 
 {

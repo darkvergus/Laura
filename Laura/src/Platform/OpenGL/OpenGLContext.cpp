@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "platform/OpenGL/OpenGLContext.h"
-#include "core/Log.h"
+#include "Platform/OpenGL/OpenGLContext.h"
+#include "Core/Log.h"
 
 namespace Laura 
 { 

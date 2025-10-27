@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core\Events\IEvent.h"
+#include "Core/Events/IEvent.h"
 
 namespace Laura 
 {

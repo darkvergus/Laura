@@ -1,4 +1,4 @@
-#include "core/Log.h"
+#include "Core/Log.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace Laura 

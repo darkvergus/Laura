@@ -1,5 +1,5 @@
 #include "Renderer/IRendererAPI.h"
-#include "platform/opengl/OpenGLRendererAPI.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace Laura 
 {

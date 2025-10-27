@@ -34,6 +34,11 @@ target_precompile_headers(LauraEngine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/l
 target_link_libraries(LauraEngine PUBLIC glm spdlog::spdlog entt yaml-cpp) 
 target_link_libraries(LauraEngine PUBLIC assimp glfw libglew_static stb_image stb_truetype) 
 
+# Suppress array-bounds warning only for assimp
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(assimp PRIVATE -Wno-array-bounds)
+endif()
+
 
 # DEFINES 
 target_compile_definitions(LauraEngine PUBLIC

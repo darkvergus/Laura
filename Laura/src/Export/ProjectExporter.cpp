@@ -123,11 +123,19 @@ namespace Laura
             }
             copyInto(exportProjectFolderPath, runtimePath);
 
-            // Rename the runtime .exe file
-            std::filesystem::rename(
+			
+			// Rename the runtime executable file
+			#if defined(_WIN32)
+			std::filesystem::rename(
 				exportProjectFolderPath / "LauraRuntime.exe", // hardcoded string (not ideal)
 				exportProjectFolderPath / (projectName + ".exe")
 			);
+			#else
+			std::filesystem::rename(
+				exportProjectFolderPath / "LauraRuntime",
+				exportProjectFolderPath / projectName
+			);
+			#endif
 
 			#ifdef BUILD_INSTALL
 			// Copy engine resources into export folder.

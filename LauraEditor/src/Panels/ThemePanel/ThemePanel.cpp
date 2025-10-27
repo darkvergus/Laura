@@ -3,7 +3,7 @@
 #include <filesystem>
 #include "ThemePanel.h"
 #include "Dialogs/ConfirmationDialog.h"
-#include "Platform/Windows/Dialogs/FilePickerDialog.h"
+#include "Dialogs/FilePickerDialog.h"
 
 namespace Laura
 {

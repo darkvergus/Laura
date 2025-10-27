@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
 
-# Platform check - only allow Windows for now
-if(NOT WIN32)
-    message(FATAL_ERROR "Laura engine currently only supports Windows platform")
-endif()
-
 # if BUILD_INSTALL = ON -> LauraEngine target defines #define BUILD_INSTALL
 # and propagates the macro to Runtime & Editor
 option(BUILD_INSTALL "Use installed paths instead of source-tree paths" ON)
