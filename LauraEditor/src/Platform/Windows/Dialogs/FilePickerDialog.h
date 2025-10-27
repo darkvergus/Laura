@@ -2,20 +2,13 @@
 
 #include <filesystem>
 #include <string>
-#include <vector>
-#include <windows.h>
 #include <commdlg.h> // OPENFILENAMEA
 #include <format>
 
-namespace Laura {
+namespace Laura
+{
 
-    using NativeWindowHandle = HWND;
-
-    inline std::filesystem::path FilePickerDialog(
-        const char* ext,
-        const char* title,
-        NativeWindowHandle owner = nullptr)
-    {
+    inline std::filesystem::path FilePickerDialog(const char* ext, const char* title, HWND owner = nullptr) {
         char buff[MAX_PATH] = {};
 
         std::string filter = std::format("{} Files", ext);
@@ -39,12 +32,7 @@ namespace Laura {
         return {}; // empty path if cancelled
     }
 
-    inline std::filesystem::path SaveFileDialog(
-        const char* ext,
-        const char* title,
-        const char* defaultName = nullptr,
-        NativeWindowHandle owner = nullptr)
-    {
+    inline std::filesystem::path SaveFileDialog(const char* ext, const char* title, const char* defaultName = nullptr, HWND owner = nullptr) {
         // Use Unicode version for proper Unicode support and longer paths
         const int MAX_UNICODE_PATH = 32768; // Much longer than MAX_PATH
         std::vector<wchar_t> buff(MAX_UNICODE_PATH, L'\0');

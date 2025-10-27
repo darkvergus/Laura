@@ -8,9 +8,7 @@
 namespace Laura
 {
 
-    using NativeWindowHandle = HWND;
-
-    inline std::filesystem::path FolderPickerDialog(const std::string& title = "Select Folder", NativeWindowHandle owner = nullptr) {
+    inline std::filesystem::path FolderPickerDialog(const std::string& title = "Select Folder", HWND owner = nullptr) {
 		IFileDialog* pDialog = nullptr;
 		HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL,
 									  IID_IFileDialog, reinterpret_cast<void**>(&pDialog));
