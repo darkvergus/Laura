@@ -56,12 +56,20 @@ The project is structured into three CMake targets:
 - **Structured logging** via spdlog
 
 ## Supported Platforms
-Laura currently targets **Windows (x64)** and builds with the MSVC toolchain.
 
-> [!IMPORTANT]
-> Note: The root `CMakeLists.txt` enforces Windows-only for now and enables multi-threaded compilation under MSVC.
+### Experimental Linux support
+To enable file dialogs, make sure **Zenity** is installed.
 
-Experimental Linux support:
+```bash
+# Install Zenity
+sudo apt install zenity        # Ubuntu / Debian
+sudo pacman -S zenity          # Arch
+
+# Test installation
+zenity --info --text="Hello World!"
+```
+
+**Build & Run**
 ```bash
 # Compile with g++ (GCC)
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_INSTALL=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
@@ -71,7 +79,7 @@ cmake --build build --target install -j$(nproc)
 ./build/install/LauraEditor
 ```
 
-## Getting Started
+## Getting Started Windows
 
 
 ### Prerequisites
@@ -131,7 +139,8 @@ git submodule update --init --recursive
 > [!TIP]
 > To hide the console window for applications, set `ENABLE_CONSOLE=OFF` in the root CMakeLists.txt or pass `-DENABLE_CONSOLE=OFF` when configuring.
 
-
+> [!TIP]
+> The root `CMakeLists.txt` enables multi-threaded compilation under MSVC.
 
 ## Project Structure
 ```
